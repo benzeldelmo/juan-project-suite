@@ -1568,7 +1568,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
   <link rel="stylesheet" href="/css/general-update.css?v=20260925-deliverable-payment-rush-1">
   <link rel="stylesheet" href="/css/keyboard-shortcuts.css?v=20260920-1805">
   <link rel="stylesheet" href="/css/consistency-pass.css?v=20260925-deliverable-payment-rush-1">
-  <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260928-info-cleanup-v1">
+  <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260928-project-header-v2">
   <link rel="stylesheet" href="/css/workspace-icon-system-2026-09-22.css?v=20260923-0105">
   <link rel="stylesheet" href="/css/typography-sf-pro.css?v=20260923-1">
 </head>
@@ -1961,19 +1961,25 @@ table.jp-packages-table col:nth-child(6){width:7%}
         </header>
 
         <div class="project-overall-progress" id="projectOverallProgress">
-          <div class="project-overall-progress-head">
-            <div><span>Project Progress</span><strong id="projectOverallProgressPercent">0%</strong></div>
+          <div class="project-overall-progress-main">
+            <span class="project-progress-icon" aria-hidden="true">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7"/></svg>
+            </span>
+            <div class="project-overall-progress-copy">
+              <span>Project Progress</span>
+              <strong id="projectOverallProgressPercent">0%</strong>
+            </div>
             <span id="projectOverallProgressCount">0 / 0</span>
           </div>
           <div class="progress-bar-track"><div class="progress-bar-fill" id="projectOverallProgressBar" style="width:0%"></div></div>
         </div>
 
         <div class="tabs-nav project-details-tabs">
-          <button class="tab-btn" data-project-tab="project-data" onclick="app.switchProjectTab('project-data', event)">Project Data</button>
-          <button class="tab-btn active" data-project-tab="deliverables" onclick="app.switchProjectTab('deliverables', event)">Deliverables</button>
-          <button class="tab-btn" data-project-tab="payment-tracker" onclick="app.switchProjectTab('payment-tracker', event)">Payment Monitoring</button>
-          <button class="tab-btn" data-project-tab="invoice" onclick="app.switchProjectTab('invoice', event)">Invoice</button>
-          <button class="tab-btn" data-project-tab="notes" onclick="app.switchProjectTab('notes', event)">Notes</button>
+          <button class="tab-btn" data-project-tab="project-data" onclick="app.switchProjectTab('project-data', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/></svg><span>Project Data</span></button>
+          <button class="tab-btn active" data-project-tab="deliverables" onclick="app.switchProjectTab('deliverables', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4z"/><path d="m4 7 8 4 8-4v10l-8 4-8-4z"/></svg><span>Deliverables</span></button>
+          <button class="tab-btn" data-project-tab="payment-tracker" onclick="app.switchProjectTab('payment-tracker', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7"/></svg><span>Payment Monitoring</span></button>
+          <button class="tab-btn" data-project-tab="invoice" onclick="app.switchProjectTab('invoice', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Invoice</span></button>
+          <button class="tab-btn" data-project-tab="notes" onclick="app.switchProjectTab('notes', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Notes</span></button>
         </div>
 
         <div id="projTab-project-data" class="tab-content">
@@ -2025,7 +2031,6 @@ table.jp-packages-table col:nth-child(6){width:7%}
               <div><div class="section-kicker">PRODUCTION</div><h3 class="card-title">Deliverables</h3><div class="deliverables-overall-copy"><span id="projDetailProgressCount">0 / 0 completed</span><strong id="projDetailProgressPercent">0%</strong></div></div>
 
             </div>
-            <div class="progress-bar-track deliverables-overall-progress"><div class="progress-bar-fill" id="projDetailProgressBar" style="width:0%"></div></div>
             <div class="deliverables-list" id="projectDeliverablesList"></div>
             <div id="projectFilesAccessCard" class="project-files-admin-card">
               <div class="project-files-admin-head"><div><div class="section-kicker">CLIENT DELIVERY</div><h3 class="card-title jp-title-with-info">Project Files <button type="button" class="jp-info-button" aria-label="About project files" data-info="Controls the Google Drive link and availability shown to the client in JUAN PROJECT Online.">i</button></h3></div><span id="projectFilesAccessState" class="portal-drive-state locked">Locked</span></div>
@@ -8120,15 +8125,14 @@ ${description}`))actionCallback();return;}
         const ds=normalizeProjectDeliverableHierarchy(proj);
         const countable=ds.filter(d=>!d.is_group),completed=countable.filter(d=>d.completed).length,percent=countable.length?Math.round(completed/countable.length*100):0;
         const setText=(id,v)=>{const el=document.getElementById(id);if(el)el.innerText=v};setText('projDetailProgressCount',`${completed} / ${countable.length} completed`);setText('projDetailProgressPercent',`${percent}%`);
-        const bar=document.getElementById('projDetailProgressBar');if(bar)bar.style.width=`${percent}%`;const overallBar=document.getElementById('projectOverallProgressBar'),overallPct=document.getElementById('projectOverallProgressPercent'),overallCount=document.getElementById('projectOverallProgressCount');if(overallBar)overallBar.style.width=`${percent}%`;if(overallPct)overallPct.textContent=`${percent}%`;if(overallCount)overallCount.textContent=`${completed} / ${countable.length}`;
+        const overallBar=document.getElementById('projectOverallProgressBar'),overallPct=document.getElementById('projectOverallProgressPercent'),overallCount=document.getElementById('projectOverallProgressCount');if(overallBar)overallBar.style.width=`${percent}%`;if(overallPct)overallPct.textContent=`${percent}%`;if(overallCount)overallCount.textContent=`${completed} / ${countable.length}`;
         if(!ds.length){container.innerHTML=`<div class="empty-compact-state"><strong>No deliverables yet</strong><span>Add order items in Project Data. They will appear here automatically.</span></div>`;renderProjectFilesAccess(proj);return;}
         const roots=ds.filter(d=>!d.parent_id);
         const row=(d,child=false)=>{
-          const menuId=`deliverableMenu_${String(d.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,progress=d.is_group?Number(d.progress||0):(d.completed?100:Number(d.progress||0)),children=d.is_group?ds.filter(c=>String(c.parent_id||'')===String(d.id)):[];
+          const menuId=`deliverableMenu_${String(d.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,children=d.is_group?ds.filter(c=>String(c.parent_id||'')===String(d.id)):[];
           return `<div class="deliverable-checklist-row ${child?'deliverable-child-row':''} ${d.is_group?'deliverable-package-row':''} ${d.completed?'is-complete':''}">
             <button type="button" class="deliverable-check ${d.completed?'checked':''}" aria-pressed="${d.completed?'true':'false'}" aria-label="${d.completed?'Mark incomplete':'Mark complete'}" onclick="app.toggleDeliverable('${proj.id}','${String(d.id).replace(/'/g,"\\'")}')"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></button>
             <div class="deliverable-checklist-copy"><strong>${escapeHtml(d.item_name)}</strong>${d.is_group?`<span>${children.filter(c=>c.completed).length}/${children.length} included items · Package</span>`:child?`<span>${escapeHtml(d.package_name||'Package inclusion')}</span>`:''}</div>
-            <div class="deliverable-item-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${progress}%"></div></div><span>${Math.round(progress)}%</span></div>
             <div class="popover-wrap" id="${menuId}"><button class="icon-more-button" onclick="event.stopPropagation();app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action text-danger" onclick="event.stopPropagation();app.deleteProjectDeliverable('${String(d.id).replace(/'/g,"\\'")}')">Remove Deliverable</button></div></div>
           </div>`;
         };
@@ -9847,7 +9851,7 @@ ${description}`))actionCallback();return;}
 
     document.addEventListener("DOMContentLoaded", () => {
       app.initWorkspace();
-      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-info-cleanup-v1',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
+      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-project-header-v2',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
       setTimeout(()=>{refreshSearchableSelects(document);app.bindEmailDomainSuggestions();if(location.hash==="#online-portal")app.navigateTo("online-portal");},60);
       
       document.addEventListener("click", (e) => {
@@ -10644,7 +10648,7 @@ ${description}`))actionCallback();return;}
 <script type="module" src="/js/keyboard-shortcuts.js?v=20260923-0105"></script>
 <script src="/js/workspace-icon-system-2026-09-22.js?v=20260923-0225"></script>
   <script src="/js/consistency-pass.js?v=20260925-deliverable-payment-rush-1"></script>
-  <script src="/js/workspace-unification-2026-09-22.js?v=20260928-info-cleanup-v1"></script>
+  <script src="/js/workspace-unification-2026-09-22.js?v=20260928-project-header-v2"></script>
 </body>
 </html>
 <style id="v111-maintenance-patch">

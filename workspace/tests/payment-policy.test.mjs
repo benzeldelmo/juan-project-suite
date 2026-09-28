@@ -8,7 +8,7 @@ test("payment due date follows Project End / Deadline Date", async () => {
   const html=await read("index.html");
   const sql=await read("../supabase/migrations/035_payment_due_lifecycle_v2.sql");
   assert.match(html,/Project End \/ Deadline Date/);
-  assert.match(html,/This date is also the payment due date/);
+  assert.match(html,/This date is also used as the payment due date/);
   assert.match(sql,/new\.payment_due_date:=derived_due/);
   assert.match(sql,/new\.deadline_date/);
 });
@@ -85,4 +85,28 @@ test("project detail helper notes use compact info buttons instead of technical 
   assert.match(ui,/About overdue fees/);
   assert.match(css,/\.jp-info-button\{/);
   assert.match(css,/content:attr\(data-info\)/);
+});
+
+
+test("Workspace page headers are sticky and Project Details matches the approved summary layout", async () => {
+  const html=await read("index.html");
+  const ui=await read("js/workspace-unification-2026-09-22.js");
+  const css=await read("css/workspace-unification-2026-09-22.css");
+  assert.match(css,/\.main-content>\.view>\.page-header[\s\S]*?position:sticky!important/);
+  assert.match(css,/#view-settings \.jp-settings-header/);
+  assert.match(css,/#view-in-house-ads \.jp-ads-heading/);
+  assert.match(html,/class="project-progress-icon"/);
+  assert.match(css,/#view-project-details #jpProjectFinanceSummary \.jp-finance-summary[\s\S]*?grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(ui,/class="jp-finance-icon mint"/);
+  assert.match(ui,/class="jp-finance-icon danger"/);
+  assert.match(html,/data-project-tab="deliverables"[\s\S]*?<svg/);
+  assert.match(css,/#view-project-details \.project-details-tabs[\s\S]*?width:100%!important/);
+});
+
+test("Deliverables use checkboxes instead of duplicate progress bars", async () => {
+  const html=await read("index.html");
+  const renderBlock=html.slice(html.indexOf("function renderProjectDeliverablesList"),html.indexOf("function toLocalDateTimeInput"));
+  assert.doesNotMatch(html,/id="projDetailProgressBar"/);
+  assert.doesNotMatch(renderBlock,/deliverable-item-progress/);
+  assert.doesNotMatch(renderBlock,/Math\.round\(progress\)/);
 });

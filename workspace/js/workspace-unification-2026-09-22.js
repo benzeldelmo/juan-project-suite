@@ -8,15 +8,24 @@ function balance(p){
   return Math.max(0,Number(p.total_amount||0)+Number(p.late_fee_total||0)-pays);
 }
 function statusClass(s){s=String(s||'').toLowerCase();if(s.includes('overdue'))return'overdue';if(s.includes('grace'))return'grace';if(s.includes('review'))return'review';return''}
+function financeIcon(type){
+  const icons={
+    balance:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6.5" width="17" height="12" rx="2"/><path d="M6 6.5V4.5h11v2M15.5 11h5v4h-5a2 2 0 0 1 0-4Z"/></svg>',
+    status:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16.5h.01"/></svg>',
+    due:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M8 3.5v4M16 3.5v4M4 9h16"/></svg>',
+    fee:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17l-3-2-3 2-3-2-3 2Z"/><path d="M9 8h6M9 12h6"/></svg>'
+  };
+  return icons[type]||'';
+}
 function financeHTML(p){
   const bal=balance(p),fee=Number(p.late_fee_total||0),s=p.financial_status||p.payment_status||(bal<=0?'PAID':'UNPAID');
   const dueInfo='Same as the Project End / Completion Date. A 1-day grace period follows the due date.';
   const feeInfo='₱500 applies on Day 3, then +₱250 only after each completed 7-day period while a balance remains unpaid. No daily fee.';
   return '<section class="jp-project-finance-panel" data-jp-finance-project="'+esc(p.id)+'"><div class="jp-finance-summary">'+
-    '<div class="jp-finance-cell balance"><span>Current Balance</span><strong>'+peso(bal)+'</strong></div>'+
-    '<div class="jp-finance-cell"><span>Payment Status</span><b class="jp-finance-tag '+statusClass(s)+'">'+esc(s)+'</b></div>'+
-    '<div class="jp-finance-cell"><span class="jp-label-with-info">Due Date <button type="button" class="jp-info-button" aria-label="About payment due date" data-info="'+esc(dueInfo)+'">i</button></span><strong>'+date(p.payment_due_date)+'</strong></div>'+
-    '<div class="jp-finance-cell"><span class="jp-label-with-info">Overdue Fees <button type="button" class="jp-info-button" aria-label="About overdue fees" data-info="'+esc(feeInfo)+'">i</button></span><strong class="'+(fee>0?'jp-late-fee-row':'')+'">'+peso(fee)+'</strong></div>'+
+    '<div class="jp-finance-cell balance"><span class="jp-finance-icon mint">'+financeIcon('balance')+'</span><div><span>Current Balance</span><strong>'+peso(bal)+'</strong></div></div>'+
+    '<div class="jp-finance-cell"><span class="jp-finance-icon danger">'+financeIcon('status')+'</span><div><span>Payment Status</span><b class="jp-finance-tag '+statusClass(s)+'">'+esc(s)+'</b></div></div>'+
+    '<div class="jp-finance-cell"><span class="jp-finance-icon neutral">'+financeIcon('due')+'</span><div><span class="jp-label-with-info">Due Date <button type="button" class="jp-info-button" aria-label="About payment due date" data-info="'+esc(dueInfo)+'">i</button></span><strong>'+date(p.payment_due_date)+'</strong></div></div>'+
+    '<div class="jp-finance-cell"><span class="jp-finance-icon danger">'+financeIcon('fee')+'</span><div><span class="jp-label-with-info">Overdue Fees <button type="button" class="jp-info-button" aria-label="About overdue fees" data-info="'+esc(feeInfo)+'">i</button></span><strong class="'+(fee>0?'jp-late-fee-row':'')+'">'+peso(fee)+'</strong></div></div>'+
     '</div></section>';
 }
 function findProjectFromDialog(root){
