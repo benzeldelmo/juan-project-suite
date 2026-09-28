@@ -1294,3 +1294,122 @@ html,body,#root,button,input,select,textarea{
     display:block!important;
   }
 }
+
+
+/* 2026-09-28 mobile interaction + modal close alignment pass */
+@media(max-width:899px){
+  html,body{
+    width:100%!important;
+    max-width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+  #root{
+    width:100%!important;
+    max-width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    overflow:hidden!important;
+  }
+  button,a,[role="button"]{
+    touch-action:manipulation!important;
+  }
+  input,select,textarea{
+    font-size:16px!important;
+    touch-action:manipulation!important;
+  }
+
+  /* Keep app pages stable; only the content region scrolls when content exceeds the viewport. */
+  .app{
+    width:100%!important;
+    max-width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    overflow:hidden!important;
+  }
+  .app>.page{
+    min-height:0!important;
+    max-height:100dvh!important;
+    overflow-x:hidden!important;
+    overscroll-behavior-x:none!important;
+  }
+
+  /* Product/package modal: first meta line and X are one aligned top row. */
+  #shopOverlay .shop-detail-sheet{
+    padding-top:24px!important;
+  }
+  #shopOverlay .shop-modal-topline{
+    width:100%!important;
+    min-height:40px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:16px!important;
+    margin:0 0 8px!important;
+  }
+  #shopOverlay .shop-modal-topline .shop-kind{
+    margin:0!important;
+    min-width:0!important;
+    line-height:1.2!important;
+  }
+  #shopOverlay .shop-modal-topline .sheet-x{
+    position:static!important;
+    inset:auto!important;
+    flex:0 0 40px!important;
+    width:40px!important;
+    height:40px!important;
+    min-width:40px!important;
+    min-height:40px!important;
+    margin:0!important;
+    padding:0!important;
+    display:grid!important;
+    place-items:center!important;
+    color:#111!important;
+    background:transparent!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    z-index:5!important;
+  }
+
+  /* Payment balance/reminder close button: always visible and safely inside rounded corners. */
+  .client-message-overlay .payment-reminder-modal{
+    position:relative!important;
+    padding-top:72px!important;
+    overflow:visible!important;
+  }
+  .client-message-overlay .payment-reminder-close{
+    position:absolute!important;
+    top:24px!important;
+    right:24px!important;
+    left:auto!important;
+    width:40px!important;
+    height:40px!important;
+    min-width:40px!important;
+    min-height:40px!important;
+    display:grid!important;
+    place-items:center!important;
+    padding:0!important;
+    margin:0!important;
+    color:#111!important;
+    background:transparent!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    z-index:120!important;
+  }
+  .client-message-overlay .payment-reminder-close svg{
+    display:block!important;
+    width:20px!important;
+    height:20px!important;
+    color:#111!important;
+    stroke:#111!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+}
