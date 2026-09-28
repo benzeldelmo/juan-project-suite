@@ -68,14 +68,25 @@
   function checkoutTwo(){
     var today=new Date(),min=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
     var html='<div class="jp-step-head"><span>Checkout</span><b>2 / 2</b></div><div class="jp-step-bar"><i style="width:100%"></i></div><div class="jp-step-copy left"><h1>Additional Details</h1><p>These details help JUAN PROJECT understand your request. Optional.</p></div><div class="jp-mobile-field"><label>Project / Output Name</label><input id="jpProjectTitle" value="'+esc(checkout.title)+'" placeholder="e.g. KAMPUS KONEK / CAMPUS PATROL"></div><div class="jp-mobile-field"><label>Requested Date</label><input id="jpRequestedDate" type="date" min="'+min+'" value="'+esc(checkout.deadline)+'"><small>Your requested date is a preference. Standard timeline and rush rules still apply.</small></div><div class="jp-mobile-field"><label>Notes</label><textarea id="jpProjectNotes" maxlength="500" placeholder="Any additional details about your project?">'+esc(checkout.notes)+'</textarea><small>Optional · 500 characters max</small></div><div class="jp-mobile-field"><label>Referral Code</label><input id="jpReferralCode" value="'+esc(checkout.referral)+'" placeholder="Optional · e.g. JUAN-CL-035" autocomplete="off"><small>If someone referred you to JUAN PROJECT, enter their code here.</small></div><button id="jpReviewOrder" class="jp-mobile-primary">Review Order →</button>';
-    shell(html,true,"checkout");document.getElementById("jpFlowBack").onclick=checkoutOne;document.getElementById("jpReviewOrder").onclick=function(){checkout.title=document.getElementById("jpProjectTitle").value.trim();checkout.deadline=document.getElementById("jpRequestedDate").value;checkout.notes=document.getElementById("jpProjectNotes").value.trim();checkout.referral=document.getElementById("jpReferralCode").value.trim();reviewOrder();};
+    shell(html,true,"checkout");
+    document.getElementById("jpFlowBack").onclick=checkoutOne;
+    var referral=document.getElementById("jpReferralCode");
+    if(referral){
+      referral.setAttribute("inputmode","text");
+      referral.setAttribute("autocapitalize","characters");
+      referral.addEventListener("input",function(){
+        var raw=referral.value.toUpperCase().replace(/[^A-Z0-9-]/g,"").slice(0,18);
+        referral.value=raw;
+      });
+    }
+    document.getElementById("jpReviewOrder").onclick=function(){checkout.title=document.getElementById("jpProjectTitle").value.trim();checkout.deadline=document.getElementById("jpRequestedDate").value;checkout.notes=document.getElementById("jpProjectNotes").value.trim();checkout.referral=document.getElementById("jpReferralCode").value.trim().toUpperCase();reviewOrder();};
   }
   function reviewOrder(){
     var items=cart(),html='<div class="jp-flow-title"><h1>Review Order</h1></div><section class="jp-review-card"><div class="jp-review-label">Guest Information <button id="jpEditGuest">Edit</button></div><b>'+esc(checkout.name)+'</b><span>'+esc(checkout.email)+'</span>'+(checkout.referral?'<small>Referral: '+esc(checkout.referral)+'</small>':'')+'</section><section class="jp-review-card"><div class="jp-review-label">Order Summary <span>'+count(items)+' item(s)</span></div>'+items.map(function(i){return '<div class="jp-review-item">'+thumb(i)+'<div><b>'+esc(i.name)+'</b><small>Qty: '+Number(i.qty||1)+'</small></div><strong>'+peso(Number(i.price||0)*Number(i.qty||1))+'</strong></div>';}).join("")+'<div class="jp-review-total"><span>Subtotal</span><b>'+peso(total(items))+'</b></div><div class="jp-review-total final"><span>Estimated Total</span><strong>'+peso(total(items))+'</strong></div></section><div class="jp-terms-note">ⓘ By continuing, you will need to read and agree to the <b>Terms of Service</b> before submitting your Order Request.</div><button id="jpTermsNext" class="jp-mobile-primary">Continue →</button>';
     shell(html,true,"checkout");document.getElementById("jpFlowBack").onclick=checkoutTwo;document.getElementById("jpEditGuest").onclick=checkoutOne;document.getElementById("jpTermsNext").onclick=termsScreen;
   }
   function termsScreen(){
-    var terms='<h2>JUAN PROJECT ONLINE - TERMS OF SERVICE</h2><p><b>Last Updated: September 22, 2026</b></p><p>Welcome to JUAN PROJECT ONLINE. By submitting this Order Request you acknowledge these terms. The service agreement becomes effective when the required downpayment is submitted and verified.</p>'+
+    var terms='<h2>JUAN PROJECT ONLINE - TERMS OF SERVICE</h2><p><b>Last Updated: September 28, 2026</b></p><p>Welcome to JUAN PROJECT ONLINE. By submitting this Order Request you acknowledge these terms. The service agreement becomes effective when the required downpayment is submitted and verified.</p>'+
       '<h3>1. AGREEMENT TO TERMS</h3><p>By proceeding with the initial payment, you ("the Client") enter into a binding agreement with Benzel Delmo, operating under JUAN PROJECT WORKSPACE ("the Service Provider"). This agreement governs your use of the online workspace and the fulfillment of requested services.</p>'+
       '<h3>2. PROJECT INITIATION & DOWNPAYMENT</h3><ul><li><b>Initial Deposit:</b> A non-refundable downpayment of 50% (unless otherwise specified in your invoice) is required to initialize your workspace and secure your place in the service queue.</li><li><b>Work Commencement:</b> No design, development, or production work will begin until the downpayment is successfully processed and verified in the system.</li><li><b>Final Balance:</b> Any remaining balance becomes due upon project completion or delivery and should be settled immediately.</li></ul>'+
       '<h3>3. BALANCE DUE, GRACE PERIOD & OVERDUE FEES</h3><ul><li><b>Due Date:</b> The Project End / Completion Date is also the Payment Due Date. Any remaining balance is due on that date and should be settled immediately.</li><li><b>1-Day Grace Period:</b> The first day after the due date is a grace period. No overdue charge is added on Day 1.</li><li><b>Daily Overdue Charge:</b> Beginning on Day 2 after the due date, every unpaid overdue day is counted at ₱35 per day until the outstanding balance is fully settled.</li><li><b>Initial Overdue Fee:</b> If the balance remains unpaid on Day 3 after the due date, an additional ₱500 is applied on top of accumulated daily charges.</li><li><b>7-Day Overdue Fee:</b> On Day 7 after the due date, an additional ₱250 is applied. Another ₱250 is added for every succeeding 7-day period while a balance remains unpaid.</li><li><b>Partial Payments:</b> A partial payment reduces the outstanding balance but does not stop overdue charges while a balance remains unpaid. Charges stop once the outstanding balance is fully settled.</li><li><b>Fee Waiver:</b> JUAN PROJECT may waive overdue charges for a specific project when approved by the Service Provider.</li><li><b>Release of Final Assets:</b> Final source files or restricted deliverables may be withheld until all outstanding balances and applicable overdue charges are fully settled.</li></ul>'+
@@ -162,7 +173,18 @@
   }
   function openTrack(){
     var html='<div class="jp-flow-title"><h1>Track Request</h1></div><section class="jp-track-search-card"><div class="jp-step-copy left"><h2>Find an Order Request</h2><p>Enter your Order Request ID and the email used at checkout.</p></div><div class="jp-track-search-fields"><div class="jp-mobile-field"><label>Order Request ID</label><input id="jpTrackCode" placeholder="OR-001"></div><div class="jp-mobile-field"><label>Email Address</label><input id="jpTrackEmail" type="email" placeholder="you@example.com"></div></div><button id="jpTrackLookup" class="jp-mobile-primary">Track Request</button></section>';
-    shell(html,true,"track");document.getElementById("jpFlowBack").onclick=close;document.getElementById("jpTrackLookup").onclick=async function(){var code=document.getElementById("jpTrackCode").value.trim(),email=document.getElementById("jpTrackEmail").value.trim();try{var r=await T().request("/api/suite",{action:"track-public",code:code,email:email});showTrack(r.order,"");}catch(e){toast(e.message);}};
+    shell(html,true,"track");
+    document.getElementById("jpFlowBack").onclick=close;
+    var trackCode=document.getElementById("jpTrackCode");
+    if(trackCode){
+      trackCode.setAttribute("inputmode","text");
+      trackCode.setAttribute("autocapitalize","characters");
+      trackCode.addEventListener("input",function(){
+        var digits=trackCode.value.toUpperCase().replace(/^OR-?/,"").replace(/\D/g,"").slice(0,6);
+        trackCode.value=digits?"OR-"+digits:"";
+      });
+    }
+    document.getElementById("jpTrackLookup").onclick=async function(){var code=document.getElementById("jpTrackCode").value.trim().toUpperCase(),email=document.getElementById("jpTrackEmail").value.trim();try{var r=await T().request("/api/suite",{action:"track-public",code:code,email:email});showTrack(r.order,"");}catch(e){toast(e.message);}};
   }
   async function trackToken(token){try{var r=await T().request("/api/suite",{action:"track",token:token});showTrack(r.order,token);}catch(e){toast(e.message);openTrack();}}
   function showTrack(order,token){
