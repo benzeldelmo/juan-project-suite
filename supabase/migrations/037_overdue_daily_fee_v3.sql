@@ -9,7 +9,7 @@ language sql
 immutable
 strict
 set search_path to 'public'
-as $
+as $$
   with d as (
     select greatest(p_as_of - p_due_date,0)::integer as days_after_due
   )
@@ -22,7 +22,7 @@ as $
     )::numeric
   end
   from d
-$;
+$$;
 
 create or replace function public.refresh_juan_project_financials(p_project_id text)
 returns jsonb
