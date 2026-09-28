@@ -14,7 +14,7 @@ let state={
   catalog:{categories:[],services:[],packages:[],packageItems:[]},catalogLoaded:false,
   gateOpen:false,orderFilter:'requests',shopItem:null,paymentProjectId:null,
   shopQuery:'',shopSort:'default',shopCategory:'all',paymentFlow:'',
-  notificationOpen:false,senderInstitution:'',guestGateContext:'default',receiptPreviewUrl:'',receiptPreviewType:'',receiptPreviewName:'',clientMessage:null,pendingClientMessage:null
+  notificationOpen:false,senderInstitution:'',guestGateContext:'default',receiptPreviewUrl:'',receiptPreviewType:'',receiptPreviewName:'',clientMessage:null,pendingClientMessage:null,shopView:'cards'
 };
 window.JPOAppState=state;
 
@@ -549,15 +549,23 @@ function shopRow(x){
   const price=x.kind==='Package'?Number(x.new_price||0):Number(x.price||0),old=x.kind==='Package'?Number(x.original_price||0):0;
   return '<article class="jp-shop-card"><button class="jp-shop-main" data-view-shop="'+esc(x.kind+':'+x.id)+'"><div class="jp-shop-copy"><span>'+esc(x.product_code||'')+' · '+esc(x.kind==='Package'?'Package':categoryName(x.category_id))+'</span><h3>'+esc(x.name)+'</h3><p>'+esc((x.description||'Creative service').slice(0,82))+'</p><div class="jp-shop-price"><b>'+peso(price)+'</b>'+(old>price?'<s>'+peso(old)+'</s>':'')+'</div></div></button><button class="btn primary jp-add-cart" data-add-cart="'+esc(x.kind+':'+x.id)+'">Add to Cart</button></article>';
 }
+function priceListRow(x){
+  const price=x.kind==='Package'?Number(x.new_price||0):Number(x.price||0),old=x.kind==='Package'?Number(x.original_price||0):0,label=x.kind==='Package'?'Package':categoryName(x.category_id);
+  return '<button class="jp-pricelist-row" data-view-shop="'+esc(x.kind+':'+x.id)+'"><div class="jp-pricelist-main"><span>'+esc(x.product_code||label)+'</span><b>'+esc(x.name)+'</b><small>'+esc(label)+'</small></div><div class="jp-pricelist-price">'+(old>price?'<s>'+peso(old)+'</s>':'')+'<strong>'+peso(price)+'</strong></div>'+icon('chevron',16)+'</button>';
+}
 function shop(){
   const packages=[...(state.catalog.packages||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).map(x=>({...x,kind:'Package'}));
   const services=[...(state.catalog.services||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).map(x=>({...x,kind:'Service'}));
-  const all=[...packages,...services],active=state.shopCategory||'all',q=String(state.shopQuery||'').trim().toLowerCase();
+  const all=[...packages,...services],active=state.shopCategory||'all',q=String(state.shopQuery||'').trim().toLowerCase(),view=state.shopView||'cards';
   let items=all.filter(x=>active==='all'||(active==='packages'&&x.kind==='Package')||(x.kind==='Service'&&String(x.category_id)===active));
   items=items.filter(x=>!q||[x.name,x.description,x.kind,categoryName(x.category_id),x.product_code].some(v=>String(v||'').toLowerCase().includes(q)));
   const count=window.JPMobileCommerce?.cartCount?.()||0,total=window.JPMobileCommerce?.cartTotal?.()||0;
   const chips='<button data-shop-category="all" class="'+(active==='all'?'active':'')+'">All</button><button data-shop-category="packages" class="'+(active==='packages'?'active':'')+'">Packages</button>'+(state.catalog.categories||[]).map(c=>'<button data-shop-category="'+esc(c.id)+'" class="'+(active===String(c.id)?'active':'')+'">'+esc(c.name)+'</button>').join('');
-  return '<div class="jp-shop-sticky">'+pageHead('Shop',{back:false,more:false})+'<div class="jp-shop-head"><div class="shop-search"><span>'+icon('search',17)+'</span><input id="shopSearch" value="'+esc(state.shopQuery)+'" placeholder="Search services or packages..."></div><button id="shopOrderCart" class="jp-cart-icon" aria-label="Cart">'+icon('cart',20)+'<span>'+count+'</span></button></div><div class="jp-category-chips">'+chips+'</div></div><div class="jp-shop-scroll"><div id="jpAdBannerAnchor"></div><div class="jp-shop-grid">'+(items.map(shopRow).join('')||'<div class="card empty guided-empty"><b>No matching services</b></div>')+'</div></div><div class="jp-shop-footer">'+(count?'<button id="shopMiniCart" class="jp-mini-cart"><span><b>'+count+' item'+(count===1?'':'s')+'</b><small>'+peso(total)+'</small></span><strong>View Cart →</strong></button>':'<div class="jp-shop-item-indicator">Your cart is empty</div>')+'</div>';
+  const viewToggle='<div class="jp-shop-view-toggle" role="group" aria-label="Shop view"><button id="shopCardsView" class="'+(view==='cards'?'active':'')+'">Shop</button><button id="shopPricelistView" class="'+(view==='pricelist'?'active':'')+'">View Pricelist</button></div>';
+  const content=view==='pricelist'
+    ? '<div class="jp-pricelist"><div class="jp-pricelist-head"><div><span>CURRENT PRICING</span><h2>JUAN PROJECT Pricelist</h2></div><small>Prices shown here apply to new orders. Existing project prices stay unchanged unless edited in Workspace.</small></div><div class="jp-pricelist-list">'+(items.map(priceListRow).join('')||'<div class="card empty guided-empty"><b>No matching services</b></div>')+'</div></div>'
+    : '<div class="jp-shop-grid">'+(items.map(shopRow).join('')||'<div class="card empty guided-empty"><b>No matching services</b></div>')+'</div>';
+  return '<div class="jp-shop-sticky">'+pageHead('Shop',{back:false,more:false})+'<div class="jp-shop-head"><div class="shop-search"><span>'+icon('search',17)+'</span><input id="shopSearch" value="'+esc(state.shopQuery)+'" placeholder="Search services or packages..."></div><button id="shopOrderCart" class="jp-cart-icon" aria-label="Cart">'+icon('cart',20)+'<span>'+count+'</span></button></div>'+viewToggle+'<div class="jp-category-chips">'+chips+'</div></div><div class="jp-shop-scroll"><div id="jpAdBannerAnchor"></div>'+content+'</div><div class="jp-shop-footer">'+(count?'<button id="shopMiniCart" class="jp-mini-cart"><span><b>'+count+' item'+(count===1?'':'s')+'</b><small>'+peso(total)+'</small></span><strong>View Cart →</strong></button>':'<div class="jp-shop-item-indicator">Your cart is empty</div>')+'</div>';
 }
 function findShopItem(key){const [kind,id]=String(key).split(':');if(kind==='Package')return {...state.catalog.packages.find(x=>String(x.id)===String(id)),kind};return {...state.catalog.services.find(x=>String(x.id)===String(id)),kind:'Service'}}
 
@@ -604,6 +612,8 @@ function bind(){
   const shopMiniCart=document.getElementById('shopMiniCart');if(shopMiniCart)shopMiniCart.onclick=()=>window.JPMobileCommerce?.openCart?.();
   const shopSort=document.getElementById('shopSort');if(shopSort)shopSort.onchange=()=>{state.shopSort=shopSort.value;render()};
   const shopSearch=document.getElementById('shopSearch');if(shopSearch){shopSearch.oninput=()=>{state.shopQuery=shopSearch.value;const pos=shopSearch.selectionStart;render();const next=document.getElementById('shopSearch');if(next){next.focus();try{next.setSelectionRange(pos,pos)}catch{}}}};
+  const shopCardsView=document.getElementById('shopCardsView');if(shopCardsView)shopCardsView.onclick=()=>{state.shopView='cards';render()};
+  const shopPricelistView=document.getElementById('shopPricelistView');if(shopPricelistView)shopPricelistView.onclick=()=>{state.shopView='pricelist';render()};
   document.querySelectorAll('[data-shop-category]').forEach(b=>b.onclick=()=>{state.shopCategory=b.dataset.shopCategory||'all';render();});
   const paymentHistoryTab=document.getElementById('paymentHistoryTab');if(paymentHistoryTab)paymentHistoryTab.onclick=()=>document.querySelector('.payment-history')?.scrollIntoView({behavior:'smooth'});
   const projectSel=document.getElementById('payProjectSel');if(projectSel)projectSel.onchange=()=>{state.paymentProjectId=projectSel.value;render()};
