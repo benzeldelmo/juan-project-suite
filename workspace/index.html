@@ -8661,7 +8661,7 @@ ${description}`))actionCallback();return;}
         const daysOverdue=due&&today>new Date(due.getFullYear(),due.getMonth(),due.getDate()+1)?Math.max(1,daysAfterDue-1):0;
         let nextFeeDate=null;
         if(due&&remaining>0&&overdueFeesEnabled){
-          const nextOffset=daysAfterDue<2?2:daysAfterDue+1;
+          const nextOffset=daysAfterDue<3?3:daysAfterDue<7?7:(Math.floor(daysAfterDue/7)+1)*7;
           nextFeeDate=new Date(due.getFullYear(),due.getMonth(),due.getDate()+nextOffset);
         }
         if(overviewEl)overviewEl.innerHTML=`
@@ -8679,7 +8679,7 @@ ${description}`))actionCallback();return;}
             <div class="payment-metric-card paid"><span>Amount Paid</span><strong>${formatCurrency(totalPaid)}</strong></div>
             <div class="payment-metric-card ${remaining>0?'due':'paid'}"><span>Balance Due</span><strong>${formatCurrency(remaining)}</strong></div>
           </div>
-          <div class="payment-backend-note">Payment due on the Project End / Deadline Date · 1-day grace period · ₱35/day beginning on day 2 · +₱500 on day 3 · +₱250 on day 7 and every succeeding 7 days · ${overdueFeesEnabled?'Overdue fees enabled':'Overdue fees waived for this project'}${grace?' · Grace through '+grace.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):''}</div>`;
+          <div class="payment-backend-note">Payment due on the Project End / Deadline Date · 1-day grace period · ₱500 on day 3 if unpaid · +₱250 on day 7 and every succeeding 7 days · no daily fee · ${overdueFeesEnabled?'Overdue fees enabled':'Overdue fees waived for this project'}${grace?' · Grace through '+grace.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):''}</div>`;
         if(listEl){
           if(!payments.length){listEl.innerHTML='<div class="payment-history-empty"><strong>No payments recorded</strong><span>Recorded payments will appear here.</span></div>';return;}
           payments.sort((a,b)=>new Date(b.payment_date||b.created_at||0)-new Date(a.payment_date||a.created_at||0));
