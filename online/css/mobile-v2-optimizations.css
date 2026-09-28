@@ -1100,3 +1100,99 @@ html,body,#root,button,input,select,textarea{font-family:"SF Pro Rounded",-apple
 @media(min-width:900px) and (max-height:720px){
   :root{--jp-web-edge-y:28px!important}
 }
+
+
+/* 2026-09-28 mobile UI integrity patch */
+@media(max-width:899px){
+  html,body,#root{max-width:100%;overflow-x:hidden!important}
+  body.jp-flow-open{overflow:hidden!important;overscroll-behavior-x:none!important}
+  .jp-guest-feature-panel,
+  .jp-flow-feature-panel{display:none!important}
+
+  .jp-guest-access-shell,
+  .jp-guest-access-grid,
+  .jp-guest-phone-panel{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+
+  .jp-flow-layer,
+  .jp-flow-phone,
+  .jp-flow-body,
+  .jp-flow-main{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    overflow-x:hidden!important;
+    overscroll-behavior-x:none!important;
+    touch-action:pan-y!important;
+  }
+
+  .jp-flow-main{padding-left:24px!important;padding-right:24px!important}
+  .jp-step-head,.jp-step-bar,.jp-step-copy,.jp-mobile-field,
+  .jp-mobile-primary,.jp-safe-note,.jp-flow-title,.jp-review-card,.jp-terms-note{
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+
+  .jp-step-copy{margin-bottom:24px!important}
+  .jp-step-copy h1,.jp-flow-title h1{margin-bottom:8px!important}
+  .jp-step-copy p{margin:0!important}
+  .jp-mobile-field{margin-bottom:24px!important}
+  .jp-mobile-field label{display:block;margin-bottom:8px!important}
+  .jp-mobile-field small{display:block;margin-top:8px!important;line-height:1.5!important}
+  .jp-mobile-field input,.jp-mobile-field textarea{width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+  .jp-flow-checkout .jp-mobile-primary{margin-top:8px!important}
+  .jp-safe-note{margin-top:16px!important}
+  .jp-review-card{padding:24px!important}
+  .jp-review-item{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:16px!important;align-items:start!important}
+  .jp-review-item>div{min-width:0!important;display:grid!important;gap:8px!important}
+  .jp-review-item>div>b{overflow-wrap:anywhere!important}
+  .jp-review-item>div>small{display:block!important;margin:0!important}
+  .jp-review-item>strong{white-space:nowrap!important;text-align:right!important}
+
+  #jpFlowClose,
+  .jp-v2-modal>.jp-v2-x,
+  .overlay .sheet>.sheet-x,
+  #shopOverlay .sheet-x,
+  .jp-popup-ad>.jp-popup-close{
+    top:24px!important;
+    right:24px!important;
+    color:#111!important;
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+    width:40px!important;
+    height:40px!important;
+    min-width:40px!important;
+    min-height:40px!important;
+    padding:0!important;
+    border-radius:0!important;
+    display:grid!important;
+    place-items:center!important;
+    z-index:80!important;
+  }
+  .overlay .sheet,#shopOverlay .shop-detail-sheet,.jp-v2-modal{padding-top:72px!important;overflow:visible!important}
+
+  .jp-account-bento{gap:24px!important}
+  .jp-account-client-card-simple{padding:24px!important;min-height:0!important;aspect-ratio:auto!important}
+  .jp-account-card-identity-simple{margin:24px 0!important;align-items:end!important;gap:16px!important}
+  .jp-account-card-identity-simple .jp-card-field-label{
+    display:block!important;
+    margin-bottom:8px!important;
+    color:rgba(255,255,255,.56)!important;
+    font-size:10px!important;
+    font-weight:800!important;
+    letter-spacing:.08em!important;
+    text-transform:uppercase!important;
+  }
+  .jp-account-card-identity-simple h2{font-size:24px!important;line-height:1.15!important;overflow-wrap:anywhere!important}
+  .jp-account-card-meta-simple{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important;padding:16px 0 0!important;border-bottom:0!important}
+  .jp-account-card-meta-simple>div{min-width:0!important}
+  .jp-account-card-meta-simple b{font-size:11px!important;overflow-wrap:anywhere!important}
+  .jp-account-rewards .text-button{display:block!important;margin-top:16px!important}
+  .jp-account-rewards>small{display:block!important;margin-top:16px!important;line-height:1.45!important}
+}
