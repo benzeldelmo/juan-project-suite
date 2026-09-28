@@ -112,16 +112,15 @@ test("Deliverables use checkboxes instead of duplicate progress bars", async () 
 });
 
 
-test("Project Details uses desktop side navigation and returns to horizontal navigation on smaller screens", async () => {
+test("Project Details uses the approved full-width horizontal tab rail", async () => {
   const html=await read("index.html");
   const css=await read("css/workspace-unification-2026-09-22.css");
-  assert.match(html,/class="project-details-workspace"/);
-  assert.match(html,/<aside class="tabs-nav project-details-tabs" aria-label="Project sections">/);
-  assert.match(html,/class="project-details-content"/);
-  assert.match(css,/grid-template-columns:224px minmax\(0,1fr\)!important/);
-  assert.match(css,/#view-project-details \.project-details-tabs[\s\S]*?flex-direction:column!important/);
-  assert.match(css,/@media\(max-width:960px\)[\s\S]*?#view-project-details \.project-details-tabs[\s\S]*?flex-direction:row!important/);
+  assert.doesNotMatch(html,/class="project-details-workspace"/);
+  assert.match(html,/class="tabs-nav project-details-tabs" aria-label="Project sections"/);
+  assert.match(css,/#view-project-details \.project-details-tabs\{[\s\S]*?flex-direction:row!important[\s\S]*?width:100%!important/);
+  assert.doesNotMatch(css,/grid-template-columns:224px minmax\(0,1fr\)!important/);
 });
+
 
 test("Project Details follows the 8px spacing system and one icon language", async () => {
   const css=await read("css/workspace-unification-2026-09-22.css");
@@ -170,4 +169,18 @@ test("Workspace buttons, sidebar navigation and tabs use one compact component g
   assert.match(css,/\.btn-sm\{[\s\S]*?min-height:32px!important[\s\S]*?border-radius:10px!important/);
   assert.match(css,/\.sidebar \.nav-item,[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
   assert.match(css,/\.tabs-nav \.tab-btn,[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
+});
+
+test("child deliverables do not repeat the package subtitle", async () => {
+  const html=await read("index.html");
+  const renderBlock=html.slice(html.indexOf("function renderProjectDeliverablesList"),html.indexOf("function toLocalDateTimeInput"));
+  assert.match(renderBlock,/included items · Package/);
+  assert.doesNotMatch(renderBlock,/package_name\|\|'Package inclusion'/);
+});
+
+test("deliverable hierarchy uses 8px spacing and distinct parent-child typography", async () => {
+  const css=await read("css/workspace-unification-2026-09-22.css");
+  assert.match(css,/#view-project-details \.deliverable-checklist-row\{[\s\S]*?column-gap:16px!important[\s\S]*?padding:8px 16px!important/);
+  assert.match(css,/#view-project-details \.deliverable-package-row \.deliverable-checklist-copy>strong\{[\s\S]*?font-size:14px!important[\s\S]*?font-weight:750!important/);
+  assert.match(css,/#view-project-details \.deliverable-child-row \.deliverable-checklist-copy>strong\{[\s\S]*?font-size:12px!important/);
 });
