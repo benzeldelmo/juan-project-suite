@@ -1568,7 +1568,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
   <link rel="stylesheet" href="/css/general-update.css?v=20260925-deliverable-payment-rush-1">
   <link rel="stylesheet" href="/css/keyboard-shortcuts.css?v=20260920-1805">
   <link rel="stylesheet" href="/css/consistency-pass.css?v=20260925-deliverable-payment-rush-1">
-  <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260925-deliverable-payment-rush-1">
+  <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260928-info-cleanup-v1">
   <link rel="stylesheet" href="/css/workspace-icon-system-2026-09-22.css?v=20260923-0105">
   <link rel="stylesheet" href="/css/typography-sf-pro.css?v=20260923-1">
 </head>
@@ -1994,7 +1994,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
                 <div class="form-group"><label class="form-label">Project ID</label><input class="form-control" id="projectDataProjectId" readonly></div>
                 <div class="form-group"><label class="form-label">Project Name</label><input class="form-control" id="projectDataProjectName"></div>
                 <div class="form-group"><label class="form-label">Project Start Date</label><input type="date" class="form-control" id="projectDataStartDate"></div>
-                <div class="form-group"><label class="form-label">Project End / Deadline Date</label><input type="date" class="form-control" id="projectDataDeadline"><small class="text-muted">This date is also the payment due date.</small></div>
+                <div class="form-group"><label class="form-label jp-label-with-info">Project End / Deadline Date <button type="button" class="jp-info-button" aria-label="About project end date" data-info="This date is also used as the payment due date.">i</button></label><input type="date" class="form-control" id="projectDataDeadline"></div>
               </div>
               <div class="project-data-policy-grid">
                 <div class="project-priority-toggle-row">
@@ -2002,7 +2002,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
                   <label class="toggle-switch"><input type="checkbox" id="projectDataPriority"><span class="toggle-slider"></span></label>
                 </div>
                 <div class="project-priority-toggle-row">
-                  <div><strong>Apply Rush Fee</strong><small>Waive the charge without losing the calculated rush timeline.</small></div>
+                  <div><strong class="jp-label-with-info">Apply Rush Fee <button type="button" class="jp-info-button" aria-label="About rush fees" data-info="Turn this off to waive the charge while keeping the calculated rush timeline.">i</button></strong></div>
                   <label class="toggle-switch"><input type="checkbox" id="projectDataRushFeeEnabled" onchange="app.setProjectRushFeeEnabled(this.checked)"><span class="toggle-slider"></span></label>
                 </div>
               </div>
@@ -2011,12 +2011,12 @@ table.jp-packages-table col:nth-child(6){width:7%}
 
           <div class="card project-items-receipt-card">
             <div class="card-header">
-              <div><div class="section-kicker">ORDER</div><h3 class="card-title">Items</h3><div class="text-sm text-muted mt-1">Items added here are reflected automatically in Deliverables.</div></div>
+              <div><div class="section-kicker">ORDER</div><h3 class="card-title jp-title-with-info">Items <button type="button" class="jp-info-button" aria-label="About project items" data-info="Items added here also create or update the matching deliverables automatically.">i</button></h3></div>
               <button class="btn btn-secondary btn-sm" onclick="app.openProjectOrderBatchModal()">Add Items</button>
             </div>
             <div id="projectOrderItemsList"></div>
           </div>
-          <div class="project-data-save-row project-data-autosave-row"><span id="projectDataAutosaveStatus" class="project-data-autosave-status">All changes save automatically. Press ⌘S / Ctrl+S to save immediately.</span></div>
+          <div class="project-data-save-row project-data-autosave-row"><span id="projectDataAutosaveStatus" class="project-data-autosave-status">Autosave On</span></div>
         </div>
 
         <div id="projTab-deliverables" class="tab-content active">
@@ -2028,13 +2028,13 @@ table.jp-packages-table col:nth-child(6){width:7%}
             <div class="progress-bar-track deliverables-overall-progress"><div class="progress-bar-fill" id="projDetailProgressBar" style="width:0%"></div></div>
             <div class="deliverables-list" id="projectDeliverablesList"></div>
             <div id="projectFilesAccessCard" class="project-files-admin-card">
-              <div class="project-files-admin-head"><div><div class="section-kicker">CLIENT DELIVERY</div><h3 class="card-title">Project Files</h3><p>One Google Drive folder per project. The same access state appears in JUAN PROJECT Online.</p></div><span id="projectFilesAccessState" class="portal-drive-state locked">Locked</span></div>
+              <div class="project-files-admin-head"><div><div class="section-kicker">CLIENT DELIVERY</div><h3 class="card-title jp-title-with-info">Project Files <button type="button" class="jp-info-button" aria-label="About project files" data-info="Controls the Google Drive link and availability shown to the client in JUAN PROJECT Online.">i</button></h3></div><span id="projectFilesAccessState" class="portal-drive-state locked">Locked</span></div>
               <div class="project-files-admin-grid">
                 <div class="form-group project-files-url"><label class="form-label">Google Drive URL</label><input id="projectFilesDriveUrl" class="form-control" placeholder="https://drive.google.com/…"></div>
                 <div class="form-group"><label class="form-label">Unlock Date & Time</label><input id="projectFilesUnlockAt" type="datetime-local" class="form-control"></div>
                 <div class="form-group"><label class="form-label">Expiry Date & Time</label><input id="projectFilesExpiresAt" type="datetime-local" class="form-control"></div>
               </div>
-              <div class="project-files-admin-actions"><a id="projectFilesOpenDrive" class="btn btn-secondary hidden" target="_blank" rel="noopener">Open Drive</a><span class="project-data-autosave-status">Changes save automatically.</span></div>
+              <div class="project-files-admin-actions"><a id="projectFilesOpenDrive" class="btn btn-secondary hidden" target="_blank" rel="noopener">Open Drive</a><span class="project-data-autosave-status">Autosave On</span></div>
             </div>
           </div>
         </div>
@@ -2044,7 +2044,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
             <div class="card-header payment-monitoring-head">
               <div><div class="section-kicker">FINANCE</div><h3 class="card-title">Payment & Calculations</h3></div>
               <div class="project-overdue-policy">
-                <div><strong>Overdue Fees</strong><small>Apply the standard overdue-fee policy to this project.</small></div>
+                <div><strong class="jp-label-with-info">Overdue Fees <button type="button" class="jp-info-button" aria-label="About overdue fees" data-info="1-day grace period. ₱500 applies on Day 3, then +₱250 only after each completed 7-day period. No daily fee.">i</button></strong></div>
                 <label class="toggle-switch" title="Apply overdue fees to this project"><input type="checkbox" id="projectOverdueFeesToggle" onchange="app.setProjectOverdueFeesEnabled(this.checked)"><span class="toggle-slider"></span></label>
               </div>
             </div>
@@ -2084,7 +2084,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
           <div class="card">
             <h3 class="card-title mb-3">Project Notes</h3>
             <textarea class="form-control" id="projectNotesTextarea" rows="6" placeholder="Add specific client requests, asset URLs, or technical constraints..."></textarea>
-            <div class="mt-3 text-right"><span class="project-data-autosave-status">Notes save automatically.</span></div>
+            <div class="mt-3 text-right"><span class="project-data-autosave-status">Autosave On</span></div>
           </div>
         </div>
       </section>
@@ -8062,7 +8062,7 @@ ${description}`))actionCallback();return;}
         set('projectDataProjectId',formatProjectId(proj));set('projectDataProjectName',proj.title||'');set('projectDataStartDate',proj.start_date||'');set('projectDataDeadline',proj.deadline_date||'');
         const priorityEl=document.getElementById('projectDataPriority');if(priorityEl)priorityEl.checked=projectIsPriority(proj);
         const rushToggle=document.getElementById('projectDataRushFeeEnabled');if(rushToggle){rushToggle.checked=proj.rush_fee_enabled!==false;rushToggle.disabled=pricingVersionForProject(proj)!=='v2';}
-        bindProjectDataAutosave();setProjectDataAutosaveStatus('All changes save automatically.');
+        bindProjectDataAutosave();setProjectDataAutosaveStatus('Autosave On');
       }
       function openProjectData(projId){
         if(projId&&projId!==state.activeProjectId){openProjectDetails(projId);setTimeout(()=>switchProjectTab('project-data'),0);return;}
@@ -8667,7 +8667,6 @@ ${description}`))actionCallback();return;}
         const status=rawStatus==='DOWNPAYMENT'?'PARTIALLY PAID':rawStatus;
         const statusClass=status==='PAID'?'paid':status==='OVERDUE'?'overdue':status==='GRACE PERIOD'?'partial':status==='PAYMENT UNDER REVIEW'?'partial':status==='PARTIALLY PAID'?'partial':'unpaid';
         const due=proj.payment_due_date?parseDateSafe(proj.payment_due_date):null;
-        const grace=proj.grace_period_end?parseDateSafe(proj.grace_period_end):null;
         if(overviewEl)overviewEl.innerHTML=`
           <div class="payment-status-card ${statusClass}"><div><span>Payment Status</span><strong>${escapeHtml(status)}</strong><small>${due?'Due '+due.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'Due date follows the Project End / Deadline Date'}</small></div><div class="payment-status-balance"><span>Balance Due</span><strong>${formatCurrency(remaining)}</strong></div></div>
           <div class="payment-modular-grid">
@@ -8676,12 +8675,11 @@ ${description}`))actionCallback();return;}
             <div class="payment-metric-card"><span>Other Charges</span><strong>${formatCurrency(workloadSurcharge+maintenance+otherFees)}</strong></div>
             <div class="payment-metric-card"><span>Discounts</span><strong>${formatCurrency(discounts)}</strong></div>
             <div class="payment-metric-card"><span>Base Total</span><strong>${formatCurrency(baseTotal)}</strong></div>
-            <div class="payment-metric-card ${lateFees>0?'due':''}"><span>Overdue Fees</span><strong>${overdueFeesEnabled?formatCurrency(lateFees):'Disabled'}</strong></div>
+            <div class="payment-metric-card ${lateFees>0?'due':''}"><span class="jp-label-with-info">Overdue Fees <button type="button" class="jp-info-button" aria-label="About overdue fee calculation" data-info="1-day grace period. ₱500 applies on Day 3, then +₱250 only after each completed 7-day period. No daily fee.">i</button></span><strong>${overdueFeesEnabled?formatCurrency(lateFees):'Disabled'}</strong></div>
             <div class="payment-metric-card"><span>Current Total</span><strong>${formatCurrency(total)}</strong></div>
             <div class="payment-metric-card paid"><span>Amount Paid</span><strong>${formatCurrency(totalPaid)}</strong></div>
             <div class="payment-metric-card ${remaining>0?'due':'paid'}"><span>Balance Due</span><strong>${formatCurrency(remaining)}</strong></div>
-          </div>
-          <div class="payment-backend-note">Payment due on the Project End / Deadline Date · 1-day grace period · ₱500 on day 3 if unpaid · +₱250 on day 7 and every succeeding 7 days · no daily fee · ${overdueFeesEnabled?'Overdue fees enabled':'Overdue fees waived for this project'}${grace?' · Grace through '+grace.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):''}</div>`;
+          </div>`;
         if(listEl){
           if(!payments.length){listEl.innerHTML='<div class="payment-history-empty"><strong>No payments recorded</strong><span>Recorded payments will appear here.</span></div>';return;}
           payments.sort((a,b)=>new Date(b.payment_date||b.created_at||0)-new Date(a.payment_date||a.created_at||0));
@@ -9849,7 +9847,7 @@ ${description}`))actionCallback();return;}
 
     document.addEventListener("DOMContentLoaded", () => {
       app.initWorkspace();
-      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-checklist-spacing-v2',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
+      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-info-cleanup-v1',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
       setTimeout(()=>{refreshSearchableSelects(document);app.bindEmailDomainSuggestions();if(location.hash==="#online-portal")app.navigateTo("online-portal");},60);
       
       document.addEventListener("click", (e) => {
@@ -10646,7 +10644,7 @@ ${description}`))actionCallback();return;}
 <script type="module" src="/js/keyboard-shortcuts.js?v=20260923-0105"></script>
 <script src="/js/workspace-icon-system-2026-09-22.js?v=20260923-0225"></script>
   <script src="/js/consistency-pass.js?v=20260925-deliverable-payment-rush-1"></script>
-  <script src="/js/workspace-unification-2026-09-22.js?v=20260923-1208"></script>
+  <script src="/js/workspace-unification-2026-09-22.js?v=20260928-info-cleanup-v1"></script>
 </body>
 </html>
 <style id="v111-maintenance-patch">

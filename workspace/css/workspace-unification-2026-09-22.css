@@ -138,10 +138,31 @@ body{overflow-x:hidden!important}
 .jp-finance-tag.review{background:#eef2ff;color:#4754a4}
 .jp-late-fee-row{color:var(--jp-danger)!important}
 
+/* Compact contextual information — replace long helper notes with on-demand detail */
+.jp-label-with-info,.jp-title-with-info{display:inline-flex!important;align-items:center!important;gap:6px!important}
+.jp-info-button{
+  position:relative;display:inline-grid;place-items:center;width:16px;height:16px;min-width:16px;
+  padding:0;border:1px solid var(--border-medium);border-radius:50%;background:transparent;color:var(--text-tertiary);
+  font:700 10px/1 var(--font-system);text-transform:none!important;letter-spacing:0!important;cursor:help;vertical-align:middle;
+}
+.jp-info-button:hover,.jp-info-button:focus-visible{border-color:var(--text-secondary);color:var(--text-primary);outline:none;background:var(--bg-subtle)}
+.jp-info-button::after{
+  content:attr(data-info);position:absolute;left:50%;top:calc(100% + 8px);transform:translate(-50%,4px);
+  width:max-content;max-width:min(280px,70vw);padding:8px 10px;border-radius:9px;background:#1d1d1f;color:#fff;
+  box-shadow:0 8px 24px rgba(0,0,0,.16);font:500 10px/1.45 var(--font-system);text-align:left;
+  text-transform:none!important;letter-spacing:0!important;white-space:normal;opacity:0;visibility:hidden;pointer-events:none;
+  z-index:1600;transition:opacity .12s ease,transform .12s ease,visibility .12s ease;
+}
+.jp-info-button:hover::after,.jp-info-button:focus::after,.jp-info-button:focus-visible::after{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.jp-finance-cell:nth-child(4) .jp-info-button::after,.project-overdue-policy .jp-info-button::after{left:auto;right:0;transform:translate(0,4px)}
+.jp-finance-cell:nth-child(4) .jp-info-button:hover::after,.jp-finance-cell:nth-child(4) .jp-info-button:focus::after,.project-overdue-policy .jp-info-button:hover::after,.project-overdue-policy .jp-info-button:focus::after{transform:translate(0,0)}
+.project-data-autosave-status{display:inline-flex;align-items:center;gap:5px}
+.project-data-autosave-status:not(.error):not(.saving):not(.saved)::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--primary-mint-dark);flex:0 0 auto}
+
 /* Project details finance tab/card helpers */
 .jp-project-finance-panel{margin:0 0 24px}
 .jp-project-finance-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.jp-project-finance-note{font-size:10px;color:var(--jp-muted);line-height:1.45;margin-top:8px}
+.jp-project-finance-note,.payment-backend-note{display:none!important}
 
 /* Payment review financial context */
 .jp-payment-review-finance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 16px}
@@ -171,10 +192,6 @@ body{overflow-x:hidden!important}
 #view-project-details .project-details-tabs{margin-top:0!important}
 .payment-status-card small{
   display:block;margin-top:4px;font-size:10px!important;font-weight:500!important;color:var(--text-tertiary)!important;
-}
-.payment-backend-note{
-  margin-top:10px;padding:8px 10px;border-radius:10px;background:#f7f9f8;
-  color:var(--jp-muted);font-size:9px;line-height:1.4;
 }
 .payment-metric-card.due strong{color:var(--jp-danger)!important}
 .jp-financial-status-cell{font-weight:700!important}

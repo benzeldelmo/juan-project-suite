@@ -10,12 +10,14 @@ function balance(p){
 function statusClass(s){s=String(s||'').toLowerCase();if(s.includes('overdue'))return'overdue';if(s.includes('grace'))return'grace';if(s.includes('review'))return'review';return''}
 function financeHTML(p){
   const bal=balance(p),fee=Number(p.late_fee_total||0),s=p.financial_status||p.payment_status||(bal<=0?'PAID':'UNPAID');
+  const dueInfo='Same as the Project End / Completion Date. A 1-day grace period follows the due date.';
+  const feeInfo='₱500 applies on Day 3, then +₱250 only after each completed 7-day period while a balance remains unpaid. No daily fee.';
   return '<section class="jp-project-finance-panel" data-jp-finance-project="'+esc(p.id)+'"><div class="jp-finance-summary">'+
     '<div class="jp-finance-cell balance"><span>Current Balance</span><strong>'+peso(bal)+'</strong></div>'+
     '<div class="jp-finance-cell"><span>Payment Status</span><b class="jp-finance-tag '+statusClass(s)+'">'+esc(s)+'</b></div>'+
-    '<div class="jp-finance-cell"><span>Due Date</span><strong>'+date(p.payment_due_date)+'</strong></div>'+
-    '<div class="jp-finance-cell"><span>Overdue Fees</span><strong class="'+(fee>0?'jp-late-fee-row':'')+'">'+peso(fee)+'</strong></div>'+
-    '</div><div class="jp-project-finance-note">Grace period ends '+date(p.grace_period_end)+' · Overdue status begins '+date(p.overdue_started_at)+'. Values are enforced by the JUAN PROJECT backend.</div></section>';
+    '<div class="jp-finance-cell"><span class="jp-label-with-info">Due Date <button type="button" class="jp-info-button" aria-label="About payment due date" data-info="'+esc(dueInfo)+'">i</button></span><strong>'+date(p.payment_due_date)+'</strong></div>'+
+    '<div class="jp-finance-cell"><span class="jp-label-with-info">Overdue Fees <button type="button" class="jp-info-button" aria-label="About overdue fees" data-info="'+esc(feeInfo)+'">i</button></span><strong class="'+(fee>0?'jp-late-fee-row':'')+'">'+peso(fee)+'</strong></div>'+
+    '</div></section>';
 }
 function findProjectFromDialog(root){
   const st=state(),ps=st.projects||[];
@@ -39,7 +41,7 @@ function enhancePaymentReview(root){
   if(!p)return;
   root.dataset.jpPaymentFinance='1';
   const box=document.createElement('div');box.className='jp-payment-review-finance';
-  box.innerHTML='<div><span>Authoritative Balance</span><b>'+peso(balance(p))+'</b></div><div><span>Late Fees</span><b>'+peso(p.late_fee_total||0)+'</b></div><div><span>Status</span><b class="jp-finance-tag '+statusClass(p.financial_status)+'">'+esc(p.financial_status||'—')+'</b></div>';
+  box.innerHTML='<div><span>Current Balance</span><b>'+peso(balance(p))+'</b></div><div><span>Overdue Fees</span><b>'+peso(p.late_fee_total||0)+'</b></div><div><span>Status</span><b class="jp-finance-tag '+statusClass(p.financial_status)+'">'+esc(p.financial_status||'—')+'</b></div>';
   const body=root.querySelector('.modal-body,.jp-suite-body,.suite-panel')||root;body.prepend(box);
 }
 function normalizeTables(scope=document){
@@ -81,7 +83,7 @@ async function enhanceFinancialHistory(){
   let card=document.getElementById('jpFinancialLedgerCard');
   if(!card){
     card=document.createElement('section');card.id='jpFinancialLedgerCard';card.className='card jp-financial-ledger-card';
-    card.innerHTML='<div class="card-header"><div><div class="section-kicker">AUDIT</div><h3 class="card-title">Financial Ledger</h3></div></div><div class="jp-financial-ledger-body"><div class="jp-history-loading">Loading backend ledger…</div></div>';
+    card.innerHTML='<div class="card-header"><div><div class="section-kicker">AUDIT</div><h3 class="card-title">Financial Ledger</h3></div></div><div class="jp-financial-ledger-body"><div class="jp-history-loading">Loading financial history…</div></div>';
     tab.append(card);
   }
   if(card.dataset.projectId===String(p.id)&&card.dataset.loaded==='1')return;
@@ -97,7 +99,7 @@ async function enhanceFinancialHistory(){
         '<div><span>Latest Invoice</span><b>'+esc(invoices[0]?.invoice_number||'—')+'</b></div>'+
       '</div>'+
       (ledger.length?'<div class="jp-ledger-list">'+ledger.slice(0,12).map(x=>
-        '<div class="jp-ledger-row"><div><strong>'+esc(ledgerLabel(x.entry_type))+'</strong><small>'+esc(x.note||'Backend financial event')+' · '+date(x.occurred_at)+'</small></div><b class="'+(x.direction==='credit'?'credit':'debit')+'">'+(x.direction==='credit'?'- ':'+ ')+peso(x.amount)+'</b></div>'
+        '<div class="jp-ledger-row"><div><strong>'+esc(ledgerLabel(x.entry_type))+'</strong><small>'+esc(x.note||'Financial update')+' · '+date(x.occurred_at)+'</small></div><b class="'+(x.direction==='credit'?'credit':'debit')+'">'+(x.direction==='credit'?'- ':'+ ')+peso(x.amount)+'</b></div>'
       ).join('')+'</div>':'<div class="jp-history-empty">No financial ledger entries yet.</div>')+
       (invoices.length?'<div class="jp-issued-invoices"><h4>Invoice Snapshots</h4>'+invoices.slice(0,6).map(inv=>
         '<div class="jp-invoice-snapshot-row"><div><strong>'+esc(inv.invoice_number)+'</strong><small>'+date(inv.issued_at)+' · '+esc(inv.status||'issued')+'</small></div><div><b>'+peso(inv.total)+'</b><small>Balance '+peso(inv.balance)+'</small></div></div>'

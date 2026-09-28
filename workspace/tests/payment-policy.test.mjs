@@ -67,3 +67,22 @@ test("deliverable checklist saves before keeping the optimistic state and uses c
   assert.match(html,/\.deliverable-child-row\{[^}]*margin-left:12px!important[^}]*padding-left:22px!important/);
   assert.match(html,/\.deliverable-child-row:after\{content:none!important\}/);
 });
+
+
+test("project detail helper notes use compact info buttons instead of technical backend prose", async () => {
+  const html=await read("index.html");
+  const ui=await read("js/workspace-unification-2026-09-22.js");
+  const css=await read("css/workspace-unification-2026-09-22.css");
+  assert.match(html,/class="jp-info-button"/);
+  assert.match(html,/Autosave On/);
+  assert.doesNotMatch(html,/Values are enforced by the JUAN PROJECT backend/);
+  assert.doesNotMatch(html,/All changes save automatically/);
+  assert.doesNotMatch(html,/Items added here are reflected automatically in Deliverables/);
+  assert.doesNotMatch(html,/Payment due on the Project End \/ Deadline Date · 1-day grace period/);
+  assert.doesNotMatch(ui,/Values are enforced by the JUAN PROJECT backend/);
+  assert.doesNotMatch(ui,/Loading backend ledger/);
+  assert.doesNotMatch(ui,/Backend financial event/);
+  assert.match(ui,/About overdue fees/);
+  assert.match(css,/\.jp-info-button\{/);
+  assert.match(css,/content:attr\(data-info\)/);
+});
