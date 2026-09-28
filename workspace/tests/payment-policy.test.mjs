@@ -13,15 +13,19 @@ test("payment due date follows Project End / Deadline Date", async () => {
   assert.match(sql,/new\.deadline_date/);
 });
 
-test("overdue policy is 1-day grace, 500 on day 3, then 250 weekly", async () => {
+test("overdue policy is 1-day grace, 35 daily from day 2, 500 on day 3, then 250 weekly", async () => {
   const html=await read("index.html");
-  const sql=await read("../supabase/migrations/035_payment_due_lifecycle_v2.sql");
-  assert.match(sql,/grace_period_end:=new\.payment_due_date \+ 1/);
-  assert.match(sql,/overdue_started_at:=new\.payment_due_date \+ 2/);
-  assert.match(sql,/p_as_of - p_due_date < 3/);
-  assert.match(sql,/500 \+ floor\(\(p_as_of - p_due_date\) \/ 7\.0\) \* 250/);
-  assert.match(html,/₱500 on day 3 if unpaid/);
-  assert.match(html,/\+₱250 on day 7 and every succeeding 7 days/);
+  const terms=await read("../online/terms.html");
+  const sql=await read("../supabase/migrations/037_overdue_daily_fee_v3.sql");
+  assert.match(sql,/days_after_due <= 1/);
+  assert.match(sql,/\(days_after_due - 1\) \* 35/);
+  assert.match(sql,/when days_after_due >= 3 then 500/);
+  assert.match(sql,/floor\(days_after_due \/ 7\.0\) \* 250/);
+  assert.match(html,/₱35\/day beginning on day 2/);
+  assert.match(html,/\+₱500 on day 3/);
+  assert.match(terms,/Beginning on Day 2 after the due date/);
+  assert.match(terms,/₱35 per day/);
+  assert.match(terms,/₱570 in total overdue charges/);
 });
 
 test("workspace refresh restores the persisted Supabase session without a second auth client", async () => {
