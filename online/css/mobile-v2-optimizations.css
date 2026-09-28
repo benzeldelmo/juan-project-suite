@@ -1695,3 +1695,365 @@ html,body,#root,button,input,select,textarea{
   .app.route-shop .jp-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   .app.route-account .jp-account-bento{grid-template-columns:1fr 1fr!important}
 }
+
+
+/* 2026-09-28 SIMPLE DESKTOP V2 — concept execution */
+@media(min-width:900px){
+  :root{
+    --jp-desk-bg:#eef4f1;
+    --jp-desk-surface:#fff;
+    --jp-desk-soft:#f8faf9;
+    --jp-desk-line:#e1e7e4;
+    --jp-desk-radius:20px;
+    --jp-desk-control:12px;
+    --jp-desk-gap:16px;
+  }
+
+  html,body,#root{background:var(--jp-desk-bg)!important}
+  #root{padding:32px!important}
+  .app{
+    width:min(1260px,calc(100vw - 64px))!important;
+    height:calc(100dvh - 64px)!important;
+    min-height:560px!important;
+    grid-template-columns:204px minmax(0,1fr)!important;
+    gap:16px!important;
+  }
+  .app>.nav{
+    width:204px!important;max-width:204px!important;
+    padding:20px 12px!important;
+    border:1px solid var(--jp-desk-line)!important;
+    border-radius:20px!important;
+    background:#fff!important;
+    box-shadow:0 12px 32px rgba(24,44,34,.055)!important;
+  }
+  .jp-desktop-nav-brand{padding:0 8px 18px!important;margin:0 0 12px!important}
+  .app>.nav .jp-nav-links{gap:4px!important}
+  .app>.nav button{
+    min-height:42px!important;
+    padding:0 12px!important;
+    border-radius:10px!important;
+    font-size:11px!important;
+  }
+
+  .app>.page{
+    padding:24px!important;
+    border:1px solid var(--jp-desk-line)!important;
+    border-radius:20px!important;
+    background:#fff!important;
+    box-shadow:0 12px 32px rgba(24,44,34,.055)!important;
+  }
+  .app>.page .card{
+    border:1px solid var(--jp-desk-line)!important;
+    border-radius:16px!important;
+    box-shadow:none!important;
+  }
+  .app>.page .section-head{margin:20px 0 8px!important}
+  .app>.page .screen-head,.app>.page .dashboard-head{margin-bottom:20px!important}
+  .screen-title{font-size:24px!important}
+  .section-head h2{font-size:15px!important}
+  .btn{border-radius:10px!important}
+
+  /* Guest home: single simple display area; no feature/ad split. */
+  .app.guest-mode.route-home>.page{
+    display:grid!important;
+    place-items:center!important;
+    overflow:auto!important;
+  }
+  .app.guest-mode.route-home .jp-guest-home-centered.jp-guest-home-simple{
+    width:min(720px,100%)!important;
+    max-width:720px!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:auto!important;
+    display:block!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .jp-guest-home-simple .jp-guest-main-panel{
+    width:100%!important;
+    min-height:440px!important;
+    padding:40px!important;
+    box-sizing:border-box!important;
+    border:1px solid var(--jp-desk-line)!important;
+    border-radius:20px!important;
+    background:#fff!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    box-shadow:none!important;
+  }
+  .jp-guest-home-simple .jp-guest-hero{
+    width:min(440px,100%)!important;
+    margin:0 auto!important;
+  }
+  .jp-guest-home-simple .jp-guest-hero h1{
+    font-size:38px!important;
+    line-height:1.02!important;
+    letter-spacing:-.04em!important;
+    white-space:normal!important;
+  }
+  .jp-guest-home-simple .guest-actions{margin-top:24px!important}
+  .jp-guest-home-simple .jp-guest-about{
+    width:min(440px,100%)!important;
+    margin:24px auto 0!important;
+    padding:12px 0 0!important;
+    border:0!important;
+    border-top:1px solid #edf1ef!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+
+  /* First-open welcome + auth: single centered card, no left feature box. */
+  .jp-simple-guest-screen{
+    width:100%!important;
+    min-height:100dvh!important;
+    padding:32px!important;
+    box-sizing:border-box!important;
+    display:grid!important;
+    place-items:center!important;
+    background:var(--jp-desk-bg)!important;
+  }
+  .jp-simple-guest-card,.jp-simple-auth-card{
+    width:min(520px,calc(100vw - 64px))!important;
+    max-width:520px!important;
+    min-height:0!important;
+    height:auto!important;
+    padding:36px!important;
+    box-sizing:border-box!important;
+    border:1px solid var(--jp-desk-line)!important;
+    border-radius:20px!important;
+    background:#fff!important;
+    box-shadow:0 14px 36px rgba(24,44,34,.06)!important;
+  }
+  .jp-simple-guest-card .welcome-copy{margin:0 0 28px!important}
+  .jp-simple-guest-card .welcome-copy h1{font-size:38px!important;line-height:1.02!important}
+  .jp-simple-auth-card .auth-copy-top{margin-top:36px!important}
+  .jp-simple-auth-card .input{height:46px!important}
+
+  /* Neutralize browser autofill so login stays within JUAN PROJECT visual language. */
+  .auth-card input:-webkit-autofill,
+  .auth-card input:-webkit-autofill:hover,
+  .auth-card input:-webkit-autofill:focus{
+    -webkit-text-fill-color:#111820!important;
+    -webkit-box-shadow:0 0 0 1000px #fff inset!important;
+    box-shadow:0 0 0 1000px #fff inset!important;
+    transition:background-color 9999s ease-out 0s!important;
+  }
+
+  /* Home: simple 2-card row, activity below, ad inline full-width at the bottom. */
+  .app.client-mode.route-home>.page{display:block!important;overflow-y:auto!important}
+  .app.route-home .dashboard-head h1{font-size:27px!important}
+  .jp-home-primary-grid{
+    grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr)!important;
+    gap:16px!important;
+  }
+  .jp-home-primary-grid .active-project,.jp-home-primary-grid .home-balance-card{
+    height:auto!important;min-height:142px!important;
+  }
+  .jp-home-balance-pane .home-balance-card{padding:20px!important}
+  .jp-home-balance-pane .home-balance-card b{font-size:30px!important}
+  .jp-home-secondary-grid{
+    display:block!important;
+    margin-top:20px!important;
+  }
+  .jp-home-activity-block{width:100%!important}
+  .jp-home-ad-block{width:100%!important;padding-top:20px!important}
+  .app.client-mode.route-home #jpAdBannerAnchor.jp-home-ad-inline{
+    width:100%!important;margin:0!important;border-radius:16px!important;
+  }
+  .app.client-mode.route-home #jpAdBannerAnchor .jp-house-banner{
+    width:100%!important;height:auto!important;aspect-ratio:3/1!important;border-radius:16px!important;
+  }
+
+  /* Shop: compact catalog, not giant cards. */
+  .app.route-shop>.page{padding:20px!important}
+  .app.route-shop .jp-shop-sticky{padding:0 0 12px!important}
+  .app.route-shop .jp-shop-head{gap:12px!important}
+  .app.route-shop .shop-search{height:42px!important}
+  .app.route-shop .jp-shop-view-toggle{margin:12px 0 8px!important}
+  .app.route-shop .jp-category-chips{margin-top:8px!important;gap:6px!important}
+  .app.route-shop .jp-shop-scroll{height:calc(100% - 176px)!important;padding:4px 0 12px!important}
+  .app.route-shop .jp-shop-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+  .app.route-shop .jp-shop-card,
+  .app.route-shop .jp-v2-shop-card{
+    min-height:0!important;
+    height:auto!important;
+    padding:16px!important;
+  }
+  .app.route-shop .jp-shop-price{margin-top:8px!important}
+  .app.route-shop .jp-add-cart{min-height:38px!important;margin-top:12px!important}
+
+  /* Orders: simple two-column cards without fixed oversized heights. */
+  .app.route-orders .project-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+  .app.route-orders .project-list-card{
+    height:auto!important;min-height:116px!important;max-height:none!important;
+    padding:16px!important;
+  }
+
+  /* Project page: two useful columns only. */
+  .jp-project-desktop-grid{
+    grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr)!important;
+    gap:16px!important;
+  }
+  .jp-project-main-column,.jp-project-side-column{gap:12px!important}
+  .jp-project-desktop-grid .project-summary-card,
+  .jp-project-desktop-grid .tracking-card,
+  .jp-project-desktop-grid .deliverables-card{padding:20px!important}
+
+  /* Account: calm 2-column page, no dense bento. */
+  .app.route-account .jp-account-bento{
+    width:min(920px,100%)!important;
+    max-width:920px!important;
+    grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr)!important;
+    gap:12px!important;
+  }
+  .app.route-account .jp-account-client-card{
+    min-height:300px!important;
+    padding:28px!important;
+    padding-bottom:76px!important;
+  }
+  .app.route-account .jp-account-card-identity-simple{margin:30px 0 20px!important}
+  .app.route-account .jp-account-card-identity-simple h2{font-size:21px!important}
+  .app.route-account .jp-account-client-card .jp-view-qr{right:28px!important;bottom:28px!important}
+
+  /* Payment: one clear receiving card + one form card. */
+  .jp-payment-desktop-grid{
+    grid-template-columns:minmax(260px,.68fr) minmax(0,1.32fr)!important;
+    gap:16px!important;
+  }
+  .jp-payment-desktop-grid>.payment-card{padding:20px!important}
+  .jp-payment-desktop-grid .manual-payment-grid{gap:12px!important}
+
+  /* FLOW SYSTEM: one main display, no ad/feature split. */
+  .jp-flow-layer{
+    padding:32px!important;
+    background:var(--jp-desk-bg)!important;
+  }
+  .jp-flow-phone.jp-flow-simple{
+    width:min(1120px,calc(100vw - 64px))!important;
+    height:calc(100dvh - 64px)!important;
+    max-width:1120px!important;
+    max-height:860px!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  .jp-flow-simple .jp-flow-header{
+    height:52px!important;
+    margin-bottom:12px!important;
+    padding:0 16px!important;
+    border:1px solid var(--jp-desk-line)!important;
+    border-radius:16px!important;
+    background:#fff!important;
+    box-shadow:none!important;
+  }
+  .jp-flow-simple .jp-flow-body{
+    display:block!important;
+    height:calc(100% - 64px)!important;
+    min-height:0!important;
+  }
+  .jp-flow-simple .jp-flow-main{
+    width:100%!important;
+    height:100%!important;
+    min-width:0!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:24px!important;
+    box-sizing:border-box!important;
+    border:1px solid var(--jp-desk-line)!important;
+    border-radius:20px!important;
+    background:#fff!important;
+    box-shadow:none!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+
+  /* Cart uses the full content area, with a sticky summary to the right. */
+  .jp-flow-cart .jp-flow-main{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr)!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    gap:16px!important;
+  }
+  .jp-flow-cart .jp-flow-title{grid-column:1/-1!important;margin:0 0 4px!important}
+  .jp-flow-cart .jp-cart-list{
+    grid-column:1!important;grid-row:2!important;
+    display:grid!important;align-content:start!important;gap:10px!important;
+    overflow-y:auto!important;padding-right:4px!important;
+  }
+  .jp-flow-cart .jp-cart-item{
+    height:auto!important;min-height:86px!important;max-height:none!important;
+    padding:14px 16px!important;border:1px solid var(--jp-desk-line)!important;border-radius:14px!important;
+  }
+  .jp-flow-cart .jp-cart-sticky{
+    grid-column:2!important;grid-row:2!important;
+    position:sticky!important;top:0!important;
+    align-self:start!important;
+    padding:18px!important;
+    border:1px solid var(--jp-desk-line)!important;
+    border-radius:16px!important;
+    background:var(--jp-desk-soft)!important;
+    box-shadow:none!important;
+  }
+  .jp-flow-cart .jp-promo-row{display:none!important}
+
+  /* Checkout/review/terms: focused center form, not a fake phone. */
+  .jp-flow-checkout .jp-flow-main,
+  .jp-flow-terms .jp-flow-main,
+  .jp-flow-processing .jp-flow-main{
+    width:min(760px,100%)!important;
+    margin:0 auto!important;
+  }
+  .jp-flow-checkout .jp-mobile-field{margin-bottom:16px!important}
+  .jp-flow-checkout .jp-review-card{padding:18px!important}
+
+  /* Receipt: one centered useful result area. */
+  .jp-flow-receipt .jp-flow-main{
+    width:min(760px,100%)!important;
+    margin:0 auto!important;
+    display:grid!important;
+    place-items:start center!important;
+  }
+
+  /* Track: wide single content area, no clipping. */
+  .jp-flow-track .jp-flow-main{
+    width:min(920px,100%)!important;
+    margin:0 auto!important;
+    overflow-x:hidden!important;
+  }
+  .jp-flow-track .jp-track-search-card,
+  .jp-flow-track .jp-track-summary,
+  .jp-flow-track .jp-track-timeline,
+  .jp-flow-track .jp-next-step{
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .jp-flow-track .jp-track-timeline{overflow:hidden!important}
+
+  /* Product/detail modal stays centered and compact. */
+  #shopOverlay .shop-detail-sheet{
+    width:min(580px,calc(100vw - 80px))!important;
+    max-height:calc(100dvh - 80px)!important;
+    border-radius:20px!important;
+    padding:64px 28px 28px!important;
+  }
+
+  /* No desktop feature/ad split survives this pass. */
+  .jp-guest-feature-panel,
+  .jp-flow-feature-panel{display:none!important}
+}
+
+@media(min-width:900px) and (max-width:1100px){
+  #root{padding:20px!important}
+  .app{width:calc(100vw - 40px)!important;height:calc(100dvh - 40px)!important;grid-template-columns:184px minmax(0,1fr)!important}
+  .app>.nav{width:184px!important;max-width:184px!important}
+  .app>.page{padding:20px!important}
+  .app.route-shop .jp-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .jp-home-primary-grid,.jp-project-desktop-grid,.jp-payment-desktop-grid{grid-template-columns:1fr 1fr!important}
+  .jp-flow-layer{padding:20px!important}
+  .jp-flow-phone.jp-flow-simple{width:calc(100vw - 40px)!important;height:calc(100dvh - 40px)!important}
+}
