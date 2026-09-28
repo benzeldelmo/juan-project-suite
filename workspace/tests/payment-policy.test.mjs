@@ -63,7 +63,7 @@ test("deliverable checklist saves before keeping the optimistic state and uses c
   const block=html.slice(html.indexOf("async function toggleDeliverable"),html.indexOf("const WORKSPACE_PAYMENT_INSTITUTIONS"));
   assert.match(block,/await directProjectWrite\(proj,'Deliverable status update',\{structure:true\}\)/);
   assert.match(block,/Deliverable change was restored because it could not be saved to Supabase/);
-  assert.match(html,/\.deliverable-checklist-row\{[^}]*min-height:48px/);
-  assert.match(html,/\.deliverable-child-row\{[^}]*margin-left:6px/);
+  assert.match(html,/\.deliverable-checklist-row\{[^}]*min-height:48px[^}]*padding:6px 18px!important/);
+  assert.match(html,/\.deliverable-child-row\{[^}]*margin-left:12px!important[^}]*padding-left:22px!important/);
   assert.match(html,/\.deliverable-child-row:after\{content:none!important\}/);
 });
