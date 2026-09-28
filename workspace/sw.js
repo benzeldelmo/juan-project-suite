@@ -1,5 +1,5 @@
 // JUAN PROJECT Workspace offline cache — 20260920-1805
-const CACHE='juan-workspace-2026-09-28-finance-save-v1';
+const CACHE='juan-workspace-2026-09-28-checklist-indent-v1';
 const SHELL=[
   "/assets/brand/j-mark.svg",
   "/assets/brand/juan-project.svg",
