@@ -168,7 +168,7 @@ test("Workspace buttons, sidebar navigation and tabs use one compact component g
   assert.match(css,/\.btn\{[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
   assert.match(css,/\.btn-sm\{[\s\S]*?min-height:32px!important[\s\S]*?border-radius:10px!important/);
   assert.match(css,/\.sidebar \.nav-item,[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
-  assert.match(css,/\.tabs-nav \.tab-btn,[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
+  assert.match(css,/\.tabs-nav:not\(\.project-details-tabs\) \.tab-btn,[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
 });
 
 test("child deliverables do not repeat the package subtitle", async () => {
