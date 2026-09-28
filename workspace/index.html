@@ -1568,7 +1568,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
   <link rel="stylesheet" href="/css/general-update.css?v=20260925-deliverable-payment-rush-1">
   <link rel="stylesheet" href="/css/keyboard-shortcuts.css?v=20260920-1805">
   <link rel="stylesheet" href="/css/consistency-pass.css?v=20260925-deliverable-payment-rush-1">
-  <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260928-project-header-v2">
+  <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260928-project-side-nav-v1">
   <link rel="stylesheet" href="/css/workspace-icon-system-2026-09-22.css?v=20260923-0105">
   <link rel="stylesheet" href="/css/typography-sf-pro.css?v=20260923-1">
 </head>
@@ -1974,14 +1974,16 @@ table.jp-packages-table col:nth-child(6){width:7%}
           <div class="progress-bar-track"><div class="progress-bar-fill" id="projectOverallProgressBar" style="width:0%"></div></div>
         </div>
 
-        <div class="tabs-nav project-details-tabs">
+        <div class="project-details-workspace">
+          <aside class="tabs-nav project-details-tabs" aria-label="Project sections">
           <button class="tab-btn" data-project-tab="project-data" onclick="app.switchProjectTab('project-data', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/></svg><span>Project Data</span></button>
           <button class="tab-btn active" data-project-tab="deliverables" onclick="app.switchProjectTab('deliverables', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4z"/><path d="m4 7 8 4 8-4v10l-8 4-8-4z"/></svg><span>Deliverables</span></button>
           <button class="tab-btn" data-project-tab="payment-tracker" onclick="app.switchProjectTab('payment-tracker', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7"/></svg><span>Payment Monitoring</span></button>
           <button class="tab-btn" data-project-tab="invoice" onclick="app.switchProjectTab('invoice', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Invoice</span></button>
           <button class="tab-btn" data-project-tab="notes" onclick="app.switchProjectTab('notes', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Notes</span></button>
-        </div>
+          </aside>
 
+          <div class="project-details-content">
         <div id="projTab-project-data" class="tab-content">
           <div class="project-data-grid">
             <div class="card project-data-card">
@@ -2090,6 +2092,8 @@ table.jp-packages-table col:nth-child(6){width:7%}
             <h3 class="card-title mb-3">Project Notes</h3>
             <textarea class="form-control" id="projectNotesTextarea" rows="6" placeholder="Add specific client requests, asset URLs, or technical constraints..."></textarea>
             <div class="mt-3 text-right"><span class="project-data-autosave-status">Autosave On</span></div>
+          </div>
+        </div>
           </div>
         </div>
       </section>
@@ -9851,7 +9855,7 @@ ${description}`))actionCallback();return;}
 
     document.addEventListener("DOMContentLoaded", () => {
       app.initWorkspace();
-      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-project-header-v2',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
+      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-project-side-nav-v1',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
       setTimeout(()=>{refreshSearchableSelects(document);app.bindEmailDomainSuggestions();if(location.hash==="#online-portal")app.navigateTo("online-portal");},60);
       
       document.addEventListener("click", (e) => {

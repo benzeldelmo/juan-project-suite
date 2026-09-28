@@ -110,3 +110,29 @@ test("Deliverables use checkboxes instead of duplicate progress bars", async () 
   assert.doesNotMatch(renderBlock,/deliverable-item-progress/);
   assert.doesNotMatch(renderBlock,/Math\.round\(progress\)/);
 });
+
+
+test("Project Details uses desktop side navigation and returns to horizontal navigation on smaller screens", async () => {
+  const html=await read("index.html");
+  const css=await read("css/workspace-unification-2026-09-22.css");
+  assert.match(html,/class="project-details-workspace"/);
+  assert.match(html,/<aside class="tabs-nav project-details-tabs" aria-label="Project sections">/);
+  assert.match(html,/class="project-details-content"/);
+  assert.match(css,/grid-template-columns:224px minmax\(0,1fr\)!important/);
+  assert.match(css,/#view-project-details \.project-details-tabs[\s\S]*?flex-direction:column!important/);
+  assert.match(css,/@media\(max-width:960px\)[\s\S]*?#view-project-details \.project-details-tabs[\s\S]*?flex-direction:row!important/);
+});
+
+test("Project Details follows the 8px spacing system and one icon language", async () => {
+  const css=await read("css/workspace-unification-2026-09-22.css");
+  assert.match(css,/--pd-1:8px/);
+  assert.match(css,/--pd-2:16px/);
+  assert.match(css,/--pd-3:24px/);
+  assert.match(css,/--pd-5:40px/);
+  assert.match(css,/--pd-6:48px/);
+  assert.match(css,/#view-project-details \.icon-svg,[\s\S]*?stroke-width:1\.8!important/);
+  assert.match(css,/#view-project-details \.project-primary-actions>\.btn[\s\S]*?height:40px!important/);
+  assert.match(css,/#view-project-details \.project-overall-progress[\s\S]*?padding:24px!important/);
+  assert.match(css,/#view-project-details #jpProjectFinanceSummary \.jp-finance-icon[\s\S]*?width:40px!important/);
+  assert.match(css,/#view-project-details \.payment-modular-grid[\s\S]*?gap:16px!important/);
+});
