@@ -965,7 +965,7 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
 
 
 /* ==========================================================================
-   2026-09-28 — Project Details side navigation + strict 8px rhythm
+   2026-09-28 — Project Details: approved horizontal tabs + strict 8px rhythm
    ========================================================================== */
 #view-project-details{
   --pd-1:8px;
@@ -974,10 +974,11 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   --pd-4:32px;
   --pd-5:40px;
   --pd-6:48px;
+  --pd-7:56px;
   --pd-8:64px;
 }
 
-/* One icon language across the entire Project Details surface. */
+/* Keep one icon language across Project Details. */
 #view-project-details .icon-svg,
 #view-project-details .jp-finance-icon svg{
   fill:none!important;
@@ -987,7 +988,8 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   stroke-linejoin:round!important;
 }
 #view-project-details button>.icon-svg,
-#view-project-details .btn>.icon-svg{
+#view-project-details .btn>.icon-svg,
+#view-project-details .project-details-tabs .icon-svg{
   width:16px!important;
   height:16px!important;
   flex:0 0 16px!important;
@@ -1000,26 +1002,16 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   width:20px!important;
   height:20px!important;
 }
-#view-project-details .project-details-tabs .icon-svg{
-  width:16px!important;
-  height:16px!important;
-  flex:0 0 16px!important;
-}
 
-/* 8px spacing system: header, summary cards, content and controls. */
+/* Header, summary cards and content all stay on the 8px spacing scale. */
 #view-project-details>.page-header{
   min-height:88px!important;
   padding:16px 8px!important;
   margin-bottom:16px!important;
   gap:24px!important;
 }
-#view-project-details>.page-header>div:first-child{
-  gap:8px!important;
-}
-#view-project-details>.page-header .btn-text{
-  margin:0!important;
-  gap:8px!important;
-}
+#view-project-details>.page-header>div:first-child,
+#view-project-details>.page-header .btn-text,
 #view-project-details .project-primary-actions{
   gap:8px!important;
 }
@@ -1037,7 +1029,6 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   min-height:40px!important;
   border-radius:16px!important;
 }
-
 #view-project-details .project-overall-progress{
   padding:24px!important;
   margin:0 0 16px!important;
@@ -1052,16 +1043,9 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   width:48px!important;
   height:48px!important;
 }
-#view-project-details .project-overall-progress-copy{
-  gap:0!important;
-}
-#view-project-details .project-overall-progress>.progress-bar-track{
-  height:8px!important;
-}
-
-#view-project-details #jpProjectFinanceSummary{
-  margin:0 0 24px!important;
-}
+#view-project-details .project-overall-progress-copy{gap:0!important}
+#view-project-details .project-overall-progress>.progress-bar-track{height:8px!important}
+#view-project-details #jpProjectFinanceSummary{margin:0 0 24px!important}
 #view-project-details #jpProjectFinanceSummary .jp-finance-summary{
   padding:24px!important;
   border-radius:24px!important;
@@ -1072,109 +1056,85 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   padding:0 24px!important;
   min-height:64px!important;
 }
-#view-project-details #jpProjectFinanceSummary .jp-finance-cell:first-child{
-  padding-left:0!important;
-}
-#view-project-details #jpProjectFinanceSummary .jp-finance-cell:last-child{
-  padding-right:0!important;
-}
+#view-project-details #jpProjectFinanceSummary .jp-finance-cell:first-child{padding-left:0!important}
+#view-project-details #jpProjectFinanceSummary .jp-finance-cell:last-child{padding-right:0!important}
 #view-project-details #jpProjectFinanceSummary .jp-finance-cell:not(:last-child)::after{
   top:8px!important;
   bottom:8px!important;
 }
-#view-project-details #jpProjectFinanceSummary .jp-finance-cell>div{
-  gap:8px!important;
-}
+#view-project-details #jpProjectFinanceSummary .jp-finance-cell>div{gap:8px!important}
 #view-project-details #jpProjectFinanceSummary .jp-finance-icon{
   width:40px!important;
   height:40px!important;
 }
 
-/* Desktop: section navigation moves to a dedicated left rail. */
-#view-project-details .project-details-workspace{
-  display:grid!important;
-  grid-template-columns:224px minmax(0,1fr)!important;
-  gap:24px!important;
-  align-items:start!important;
-  min-width:0!important;
-}
-#view-project-details .project-details-content{
-  min-width:0!important;
-}
+/* Revert Project Details to the original full-width horizontal tab rail. */
 #view-project-details .project-details-tabs{
-  position:sticky!important;
-  top:104px!important;
-  z-index:30!important;
+  position:static!important;
   display:flex!important;
-  flex-direction:column!important;
-  align-items:stretch!important;
-  width:224px!important;
-  max-width:224px!important;
-  min-height:0!important;
-  gap:8px!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:56px!important;
+  gap:0!important;
   padding:8px!important;
-  margin:0!important;
+  margin:0 0 24px!important;
   border:1px solid var(--jp-border)!important;
   border-radius:16px!important;
   background:var(--bg-card)!important;
-  overflow:visible!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  box-shadow:none!important;
+  scrollbar-width:none!important;
 }
+#view-project-details .project-details-tabs::-webkit-scrollbar{display:none!important}
 #view-project-details .project-details-tabs .tab-btn{
-  width:100%!important;
-  height:40px!important;
+  position:relative!important;
+  width:auto!important;
+  flex:0 0 auto!important;
+  justify-content:center!important;
   min-height:40px!important;
-  justify-content:flex-start!important;
-  gap:8px!important;
+  height:40px!important;
   padding:0 16px!important;
-  border-radius:8px!important;
+  gap:8px!important;
+  border-radius:12px!important;
   font-size:12px!important;
   font-weight:650!important;
-  text-align:left!important;
+  text-align:center!important;
 }
-#view-project-details .project-details-tabs .tab-btn::before,
-#view-project-details .project-details-tabs .tab-btn::after{
-  display:none!important;
+#view-project-details .project-details-tabs .tab-btn:not(:first-child)::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:0!important;
+  top:8px!important;
+  bottom:8px!important;
+  width:1px!important;
+  background:var(--border-subtle)!important;
 }
-#view-project-details .project-details-tabs .tab-btn:hover{
-  background:var(--bg-subtle)!important;
-}
-#view-project-details .project-details-tabs .tab-btn.active{
-  background:var(--mint-light-bg)!important;
-  color:var(--primary-mint-dark)!important;
-}
-#view-project-details .project-details-tabs .tab-btn.active .icon-svg{
-  color:var(--primary-mint-dark)!important;
+#view-project-details .project-details-tabs .tab-btn.active::before,
+#view-project-details .project-details-tabs .tab-btn.active + .tab-btn::before{
+  opacity:0!important;
 }
 
-/* Project content continues the same 8px rhythm. */
+/* Content modules keep the same 8px rhythm. */
 #view-project-details .tab-content>.card,
 #view-project-details .project-data-card,
 #view-project-details .project-items-receipt-card{
   padding:24px!important;
   border-radius:24px!important;
 }
-#view-project-details .card-header{
-  margin-bottom:16px!important;
-  gap:16px!important;
-}
-#view-project-details .project-data-grid{
-  gap:16px!important;
-}
+#view-project-details .card-header{margin-bottom:16px!important;gap:16px!important}
+#view-project-details .project-data-grid,
 #view-project-details .project-data-form-grid,
-#view-project-details .project-files-admin-grid{
-  gap:16px!important;
-}
-#view-project-details .project-data-policy-grid{
-  gap:8px!important;
-  margin-top:16px!important;
-}
-#view-project-details .project-items-receipt-card,
-#view-project-details .project-data-save-row{
-  margin-top:16px!important;
-}
+#view-project-details .project-files-admin-grid,
 #view-project-details .payment-modular-grid{
   gap:16px!important;
 }
+#view-project-details .project-data-policy-grid{gap:8px!important;margin-top:16px!important}
+#view-project-details .project-items-receipt-card,
+#view-project-details .project-data-save-row{margin-top:16px!important}
 #view-project-details .payment-metric-card{
   min-height:80px!important;
   padding:16px!important;
@@ -1185,23 +1145,16 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   margin-bottom:16px!important;
   border-radius:24px!important;
 }
-#view-project-details .payment-monitoring-head{
-  gap:24px!important;
-}
-#view-project-details .project-overdue-policy{
-  gap:16px!important;
-}
-#view-project-details .invoice-actions-bar{
-  gap:8px!important;
-  margin-bottom:16px!important;
-}
+#view-project-details .payment-monitoring-head{gap:24px!important}
+#view-project-details .project-overdue-policy{gap:16px!important}
+#view-project-details .invoice-actions-bar{gap:8px!important;margin-bottom:16px!important}
 
-/* Deliverables: consistent checkbox/icon columns and 8px row spacing. */
-#view-project-details .deliverables-header-row{
+/* Deliverables: compact 8px spacing and clear text hierarchy. */
+#view-project-details .deliverables-header-row{margin-bottom:8px!important}
+#view-project-details .deliverables-list{margin-top:8px!important}
+#view-project-details .deliverable-group-block{
   margin-bottom:8px!important;
-}
-#view-project-details .deliverables-list{
-  margin-top:8px!important;
+  border-radius:16px!important;
 }
 #view-project-details .deliverable-checklist-row{
   grid-template-columns:32px minmax(0,1fr) 32px!important;
@@ -1210,6 +1163,7 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   min-height:48px!important;
   padding:8px 16px!important;
 }
+#view-project-details .deliverable-package-row{min-height:56px!important}
 #view-project-details .deliverable-check{
   width:24px!important;
   height:24px!important;
@@ -1217,58 +1171,45 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   min-height:24px!important;
 }
 #view-project-details .deliverable-child-row{
-  margin-left:8px!important;
-  padding-left:16px!important;
+  margin-left:24px!important;
+  padding-left:24px!important;
 }
 #view-project-details .deliverable-checklist-copy{
+  display:grid!important;
   gap:0!important;
+  min-width:0!important;
 }
-
-/* Tablet/mobile: side rail becomes the compact horizontal section bar again. */
-@media(max-width:960px){
-  #view-project-details .project-details-workspace{
-    display:block!important;
-  }
-  #view-project-details .project-details-tabs{
-    position:static!important;
-    display:flex!important;
-    flex-direction:row!important;
-    align-items:center!important;
-    width:100%!important;
-    max-width:none!important;
-    gap:8px!important;
-    padding:8px!important;
-    margin:0 0 24px!important;
-    border-radius:16px!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    scrollbar-width:none!important;
-  }
-  #view-project-details .project-details-tabs::-webkit-scrollbar{display:none!important}
-  #view-project-details .project-details-tabs .tab-btn{
-    width:auto!important;
-    flex:0 0 auto!important;
-    padding:0 16px!important;
-  }
+#view-project-details .deliverable-checklist-copy>strong{
+  font-size:13px!important;
+  line-height:1.25!important;
+  font-weight:600!important;
+  color:var(--text-primary)!important;
+}
+#view-project-details .deliverable-package-row .deliverable-checklist-copy>strong{
+  font-size:14px!important;
+  font-weight:750!important;
+}
+#view-project-details .deliverable-checklist-copy>span{
+  margin-top:0!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+  font-weight:500!important;
+  color:var(--text-tertiary)!important;
+}
+#view-project-details .deliverable-child-row .deliverable-checklist-copy>strong{
+  font-size:12px!important;
+  font-weight:600!important;
+}
+#view-project-details .deliverable-checklist-row.is-complete .deliverable-checklist-copy>strong{
+  color:var(--text-tertiary)!important;
 }
 @media(max-width:820px){
-  #view-project-details>.page-header{
-    padding:8px 0 16px!important;
-    gap:16px!important;
-  }
-  #view-project-details .project-overall-progress{
-    padding:16px!important;
-  }
-  #view-project-details #jpProjectFinanceSummary{
-    margin-bottom:16px!important;
-  }
-  #view-project-details #jpProjectFinanceSummary .jp-finance-summary{
-    padding:16px!important;
-  }
-  #view-project-details #jpProjectFinanceSummary .jp-finance-cell{
-    gap:16px!important;
-    padding:16px 0!important;
-  }
+  #view-project-details>.page-header{padding:8px 0 16px!important;gap:16px!important}
+  #view-project-details .project-overall-progress{padding:16px!important}
+  #view-project-details #jpProjectFinanceSummary{margin-bottom:16px!important}
+  #view-project-details #jpProjectFinanceSummary .jp-finance-summary{padding:16px!important}
+  #view-project-details #jpProjectFinanceSummary .jp-finance-cell{gap:16px!important;padding:16px 0!important}
+  #view-project-details .deliverable-child-row{margin-left:16px!important;padding-left:16px!important}
 }
 
 
@@ -1371,10 +1312,10 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
 }
 
 /* Tabs use one compact segmented language everywhere. */
-.tabs-nav,.portal-tabs{
+.tabs-nav:not(.project-details-tabs),.portal-tabs{
   gap:8px!important;
 }
-.tabs-nav .tab-btn,
+.tabs-nav:not(.project-details-tabs) .tab-btn,
 .portal-tabs button{
   min-height:40px!important;
   height:40px!important;
@@ -1387,29 +1328,15 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
   font-weight:650!important;
   line-height:1!important;
 }
-.tabs-nav .tab-btn.active,
+.tabs-nav:not(.project-details-tabs) .tab-btn.active,
 .portal-tabs button.active{
   background:var(--mint-light-bg)!important;
   color:var(--primary-mint-dark)!important;
   box-shadow:none!important;
 }
-.tabs-nav .tab-btn.active::after,
+.tabs-nav:not(.project-details-tabs) .tab-btn.active::after,
 .portal-tabs button.active::after{
   display:none!important;
-}
-
-/* Project Details side rail follows the same component system. */
-#view-project-details .project-details-tabs{
-  gap:8px!important;
-  padding:8px!important;
-  border-radius:16px!important;
-}
-#view-project-details .project-details-tabs .tab-btn{
-  min-height:40px!important;
-  height:40px!important;
-  padding:0 12px!important;
-  gap:8px!important;
-  border-radius:12px!important;
 }
 
 /* Order items: one overflow control instead of competing Edit + overflow buttons. */
