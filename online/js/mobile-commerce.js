@@ -23,10 +23,9 @@
   function close(){if(layer)layer.remove();layer=null;document.body.classList.remove("jp-flow-open");}
   function shell(content,back,mode){
     close();
-    var flowMode=String(mode||"default"),withFeature=["checkout","terms","processing","receipt","track"].includes(flowMode);
-    var feature=withFeature?'<aside class="jp-flow-feature-panel"><div class="jp-flow-feature-copy"><span>JUAN PROJECT ONLINE</span><strong>'+(flowMode==="track"?"Track with confidence.":flowMode==="receipt"?"Your request is ready.":"A simpler way to start your project.")+'</strong><p>'+(flowMode==="track"?"Follow your Order Request and project progress in one place.":"Featured JUAN PROJECT services and promotions appear here.")+'</p></div><div id="jpAdBannerAnchor" class="jp-flow-feature-ad"></div></aside>':"";
+    var flowMode=String(mode||"default");
     layer=document.createElement("div");layer.className="jp-flow-layer jp-flow-"+flowMode;
-    layer.innerHTML='<div class="jp-flow-phone"><header class="jp-flow-header">'+(back?'<button id="jpFlowBack" aria-label="Back">←</button>':'<span></span>')+'<div class="jp-flow-brand"><b>JUAN PROJECT</b><small>Online</small></div><button id="jpFlowClose" aria-label="Close">×</button></header><div class="jp-flow-body">'+feature+'<main class="jp-flow-main">'+content+"</main></div></div>";
+    layer.innerHTML='<div class="jp-flow-phone jp-flow-simple"><header class="jp-flow-header">'+(back?'<button id="jpFlowBack" aria-label="Back">←</button>':'<span></span>')+'<div class="jp-flow-brand"><b>JUAN PROJECT</b><small>Online</small></div><button id="jpFlowClose" aria-label="Close">×</button></header><div class="jp-flow-body"><main class="jp-flow-main">'+content+"</main></div></div>";
     document.body.appendChild(layer);document.body.classList.add("jp-flow-open");document.getElementById("jpFlowClose").onclick=close;
     window.dispatchEvent(new Event("juan-online-render"));
     return layer;
