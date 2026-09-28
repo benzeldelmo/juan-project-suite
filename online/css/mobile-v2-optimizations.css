@@ -1435,3 +1435,263 @@ html,body,#root,button,input,select,textarea{
 .jp-pricelist-price s{font-size:10px;color:#9ca59f}
 .jp-pricelist-price strong{font-size:15px;color:#07975a}
 @media(min-width:900px){.jp-shop-view-toggle{max-width:360px;margin:16px 0 8px}.jp-pricelist{padding:16px 0 32px}.jp-pricelist-row{padding:16px 24px}}
+
+
+/* 2026-09-28 canonical desktop optimization pass */
+@media(min-width:900px){
+  :root{
+    --jp-desktop-max:1280px;
+    --jp-desktop-gutter-x:clamp(32px,5vw,72px);
+    --jp-desktop-gutter-y:clamp(32px,5vh,56px);
+    --jp-desktop-gap:24px;
+    --jp-desktop-card-gap:16px;
+    --jp-desktop-radius:24px;
+    --jp-desktop-card-radius:20px;
+  }
+
+  html,body{background:#edf3f1!important;overflow:hidden!important}
+  #root{
+    width:100%!important;
+    height:100dvh!important;
+    padding:var(--jp-desktop-gutter-y) var(--jp-desktop-gutter-x)!important;
+    box-sizing:border-box!important;
+    display:grid!important;
+    place-items:center!important;
+  }
+  .app{
+    width:min(var(--jp-desktop-max),calc(100vw - (2 * var(--jp-desktop-gutter-x))))!important;
+    max-width:var(--jp-desktop-max)!important;
+    height:calc(100dvh - (2 * var(--jp-desktop-gutter-y)))!important;
+    min-height:560px!important;
+    max-height:900px!important;
+    grid-template-columns:220px minmax(0,1fr)!important;
+    gap:24px!important;
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  .app>.nav{
+    width:220px!important;max-width:220px!important;height:100%!important;
+    padding:24px 16px!important;
+    border:1px solid #dfe6e2!important;border-radius:24px!important;
+    background:#fff!important;box-shadow:0 18px 48px rgba(24,44,34,.07)!important;
+  }
+  .app>.nav .jp-nav-links{gap:8px!important}
+  .app>.nav button{min-height:44px!important;padding:0 12px!important;border-radius:12px!important;font-size:12px!important}
+  .jp-desktop-nav-brand{padding:0 8px 24px!important;margin:0 0 16px!important}
+  .jp-desktop-nav-brand b{font-size:15px!important}
+  .jp-desktop-nav-brand span{font-size:12px!important}
+
+  .app>.page{
+    width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+    padding:32px!important;
+    border:1px solid #dfe6e2!important;border-radius:24px!important;
+    background:#f8faf9!important;box-shadow:0 18px 48px rgba(24,44,34,.07)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    box-sizing:border-box!important;
+  }
+  .app>.page .screen-head,.app>.page .dashboard-head{margin-bottom:24px!important}
+  .app>.page .section-head{margin:24px 0 8px!important}
+  .app>.page .card{border-radius:20px!important;box-shadow:none!important}
+  .app>.page .btn{min-height:40px!important}
+
+  /* HOME: primary project + balance, then activity + 3:1 ad. */
+  .app.client-mode.route-home>.page{overflow-y:auto!important;padding:32px!important;display:block!important}
+  .app.route-home .dashboard-head h1{font-size:30px!important;line-height:1.05!important}
+  .jp-home-primary-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.65fr) minmax(280px,.75fr)!important;
+    gap:24px!important;
+    align-items:stretch!important;
+  }
+  .jp-home-primary-grid .section-head{margin-top:0!important}
+  .jp-home-primary-grid .active-project,.jp-home-primary-grid .home-balance-card{height:calc(100% - 32px)!important;box-sizing:border-box!important}
+  .jp-home-balance-pane .home-balance-card{display:grid!important;align-content:center!important;padding:24px!important}
+  .jp-home-balance-pane .home-balance-card b{font-size:34px!important}
+  .jp-home-secondary-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr)!important;
+    gap:24px!important;
+    align-items:start!important;
+    margin-top:24px!important;
+  }
+  .jp-home-activity-block .section-head{margin-top:0!important}
+  .jp-home-ad-block{padding-top:32px!important}
+  .app.client-mode.route-home #jpAdBannerAnchor.jp-home-ad-inline{
+    position:relative!important;inset:auto!important;width:100%!important;margin:0!important;padding:0!important;
+    border-radius:20px!important;overflow:hidden!important;background:transparent!important;
+  }
+  .app.client-mode.route-home #jpAdBannerAnchor .jp-house-banner{
+    width:100%!important;height:auto!important;aspect-ratio:3/1!important;margin:0!important;border-radius:20px!important;
+  }
+  .app.client-mode.route-home #jpAdBannerAnchor img{width:100%!important;height:100%!important;object-fit:cover!important}
+
+  /* ORDERS: denser two-column desktop list. */
+  .app.route-orders .order-tabs{max-width:520px!important;margin-bottom:24px!important}
+  .app.route-orders .project-list{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important;
+  }
+  .app.route-orders .project-list-card{min-height:132px!important;padding:20px!important}
+  .app.route-orders .project-list-card .project-name{font-size:16px!important}
+  .app.route-orders .project-list .guided-empty{grid-column:1/-1!important}
+
+  /* PROJECT: main progress/tracker with compact deliverables side column. */
+  .jp-project-desktop-grid{
+    display:grid!important;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr)!important;gap:24px!important;align-items:start!important;
+  }
+  .jp-project-main-column,.jp-project-side-column{display:grid!important;gap:16px!important;min-width:0!important}
+  .jp-project-side-column>.section-head{margin:0!important}
+  .jp-project-desktop-grid .project-summary-card,.jp-project-desktop-grid .tracking-card,.jp-project-desktop-grid .deliverables-card{padding:24px!important}
+  .jp-project-desktop-grid .route-timeline{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;column-gap:24px!important}
+  .jp-project-side-column .deliverables-card{max-height:430px!important;overflow:auto!important}
+  .jp-project-side-column .project-actions-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:0!important}
+
+  /* SHOP + PRICELIST. */
+  .app.route-shop>.page{padding:24px!important;overflow:hidden!important}
+  .app.route-shop .jp-shop-sticky{
+    padding:0 0 16px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
+  }
+  .app.route-shop .jp-shop-head{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:16px!important;align-items:center!important}
+  .app.route-shop .shop-search{height:44px!important;max-width:620px!important}
+  .app.route-shop .jp-shop-view-toggle{margin:16px 0 8px!important;max-width:340px!important}
+  .app.route-shop .jp-category-chips{margin-top:8px!important}
+  .app.route-shop .jp-shop-scroll{height:calc(100% - 190px)!important;overflow-y:auto!important;padding:8px 0 16px!important}
+  .app.route-shop .jp-shop-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important}
+  .app.route-shop .jp-shop-card{min-height:210px!important;display:flex!important;flex-direction:column!important;padding:20px!important}
+  .app.route-shop .jp-shop-main{flex:1!important;text-align:left!important}
+  .app.route-shop .jp-add-cart{margin-top:16px!important}
+  .app.route-shop .jp-shop-footer{margin:0!important;padding:12px 0 0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+  .app.route-shop .jp-pricelist{padding:8px 0 24px!important}
+  .app.route-shop .jp-pricelist-list{border-radius:20px!important}
+  .app.route-shop .jp-pricelist-row{
+    grid-template-columns:minmax(0,1fr) minmax(140px,.35fr) 16px!important;
+    min-height:68px!important;padding:16px 24px!important;
+  }
+
+  /* PRODUCT / QR / shared modals. */
+  .overlay{padding:40px!important}
+  .overlay .sheet,#shopOverlay .shop-detail-sheet,.jp-v2-modal,.payment-reminder-modal{
+    width:min(560px,calc(100vw - 80px))!important;max-height:min(760px,calc(100dvh - 80px))!important;
+    margin:auto!important;border-radius:24px!important;padding:72px 32px 32px!important;overflow-y:auto!important;
+  }
+  #shopOverlay .shop-detail-sheet{width:min(620px,calc(100vw - 80px))!important}
+  #shopOverlay .shop-modal-topline{margin-bottom:8px!important}
+  #jpFlowClose,.jp-v2-modal>.jp-v2-x,.overlay .sheet>.sheet-x,#shopOverlay .sheet-x,.jp-popup-ad>.jp-popup-close,.payment-reminder-close{
+    top:24px!important;right:24px!important;color:#111!important;background:transparent!important;border:0!important;box-shadow:none!important;
+  }
+
+  /* PAYMENT: receiving account beside proof form. */
+  .app.route-payment>.page{overflow-y:auto!important}
+  .app.route-payment .payment-summary{margin-bottom:16px!important}
+  .app.route-payment .payment-tabs{max-width:420px!important;margin-bottom:24px!important}
+  .jp-payment-desktop-grid{
+    display:grid!important;grid-template-columns:minmax(280px,.7fr) minmax(0,1.3fr)!important;gap:24px!important;align-items:start!important;
+  }
+  .jp-payment-desktop-grid>.payment-card{padding:24px!important;margin:0!important}
+  .jp-payment-desktop-grid>.payment-card:first-child{position:sticky!important;top:0!important}
+  .jp-payment-desktop-grid .qr{width:min(100%,220px)!important}
+  .jp-payment-desktop-grid .manual-payment-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:16px!important}
+  .app.route-payment .payment-history{margin-top:32px!important}
+  .app.route-payment .history-list{margin-bottom:24px!important}
+
+  /* ACCOUNT: narrower centered dashboard; identity is prominent but not oversized. */
+  .app.route-account>.page{overflow-y:auto!important}
+  .app.route-account .screen-head{max-width:980px!important;margin-left:auto!important;margin-right:auto!important}
+  .app.route-account .jp-account-bento{
+    width:min(980px,100%)!important;max-width:980px!important;height:auto!important;margin:0 auto!important;
+    display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;grid-template-rows:auto!important;
+    gap:16px!important;
+  }
+  .app.route-account .jp-account-client-card{
+    grid-column:1!important;grid-row:1/4!important;height:auto!important;min-height:360px!important;padding:32px!important;padding-bottom:88px!important;
+  }
+  .app.route-account .jp-account-card-identity-simple{margin:40px 0 24px!important}
+  .app.route-account .jp-account-card-identity-simple h2{font-size:22px!important;line-height:1.15!important}
+  .app.route-account .jp-account-card-meta-simple{padding-right:0!important;gap:24px!important}
+  .app.route-account .jp-account-client-card .jp-view-qr{right:32px!important;bottom:32px!important}
+  .app.route-account .jp-account-rewards{grid-column:2!important;grid-row:1!important}
+  .app.route-account .account-status-card{grid-column:2!important;grid-row:2!important}
+  .app.route-account .jp-account-referral{grid-column:2!important;grid-row:3!important}
+  .app.route-account .jp-account-password-tile,.app.route-account .jp-account-notification-tile,.app.route-account .jp-account-legal-tile{grid-column:1/-1!important}
+  .app.route-account .jp-account-password-tile{grid-row:4!important}
+  .app.route-account .jp-account-notification-tile{grid-row:5!important}
+  .app.route-account .jp-account-legal-tile{grid-row:6!important}
+  .app.route-account .settings-list{height:auto!important}
+
+  /* CART: items left, sticky summary right. */
+  .jp-flow-cart .jp-flow-phone{width:min(1120px,calc(100vw - 96px))!important;max-width:1120px!important}
+  .jp-flow-cart .jp-flow-body{display:block!important}
+  .jp-flow-cart .jp-flow-main{
+    width:100%!important;height:100%!important;padding:24px!important;
+    display:grid!important;grid-template-columns:minmax(0,1.45fr) minmax(300px,.55fr)!important;
+    grid-template-rows:auto minmax(0,1fr)!important;gap:24px!important;
+    background:#fff!important;border:1px solid #dfe6e2!important;border-radius:24px!important;
+  }
+  .jp-flow-cart .jp-flow-title{grid-column:1/-1!important;margin:0!important}
+  .jp-flow-cart .jp-cart-list{grid-column:1!important;grid-row:2!important;overflow-y:auto!important;padding-right:8px!important}
+  .jp-flow-cart .jp-cart-sticky{
+    grid-column:2!important;grid-row:2!important;position:sticky!important;top:0!important;align-self:start!important;
+    margin:0!important;padding:24px!important;border:1px solid #e2e8e5!important;border-radius:20px!important;background:#f8faf9!important;
+  }
+  .jp-flow-cart .jp-cart-item{padding:16px!important;border-radius:16px!important}
+  .jp-flow-cart .jp-promo-row{display:none!important}
+
+  /* CHECKOUT / TRACK / TERMS / RECEIPT. */
+  .jp-flow-layer{padding:var(--jp-desktop-gutter-y) var(--jp-desktop-gutter-x)!important;background:#edf3f1!important}
+  .jp-flow-phone{
+    width:min(1120px,calc(100vw - (2 * var(--jp-desktop-gutter-x))))!important;
+    height:calc(100dvh - (2 * var(--jp-desktop-gutter-y)))!important;
+    max-width:1120px!important;max-height:860px!important;
+  }
+  .jp-flow-header{height:56px!important;margin-bottom:16px!important;border-radius:16px!important}
+  .jp-flow-checkout .jp-flow-body,.jp-flow-track .jp-flow-body,.jp-flow-terms .jp-flow-body,.jp-flow-processing .jp-flow-body,.jp-flow-receipt .jp-flow-body{
+    grid-template-columns:minmax(0,1.35fr) minmax(360px,.65fr)!important;gap:24px!important;
+  }
+  .jp-flow-feature-panel{padding:32px!important;border-radius:24px!important;align-content:start!important}
+  .jp-flow-feature-copy strong{font-size:32px!important}
+  .jp-flow-feature-ad{height:auto!important;align-self:end!important}
+  .jp-flow-feature-ad .jp-house-banner{width:100%!important;height:auto!important;aspect-ratio:3/1!important}
+  .jp-flow-checkout .jp-flow-main,.jp-flow-track .jp-flow-main,.jp-flow-terms .jp-flow-main,.jp-flow-processing .jp-flow-main,.jp-flow-receipt .jp-flow-main{
+    padding:32px!important;border-radius:24px!important;
+  }
+  .jp-flow-checkout .jp-mobile-field input,.jp-flow-checkout .jp-mobile-field textarea{width:100%!important;box-sizing:border-box!important}
+  .jp-flow-checkout .jp-mobile-field{margin-bottom:16px!important}
+  .jp-flow-checkout .jp-mobile-field label{display:block!important;margin-bottom:8px!important}
+  .jp-flow-checkout .jp-step-copy{margin-bottom:24px!important}
+  .jp-flow-checkout .jp-review-card{padding:20px!important}
+
+  /* LOGIN/AUTH: clean centered card, no ads or oversized feature area. */
+  .auth-shell.jp-guest-access-shell{display:grid!important;place-items:center!important}
+  .auth-shell .jp-guest-access-grid{
+    width:min(520px,calc(100vw - 96px))!important;height:auto!important;max-height:none!important;display:block!important;
+  }
+  .auth-shell .jp-guest-feature-panel{display:none!important}
+  .auth-shell .jp-guest-phone-panel{
+    width:100%!important;min-height:0!important;height:auto!important;max-height:none!important;padding:32px!important;
+    border:1px solid #dfe6e2!important;border-radius:24px!important;background:#fff!important;box-shadow:0 18px 48px rgba(24,44,34,.07)!important;
+  }
+
+  /* Welcome remains a deliberate desktop composition, not a stretched phone. */
+  .welcome-shell.jp-guest-access-shell .jp-guest-access-grid{grid-template-columns:minmax(0,1.45fr) minmax(340px,.55fr)!important;gap:24px!important}
+  .welcome-shell .jp-guest-feature-panel,.welcome-shell .jp-guest-phone-panel{border-radius:24px!important}
+  .welcome-shell .jp-guest-feature-ad .jp-house-banner{aspect-ratio:3/1!important;height:auto!important}
+
+  /* Keep typography restrained. */
+  .screen-title{font-size:26px!important}
+  .section-head h2{font-size:16px!important}
+  .card-title,.project-summary-card h2{letter-spacing:-.02em!important}
+
+  /* Avoid accidental desktop horizontal scroll / swipe. */
+  .app,.app>.page,.jp-flow-layer,.jp-flow-phone,.jp-flow-body,.jp-flow-main{overscroll-behavior-x:none!important}
+}
+
+@media(min-width:900px) and (max-width:1120px){
+  #root{padding:24px!important}
+  .app{width:calc(100vw - 48px)!important;height:calc(100dvh - 48px)!important;grid-template-columns:190px minmax(0,1fr)!important;gap:16px!important}
+  .app>.nav{width:190px!important;max-width:190px!important}
+  .app>.page{padding:24px!important}
+  .jp-home-primary-grid,.jp-home-secondary-grid,.jp-project-desktop-grid,.jp-payment-desktop-grid{grid-template-columns:1fr 1fr!important}
+  .app.route-shop .jp-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .app.route-account .jp-account-bento{grid-template-columns:1fr 1fr!important}
+}
