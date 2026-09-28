@@ -1994,7 +1994,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
                 <div class="form-group"><label class="form-label">Project ID</label><input class="form-control" id="projectDataProjectId" readonly></div>
                 <div class="form-group"><label class="form-label">Project Name</label><input class="form-control" id="projectDataProjectName"></div>
                 <div class="form-group"><label class="form-label">Project Start Date</label><input type="date" class="form-control" id="projectDataStartDate"></div>
-                <div class="form-group"><label class="form-label">Project Deadline</label><input type="date" class="form-control" id="projectDataDeadline"></div>
+                <div class="form-group"><label class="form-label">Project End / Deadline Date</label><input type="date" class="form-control" id="projectDataDeadline"><small class="text-muted">This date is also the payment due date.</small></div>
               </div>
               <div class="project-data-policy-grid">
                 <div class="project-priority-toggle-row">
@@ -2360,7 +2360,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
           <div class="modal-section-title">Schedule & completion</div>
           <div class="edit-grid">
             <div class="form-group"><label class="form-label">Start Date</label><input type="date" class="form-control" id="editProjectStartDate"></div>
-            <div class="form-group"><label class="form-label">Deadline / Completion Date</label><input type="date" class="form-control" id="editProjectDeadline"></div>
+            <div class="form-group"><label class="form-label">Project End / Completion Date</label><input type="date" class="form-control" id="editProjectDeadline"><small class="text-muted">This date is also used as the payment due date.</small></div>
             <div class="form-group"><label class="form-label">Priority</label><select class="form-control" id="editProjectPriority"><option value="NO">No</option><option value="YES">Yes</option></select><div class="text-sm text-muted mt-2">Automatically treated as Yes when there is a rush fee or the timeline is under 14 days.</div></div>
           </div>
           <div class="toggle-row">
@@ -3129,7 +3129,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
             auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
           });
 
-          if (!workspaceCloudIntent() || workspaceIdleExpired()) {
+          if (workspaceCloudIntent() && workspaceIdleExpired()) {
             try { await supabaseClient.auth.signOut(); } catch (_) {}
             clearWorkspaceCloudMemory();
           }
@@ -5107,6 +5107,7 @@ ${description}`))actionCallback();return;}
           if (!ready) { showWorkspaceAuthGate("Database deployment configuration is unavailable. Check the Vercel environment variables, then try again."); return; }
           if (!window.supabase?.createClient) { showWorkspaceAuthGate("Supabase client library did not load."); return; }
           supabaseClient = window.supabase.createClient(state.supabaseUrl,state.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+          window.supabaseClient=supabaseClient;
         }
         if (btn) { btn.disabled = true; btn.textContent = "Signing in…"; }
         try {
@@ -5144,6 +5145,30 @@ ${description}`))actionCallback();return;}
         renderCurrentView();
       }
 
+      async function waitForWorkspaceSession(client,maxWaitMs=1800){
+        if(!client?.auth)return null;
+        try{
+          const first=await client.auth.getSession();
+          if(first?.data?.session?.user)return first.data.session;
+          const refreshed=await client.auth.refreshSession();
+          if(refreshed?.data?.session?.user)return refreshed.data.session;
+        }catch(error){
+          const message=String(error?.message||'').toLowerCase();
+          if(!message.includes('session')&&!message.includes('refresh token'))console.warn('Workspace session restore check:',error);
+        }
+        return await new Promise(resolve=>{
+          let done=false,subscription=null,timer=null;
+          const finish=session=>{if(done)return;done=true;if(timer)clearTimeout(timer);try{subscription?.unsubscribe?.()}catch(_){ }resolve(session?.user?session:null);};
+          const listener=client.auth.onAuthStateChange((event,session)=>{
+            if(session?.user&&['INITIAL_SESSION','SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED'].includes(event))finish(session);
+          });
+          subscription=listener?.data?.subscription||null;
+          timer=setTimeout(async()=>{
+            try{const latest=await client.auth.getSession();finish(latest?.data?.session||null)}catch(_){finish(null)}
+          },maxWaitMs);
+        });
+      }
+
       async function initSupabase(skipGate = false) {
         updateConnectionStatus("connecting", "CONNECTING...");
 
@@ -5169,8 +5194,9 @@ ${description}`))actionCallback();return;}
               }
             }
           );
+          window.supabaseClient=supabaseClient;
 
-          const { data: { session } } = await supabaseClient.auth.getSession();
+          const session=await waitForWorkspaceSession(supabaseClient);
           if (!session?.user) {
             state.isConnected = false;
             updateConnectionStatus("error", "○ SIGN IN REQUIRED");
@@ -7035,7 +7061,7 @@ ${description}`))actionCallback();return;}
           deadline_date: project.deadline_date || null,
           delivery_status: project.delivery_status || (project.status === 'Completed' ? 'Delivered' : 'Pending'),
           priority: Boolean(project.priority),
-          payment_due_date: project.payment_due_date || project.deadline_date || null,
+          payment_due_date: project.deadline_date || project.payment_due_date || null,
           drive_url: project.drive_url || null,
           drive_unlock_at: project.drive_unlock_at || null,
           drive_expires_at: project.drive_expires_at || null,
@@ -7635,7 +7661,7 @@ ${description}`))actionCallback();return;}
         const desired = `${formatProjectId(proj)}-${year}`;
         if (proj.invoice_number !== desired) proj.invoice_number = desired;
         proj.invoice_issue_date = proj.invoice_issue_date || (proj.start_date || proj.record_date || String(proj.created_at || '').slice(0,10) || new Date().toISOString().slice(0,10));
-        proj.invoice_due_date = proj.invoice_due_date || proj.payment_due_date || proj.deadline_date || "";
+        proj.invoice_due_date = proj.payment_due_date || proj.deadline_date || proj.invoice_due_date || "";
         persistProjectsState();
         return proj.invoice_number;
       }
@@ -7660,10 +7686,14 @@ ${description}`))actionCallback();return;}
 
       function getInvoiceStatus(proj, balance) {
         if (balance <= 0 && Number(proj.total_amount) > 0) return "PAID";
-        const due = proj.invoice_due_date || proj.payment_due_date || proj.deadline_date;
+        const due = proj.payment_due_date || proj.deadline_date || proj.invoice_due_date;
         if (balance > 0 && due) {
-          const d = new Date(due); d.setHours(23,59,59,999);
-          if (d < new Date()) return "OVERDUE";
+          const d=parseDateSafe(due),today=new Date();today.setHours(0,0,0,0);
+          if(d){
+            const graceEnd=new Date(d);graceEnd.setDate(graceEnd.getDate()+1);
+            if(today>graceEnd)return "OVERDUE";
+            if(today>d)return "GRACE PERIOD";
+          }
         }
         if (balance < Number(proj.total_amount)) return "DOWNPAYMENT";
         return "UNPAID";
@@ -7911,7 +7941,7 @@ ${description}`))actionCallback();return;}
         const title=document.getElementById("editProjectTitle").value.trim(),clientName=document.getElementById("editProjectClientName").value.trim(),email=document.getElementById("editProjectClientEmail").value.trim();
         if(!title||!clientName){showToast("Project and client name are required.");return;} if(email&&!email.includes('@')){showToast("Please enter a valid client email.");return;}
         proj.title=title; proj.project_type=document.getElementById("editProjectType").value.trim(); proj.client_name=clientName; proj.client_email=email;
-        proj.total_amount=Math.max(0,Number(document.getElementById("editProjectAmount").value||0)); proj.legacy_reference=document.getElementById("editProjectLegacyRef").value.trim(); proj.record_date=document.getElementById("editProjectRecordDate").value; proj.start_date=document.getElementById("editProjectStartDate").value; proj.deadline_date=document.getElementById("editProjectDeadline").value;
+        proj.total_amount=Math.max(0,Number(document.getElementById("editProjectAmount").value||0)); proj.legacy_reference=document.getElementById("editProjectLegacyRef").value.trim(); proj.record_date=document.getElementById("editProjectRecordDate").value; proj.start_date=document.getElementById("editProjectStartDate").value; proj.deadline_date=document.getElementById("editProjectDeadline").value; proj.payment_due_date=proj.deadline_date||null; proj.invoice_due_date=proj.payment_due_date||"";
         proj.priority=document.getElementById('editProjectPriority').value==='YES';
         const received=Math.max(0,Number(document.getElementById("editProjectAmountReceived").value||0)); const pendingInput=Math.max(0,Number(document.getElementById("editProjectPendingAmount").value||0)); proj.payment_status=document.getElementById("editProjectPaymentStatus").value.trim(); proj.pending_amount=pendingInput;
         proj.payments=received>0?[{id:(proj.payments?.[0]?.id||('pay_hist_'+proj.id)),amount_paid:received,amount:received,payment_date:proj.record_date||proj.start_date||String(proj.created_at||'').slice(0,10),method:proj.payments?.[0]?.method||'Historical Record',reference_number:proj.payments?.[0]?.reference_number||'',notes:proj.payments?.[0]?.notes||'',created_at:proj.payments?.[0]?.created_at||proj.created_at||new Date().toISOString()}]:[];
@@ -8047,7 +8077,7 @@ ${description}`))actionCallback();return;}
         projectDataAutosaveBusy=true;setProjectDataAutosaveStatus('Saving…','saving');
         const previousClientId=proj.client_id,previousEmail=proj.client_email||'',previousStart=proj.start_date||'',previousDeadline=proj.deadline_date||'';
         try{
-          proj.title=name;proj.client_name=document.getElementById('projectDataClientName')?.value.trim()||'';proj.client_email=email;proj.client_phone=document.getElementById('projectDataClientPhone')?.value.trim()||'';proj.client_address=document.getElementById('projectDataClientAddress')?.value.trim()||'';proj.start_date=document.getElementById('projectDataStartDate')?.value||'';proj.deadline_date=document.getElementById('projectDataDeadline')?.value||'';
+          proj.title=name;proj.client_name=document.getElementById('projectDataClientName')?.value.trim()||'';proj.client_email=email;proj.client_phone=document.getElementById('projectDataClientPhone')?.value.trim()||'';proj.client_address=document.getElementById('projectDataClientAddress')?.value.trim()||'';proj.start_date=document.getElementById('projectDataStartDate')?.value||'';proj.deadline_date=document.getElementById('projectDataDeadline')?.value||'';proj.payment_due_date=proj.deadline_date||null;proj.invoice_due_date=proj.payment_due_date||'';
           const start=parseDateSafe(proj.start_date),due=parseDateSafe(proj.deadline_date),dateChanged=previousStart!==proj.start_date||previousDeadline!==proj.deadline_date,rushCalc=pricingVersionForProject(proj)==='v2'?calculateRushForProject(proj,proj.start_date,proj.deadline_date):calculateRushFromTimeline(proj.start_date,proj.deadline_date);
           if(dateChanged&&start&&due){proj.rush_days_early=rushCalc.daysEarly;proj.calculated_rush_fee=rushCalc.fee;proj.rush_fee_enabled=proj.rush_fee_enabled!==false;proj.rush_fee=proj.rush_fee_enabled?rushCalc.fee:0;if(Array.isArray(proj.project_items)&&proj.project_items.length)recalculateProjectFromOrderItems(proj);setProjectDataAutosaveStatus('Rush fee recalculated · saving…','saving');}
           const autoPriority=Number(proj.rush_fee||0)>0||Number(proj.rush_days_early||0)>0||!!(start&&due&&Math.ceil((due-start)/86400000)<14);
@@ -8523,6 +8553,10 @@ ${description}`))actionCallback();return;}
           if(draft.receiptDraft?.file)newReceiptPath=await uploadWorkspacePaymentReceipt(draft.receiptDraft.file);
           if(draft.receiptDraft?.removed)newReceiptPath=null;
           const receiptFilename=draft.receiptDraft?.filename||null;let record;
+          if(supabaseClient&&state.isConnected){
+            const financialRefresh=await supabaseClient.rpc('refresh_juan_project_financials',{p_project_id:proj.id});
+            if(financialRefresh.error)throw financialRefresh.error;
+          }
           if(draft.editingId){
             record=(proj.payments||[]).find(p=>String(p.id)===String(draft.editingId)&&!p.deleted_at);if(!record)throw new Error('Payment record was not found.');
             const before={...record};
@@ -8622,8 +8656,16 @@ ${description}`))actionCallback();return;}
         const statusClass=status==='PAID'?'paid':status==='OVERDUE'?'overdue':status==='GRACE PERIOD'?'partial':status==='PAYMENT UNDER REVIEW'?'partial':status==='PARTIALLY PAID'?'partial':'unpaid';
         const due=proj.payment_due_date?parseDateSafe(proj.payment_due_date):null;
         const grace=proj.grace_period_end?parseDateSafe(proj.grace_period_end):null;
+        const today=new Date();today.setHours(0,0,0,0);
+        const daysAfterDue=due?Math.max(0,Math.floor((today.getTime()-due.getTime())/86400000)):0;
+        const daysOverdue=due&&today>new Date(due.getFullYear(),due.getMonth(),due.getDate()+1)?Math.max(1,daysAfterDue-1):0;
+        let nextFeeDate=null;
+        if(due&&remaining>0&&overdueFeesEnabled){
+          const nextOffset=daysAfterDue<3?3:daysAfterDue<7?7:(Math.floor(daysAfterDue/7)+1)*7;
+          nextFeeDate=new Date(due.getFullYear(),due.getMonth(),due.getDate()+nextOffset);
+        }
         if(overviewEl)overviewEl.innerHTML=`
-          <div class="payment-status-card ${statusClass}"><div><span>Payment Status</span><strong>${escapeHtml(status)}</strong><small>${due?'Due '+due.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'Due date will be set by the project lifecycle'}</small></div><div class="payment-status-balance"><span>Balance Due</span><strong>${formatCurrency(remaining)}</strong></div></div>
+          <div class="payment-status-card ${statusClass}"><div><span>Payment Status</span><strong>${escapeHtml(status)}</strong><small>${due?'Due '+due.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'Due date follows the Project End / Deadline Date'}</small></div><div class="payment-status-balance"><span>Balance Due</span><strong>${formatCurrency(remaining)}</strong></div></div>
           <div class="payment-modular-grid">
             <div class="payment-metric-card"><span>Items Subtotal</span><strong>${formatCurrency(itemsSubtotal)}</strong></div>
             <div class="payment-metric-card"><span>Rush Fee</span><strong>${formatCurrency(rushFee)}</strong></div>
@@ -8631,11 +8673,13 @@ ${description}`))actionCallback();return;}
             <div class="payment-metric-card"><span>Discounts</span><strong>${formatCurrency(discounts)}</strong></div>
             <div class="payment-metric-card"><span>Base Total</span><strong>${formatCurrency(baseTotal)}</strong></div>
             <div class="payment-metric-card ${lateFees>0?'due':''}"><span>Overdue Fees</span><strong>${overdueFeesEnabled?formatCurrency(lateFees):'Disabled'}</strong></div>
+            <div class="payment-metric-card"><span>Days Overdue</span><strong>${daysOverdue}</strong></div>
+            <div class="payment-metric-card"><span>Next Fee Date</span><strong>${nextFeeDate&&remaining>0?nextFeeDate.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—'}</strong></div>
             <div class="payment-metric-card"><span>Current Total</span><strong>${formatCurrency(total)}</strong></div>
             <div class="payment-metric-card paid"><span>Amount Paid</span><strong>${formatCurrency(totalPaid)}</strong></div>
             <div class="payment-metric-card ${remaining>0?'due':'paid'}"><span>Balance Due</span><strong>${formatCurrency(remaining)}</strong></div>
           </div>
-          <div class="payment-backend-note">Backend-enforced status · ${overdueFeesEnabled?'Overdue fees enabled':'Overdue fees disabled for this project'} · ${grace?'Grace period through '+grace.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'No grace-period date assigned'}</div>`;
+          <div class="payment-backend-note">Payment due on the Project End / Deadline Date · 1-day grace period · ₱500 on day 3 if unpaid · +₱250 on day 7 and every succeeding 7 days · ${overdueFeesEnabled?'Overdue fees enabled':'Overdue fees waived for this project'}${grace?' · Grace through '+grace.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):''}</div>`;
         if(listEl){
           if(!payments.length){listEl.innerHTML='<div class="payment-history-empty"><strong>No payments recorded</strong><span>Recorded payments will appear here.</span></div>';return;}
           payments.sort((a,b)=>new Date(b.payment_date||b.created_at||0)-new Date(a.payment_date||a.created_at||0));
@@ -8689,7 +8733,7 @@ ${description}`))actionCallback();return;}
         const paid=(proj.payments||[]).filter(p=>!p.deleted_at).reduce((sum,p)=>sum+Number(p.amount_paid||p.amount||0),0);
         const balance=Math.max(0,total-paid); const status=String(proj.financial_status||"").toUpperCase()||getInvoiceStatus(proj,balance);
         const issue=new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
-        const due=proj.invoice_due_date||proj.payment_due_date||proj.deadline_date||'';
+        const due=proj.payment_due_date||proj.deadline_date||proj.invoice_due_date||'';
         const dueText=due?new Date(due+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}):'';
         const statusClass=status==='OVERDUE'?'overdue':status==='UNPAID'?'unpaid':status==='DOWNPAYMENT'?'partial':'';
         const itemRows=items.length
@@ -9803,7 +9847,7 @@ ${description}`))actionCallback();return;}
 
     document.addEventListener("DOMContentLoaded", () => {
       app.initWorkspace();
-      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260923-refresh-fix-1',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
+      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-payment-session-v2',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
       setTimeout(()=>{refreshSearchableSelects(document);app.bindEmailDomainSuggestions();if(location.hash==="#online-portal")app.navigateTo("online-portal");},60);
       
       document.addEventListener("click", (e) => {

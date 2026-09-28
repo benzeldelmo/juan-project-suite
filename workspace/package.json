@@ -9,5 +9,5 @@
     "@supabase/supabase-js": "2.57.4",
     "qrcode": "1.5.4"
   },
-  "version": "2026.9.23-ui.2"
+  "version": "2026.9.28-payment-session.1"
 }

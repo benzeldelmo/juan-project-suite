@@ -1,9 +1,17 @@
 const __JUAN_APP=window.JUAN_SUITE_APP||((document.querySelector('.app-container')||document.querySelector('#view-my-works'))?'workspace':'online');
 let __JUAN_SB=null,__JUAN_SESSION=null,__JUAN_AUTH_BOUND=false;
 async function __juanResolveClient(){
-  const shared=window.supabaseClient;
+  let shared=window.supabaseClient;
   if(shared?.auth?.getSession){__JUAN_SB=shared;return shared}
   if(__JUAN_SB)return __JUAN_SB;
+  if(__JUAN_APP==='workspace'){
+    for(let attempt=0;attempt<40;attempt++){
+      await new Promise(resolve=>setTimeout(resolve,50));
+      shared=window.supabaseClient;
+      if(shared?.auth?.getSession){__JUAN_SB=shared;return shared}
+    }
+    return null;
+  }
   try{
     if(!window.supabase?.createClient)return null;
     const r=await fetch('/api/supabase-config',{cache:'no-store'});
