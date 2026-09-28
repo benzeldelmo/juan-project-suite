@@ -33,3 +33,36 @@ test("workspace refresh restores the persisted Supabase session without a second
   assert.match(runtime,/if\(__JUAN_APP==='workspace'\)/);
   assert.match(runtime,/shared=window\.supabaseClient/);
 });
+
+
+test("weekly overdue increments require completed seven-day blocks", async () => {
+  const sql=await read("../supabase/migrations/038_remove_daily_overdue_fee.sql");
+  assert.match(sql,/floor\(\(p_as_of - p_due_date\) \/ 7\.0\) \* 250/);
+});
+
+test("payment create and edit use the authenticated Workspace API, not direct financial RPC", async () => {
+  const html=await read("index.html");
+  const api=await read("api/suite.js");
+  const paymentBlock=html.slice(html.indexOf("async function finalizePaymentRecord"),html.indexOf("async function setProjectRushFeeEnabled"));
+  assert.match(paymentBlock,/action:'save-payment'/);
+  assert.match(paymentBlock,/action:'delete-payment'/);
+  assert.doesNotMatch(paymentBlock,/supabaseClient\.rpc\('refresh_juan_project_financials'/);
+  assert.match(api,/if\(action==='save-payment'\)/);
+  assert.match(api,/if\(action==='delete-payment'\)/);
+  assert.match(api,/svc\.rpc\('refresh_juan_project_financials'/);
+});
+
+test("payment calculations stay compact", async () => {
+  const html=await read("index.html");
+  assert.doesNotMatch(html,/<span>Days Overdue<\/span>/);
+  assert.doesNotMatch(html,/<span>Next Fee Date<\/span>/);
+});
+
+test("deliverable checklist saves before keeping the optimistic state and uses compact spacing", async () => {
+  const html=await read("index.html");
+  const block=html.slice(html.indexOf("async function toggleDeliverable"),html.indexOf("const WORKSPACE_PAYMENT_INSTITUTIONS"));
+  assert.match(block,/await directProjectWrite\(proj,'Deliverable status update',\{structure:true\}\)/);
+  assert.match(block,/Deliverable change was restored because it could not be saved to Supabase/);
+  assert.match(html,/\.deliverable-checklist-row\{[^}]*min-height:48px/);
+  assert.match(html,/\.deliverable-child-row\{[^}]*margin-left:12px/);
+});

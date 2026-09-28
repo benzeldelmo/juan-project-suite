@@ -439,6 +439,65 @@ export default async function handler(req,res){
       const {data,error}=await svc.rpc('review_juan_payment_submission',{p_submission_id:b.id||b.submissionId,p_decision:decision,p_admin_user:user.id,p_reason:reason||null});
       if(error)throw error;await audit(svc,'Payment '+data,String(b.id||b.submissionId),user.id);return res.status(200).json({ok:true,status:data});
     }
+    if(action==='save-payment'){
+      const projectId=String(b.project_id||b.projectId||'').trim();
+      if(!projectId)fail('Project is required.');
+      const payment=b.payment||{};
+      const amount=money(payment.amount_paid??payment.amount);
+      if(amount<=0)fail('Payment amount must be greater than zero.');
+      const paymentDate=String(payment.payment_date||'').trim();
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(paymentDate)||Number.isNaN(new Date(paymentDate+'T00:00:00').getTime()))fail('Choose a valid payment date.');
+      const project=await svc.from('projects').select('id,client_id,project_code').eq('id',projectId).maybeSingle();
+      if(project.error)throw project.error;if(!project.data)fail('Project not found.',404);
+      const pre=await svc.rpc('refresh_juan_project_financials',{p_project_id:projectId});if(pre.error)throw pre.error;
+      const row={
+        project_id:projectId,
+        client_id:project.data.client_id||null,
+        amount_paid:amount,
+        payment_date:paymentDate,
+        payment_method:String(payment.payment_method||'Payment').trim().slice(0,120)||'Payment',
+        sender_institution:String(payment.sender_institution||'').trim().slice(0,80)||null,
+        reference_no:String(payment.reference_no||'').trim().slice(0,120)||null,
+        notes:String(payment.notes||'').trim().slice(0,3000)||null,
+        receipt_path:String(payment.receipt_path||'').trim().slice(0,500)||null,
+        receipt_filename:String(payment.receipt_filename||'').trim().slice(0,255)||null,
+        updated_at:now()
+      };
+      const paymentId=String(b.payment_id||b.paymentId||'').trim();
+      let saved;
+      if(paymentId){
+        const existing=await svc.from('payments').select('*').eq('id',paymentId).eq('project_id',projectId).is('deleted_at',null).maybeSingle();
+        if(existing.error)throw existing.error;if(!existing.data)fail('Payment record not found.',404);
+        const updated=await svc.from('payments').update(row).eq('id',paymentId).eq('project_id',projectId).is('deleted_at',null).select('*').single();
+        if(updated.error)throw updated.error;saved=updated.data;
+        const log=await svc.from('payment_audit_logs').insert({payment_id:String(paymentId),project_id:projectId,action:'EDIT',before_value:existing.data,after_value:saved,changed_by:user.id});if(log.error)throw log.error;
+        await audit(svc,'Payment edited',project.data.project_code||projectId,user.id);
+      }else{
+        const inserted=await svc.from('payments').insert(row).select('*').single();
+        if(inserted.error)throw inserted.error;saved=inserted.data;
+        const log=await svc.from('payment_audit_logs').insert({payment_id:String(saved.id),project_id:projectId,action:'CREATE',before_value:null,after_value:saved,changed_by:user.id});if(log.error)throw log.error;
+        await audit(svc,'Payment recorded',project.data.project_code||projectId,user.id);
+      }
+      const refreshed=await svc.rpc('refresh_juan_project_financials',{p_project_id:projectId});if(refreshed.error)throw refreshed.error;
+      const financial=await svc.from('projects').select('id,total_amount,late_fee_total,financial_status,payment_due_date,grace_period_end,overdue_started_at,overdue_fees_enabled,settled_at').eq('id',projectId).single();
+      if(financial.error)throw financial.error;
+      return res.status(200).json({ok:true,payment:saved,project:financial.data,financial:refreshed.data});
+    }
+    if(action==='delete-payment'){
+      const projectId=String(b.project_id||b.projectId||'').trim(),paymentId=String(b.payment_id||b.paymentId||'').trim();
+      if(!projectId||!paymentId)fail('Project and payment are required.');
+      const existing=await svc.from('payments').select('*').eq('id',paymentId).eq('project_id',projectId).is('deleted_at',null).maybeSingle();
+      if(existing.error)throw existing.error;if(!existing.data)fail('Payment record not found.',404);
+      const deletedAt=now();
+      const updated=await svc.from('payments').update({deleted_at:deletedAt,deleted_by:user.id,deletion_reason:'Deleted from Workspace payment history',updated_at:deletedAt}).eq('id',paymentId).eq('project_id',projectId).is('deleted_at',null).select('*').single();
+      if(updated.error)throw updated.error;
+      const log=await svc.from('payment_audit_logs').insert({payment_id:String(paymentId),project_id:projectId,action:'DELETE',before_value:existing.data,after_value:{deleted_at:deletedAt},changed_by:user.id});if(log.error)throw log.error;
+      const refreshed=await svc.rpc('refresh_juan_project_financials',{p_project_id:projectId});if(refreshed.error)throw refreshed.error;
+      const financial=await svc.from('projects').select('id,total_amount,late_fee_total,financial_status,payment_due_date,grace_period_end,overdue_started_at,overdue_fees_enabled,settled_at').eq('id',projectId).single();
+      if(financial.error)throw financial.error;
+      await audit(svc,'Payment deleted',projectId,user.id);
+      return res.status(200).json({ok:true,payment:updated.data,project:financial.data,financial:refreshed.data});
+    }
     if(action==='set-rush-fees'){
       const projectId=String(b.project_id||b.projectId||'').trim();if(!projectId)fail('Project is required.');
       const enabled=b.enabled===true||b.enabled==='true';
