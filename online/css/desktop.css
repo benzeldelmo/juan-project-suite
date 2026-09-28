@@ -1,0 +1,263 @@
+/* JUAN PROJECT Online — Canonical Desktop UI
+   Desktop-only rules. Keep mobile behavior in the existing mobile stylesheets. */
+@media (min-width:900px){
+  :root{
+    --jp-desktop-bg:#eef4f1;
+    --jp-desktop-surface:#fff;
+    --jp-desktop-soft:#f8faf9;
+    --jp-desktop-line:#e2e8e5;
+    --jp-desktop-text:#111820;
+    --jp-desktop-muted:#7c8781;
+    --jp-desktop-green:#08b966;
+    --jp-desktop-radius:20px;
+  }
+
+  html,body{height:100%;overflow:hidden;background:var(--jp-desktop-bg)!important}
+  body{margin:0}
+  #root{
+    width:100%;height:100dvh;
+    padding:32px!important;
+    box-sizing:border-box!important;
+    background:var(--jp-desktop-bg)!important;
+  }
+
+  /* Canonical app shell */
+  .app{
+    width:min(1260px,calc(100vw - 64px))!important;
+    height:calc(100dvh - 64px)!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0 auto!important;
+    display:grid!important;
+    grid-template-columns:204px minmax(0,1fr)!important;
+    gap:16px!important;
+    background:transparent!important;
+    border:0!important;
+    overflow:visible!important;
+    box-shadow:none!important;
+  }
+  .app>.nav{
+    grid-column:1!important;grid-row:1!important;
+    width:204px!important;max-width:204px!important;height:100%!important;
+    padding:20px 12px!important;box-sizing:border-box!important;
+    border:1px solid var(--jp-desktop-line)!important;
+    border-radius:20px!important;
+    background:#fff!important;
+    box-shadow:0 12px 32px rgba(24,44,34,.055)!important;
+    overflow:hidden!important;
+  }
+  .jp-desktop-nav-brand{padding:0 8px 18px!important;margin:0 0 12px!important}
+  .app>.nav .jp-nav-links{display:grid!important;gap:4px!important}
+  .app>.nav button{
+    min-height:42px!important;height:42px!important;
+    padding:0 12px!important;border-radius:10px!important;
+    font-size:12px!important;line-height:1!important;
+  }
+  .app>.page{
+    grid-column:2!important;grid-row:1!important;
+    width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+    padding:24px!important;box-sizing:border-box!important;
+    border:1px solid var(--jp-desktop-line)!important;border-radius:20px!important;
+    background:#fff!important;box-shadow:0 12px 32px rgba(24,44,34,.055)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+  }
+
+  /* Global density */
+  .app>.page .card{border:1px solid var(--jp-desktop-line)!important;border-radius:16px!important;box-shadow:none!important}
+  .app>.page .section-head{margin:20px 0 8px!important}
+  .app>.page .section-head h2{font-size:15px!important}
+  .app>.page .screen-head,.app>.page .dashboard-head{margin-bottom:20px!important}
+  .screen-title{font-size:24px!important}
+  .btn{min-height:40px!important;border-radius:10px!important}
+  .badge{font-size:10px!important}
+
+  /* Guest welcome/auth */
+  .jp-simple-guest-screen{
+    width:100%!important;min-height:100dvh!important;
+    padding:32px!important;box-sizing:border-box!important;
+    display:grid!important;place-items:center!important;
+    background:var(--jp-desktop-bg)!important;
+  }
+  .jp-simple-guest-card,.jp-simple-auth-card{
+    width:min(520px,calc(100vw - 64px))!important;
+    max-width:520px!important;height:auto!important;min-height:0!important;
+    padding:36px!important;box-sizing:border-box!important;
+    border:1px solid var(--jp-desktop-line)!important;border-radius:20px!important;
+    background:#fff!important;box-shadow:0 14px 36px rgba(24,44,34,.06)!important;
+  }
+  .jp-simple-guest-card .welcome-copy h1{font-size:38px!important;line-height:1.02!important;white-space:normal!important}
+  .jp-simple-auth-card .auth-copy-top{margin-top:36px!important}
+  .jp-simple-auth-card .input{height:46px!important}
+  .auth-card input:-webkit-autofill,
+  .auth-card input:-webkit-autofill:hover,
+  .auth-card input:-webkit-autofill:focus{
+    -webkit-text-fill-color:#111820!important;
+    -webkit-box-shadow:0 0 0 1000px #fff inset!important;
+    box-shadow:0 0 0 1000px #fff inset!important;
+  }
+
+  /* Guest home in main app */
+  .app.guest-mode.route-home>.page{display:grid!important;place-items:center!important}
+  .jp-guest-home-simple{width:min(720px,100%)!important;max-width:720px!important;height:auto!important;margin:auto!important}
+  .jp-guest-home-simple .jp-guest-main-panel{
+    width:100%!important;min-height:420px!important;padding:40px!important;box-sizing:border-box!important;
+    border:1px solid var(--jp-desktop-line)!important;border-radius:20px!important;background:#fff!important;
+    display:flex!important;flex-direction:column!important;justify-content:center!important;
+  }
+  .jp-guest-home-simple .jp-guest-hero{width:min(440px,100%)!important;margin:0 auto!important}
+  .jp-guest-home-simple .jp-guest-hero h1{font-size:38px!important;line-height:1.02!important;white-space:normal!important}
+  .jp-guest-home-simple .jp-guest-about{width:min(440px,100%)!important;margin:24px auto 0!important;padding-top:12px!important;border-top:1px solid #edf1ef!important}
+
+  /* Home */
+  .app.client-mode.route-home>.page{display:block!important;overflow-y:auto!important}
+  .app.route-home .dashboard-head h1{font-size:27px!important}
+  .jp-home-primary-grid{display:grid!important;grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr)!important;gap:16px!important;align-items:stretch!important}
+  .jp-home-primary-grid .section-head{margin-top:0!important}
+  .jp-home-primary-grid .active-project,.jp-home-primary-grid .home-balance-card{height:auto!important;min-height:142px!important}
+  .jp-home-balance-pane .home-balance-card{padding:20px!important}
+  .jp-home-balance-pane .home-balance-card b{font-size:30px!important}
+  .jp-home-secondary-grid{display:block!important;margin-top:20px!important}
+  .jp-home-activity-block{width:100%!important}
+  .jp-home-ad-block{width:100%!important;padding-top:20px!important}
+  .app.client-mode.route-home #jpAdBannerAnchor.jp-home-ad-inline{position:relative!important;inset:auto!important;width:100%!important;margin:0!important}
+  .app.client-mode.route-home #jpAdBannerAnchor .jp-house-banner{width:100%!important;height:auto!important;max-height:220px!important;aspect-ratio:3/1!important;border-radius:16px!important;overflow:hidden!important}
+
+  /* Orders/project */
+  .app.route-orders .project-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+  .app.route-orders .project-list-card{height:auto!important;min-height:112px!important;max-height:none!important;padding:16px!important}
+  .jp-project-desktop-grid{display:grid!important;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr)!important;gap:16px!important;align-items:start!important}
+  .jp-project-main-column,.jp-project-side-column{display:grid!important;gap:12px!important;min-width:0!important}
+  .jp-project-side-column>.section-head{margin:0!important}
+  .jp-project-desktop-grid .project-summary-card,.jp-project-desktop-grid .tracking-card,.jp-project-desktop-grid .deliverables-card{padding:20px!important}
+  .jp-project-side-column .deliverables-card{max-height:430px!important;overflow:auto!important}
+
+  /* Shop */
+  .app.route-shop>.page{padding:20px!important;overflow:hidden!important}
+  .app.route-shop .jp-shop-sticky{position:relative!important;top:auto!important;padding:0 0 12px!important;background:#fff!important;border:0!important;box-shadow:none!important}
+  .app.route-shop .jp-shop-head{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px!important;align-items:center!important}
+  .app.route-shop .shop-search{height:42px!important;max-width:none!important}
+  .app.route-shop .jp-shop-view-toggle{max-width:320px!important;margin:12px 0 8px!important}
+  .app.route-shop .jp-category-chips{margin-top:8px!important;gap:6px!important}
+  .app.route-shop .jp-shop-scroll{height:calc(100% - 188px)!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding:4px 0 12px!important}
+  .app.route-shop .jp-shop-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+  .app.route-shop .jp-shop-card{height:auto!important;min-height:170px!important;padding:16px!important;display:flex!important;flex-direction:column!important}
+  .app.route-shop .jp-shop-main{flex:1!important;text-align:left!important}
+  .app.route-shop .jp-shop-copy p{min-height:32px!important;max-height:32px!important;overflow:hidden!important}
+  .app.route-shop .jp-add-cart{min-height:38px!important;margin-top:12px!important}
+  .app.route-shop .jp-shop-footer{position:relative!important;inset:auto!important;margin:0!important;padding:10px 0 0!important;border:0!important;background:#fff!important;box-shadow:none!important;border-radius:0!important}
+
+  /* Pricelist: five package cards + one individual-services table */
+  .jp-pricelist{padding:4px 0 24px!important}
+  .jp-pricelist-head{display:flex!important;justify-content:space-between!important;gap:24px!important;align-items:end!important;margin:10px 0 20px!important}
+  .jp-pricelist-head h2{margin:3px 0 0!important;font-size:24px!important}
+  .jp-pricelist-head small{max-width:420px!important;text-align:right!important}
+  .jp-pricelist-section-head{display:flex!important;justify-content:space-between!important;align-items:center!important;margin:18px 0 8px!important}
+  .jp-pricelist-section-head h3{margin:0!important;font-size:15px!important}
+  .jp-pricelist-section-head span{font-size:10px!important;color:var(--jp-desktop-muted)!important}
+  .jp-pricelist-packages{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px!important}
+  .jp-pricelist-package-card{
+    min-width:0!important;min-height:190px!important;padding:16px!important;
+    display:flex!important;flex-direction:column!important;justify-content:space-between!important;gap:14px!important;
+    border:1px solid var(--jp-desktop-line)!important;border-radius:16px!important;background:#fff!important;color:inherit!important;
+    text-align:left!important;font:inherit!important;
+  }
+  .jp-pricelist-package-card span{font-size:9px!important;color:#8a958f!important;font-weight:800!important;letter-spacing:.06em!important}
+  .jp-pricelist-package-card h3{margin:6px 0!important;font-size:13px!important;line-height:1.25!important}
+  .jp-pricelist-package-card p{margin:0!important;font-size:10px!important;line-height:1.4!important;color:var(--jp-desktop-muted)!important;display:-webkit-box!important;-webkit-line-clamp:3!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
+  .jp-pricelist-package-price{display:flex!important;align-items:baseline!important;gap:8px!important;flex-wrap:wrap!important}
+  .jp-pricelist-package-price strong{font-size:17px!important;color:#07975a!important}
+  .jp-pricelist-package-price s{font-size:10px!important;color:#9ca59f!important}
+  .jp-pricelist-package-card>small{display:flex!important;align-items:center!important;justify-content:space-between!important;font-size:10px!important;color:#5f6d66!important}
+  .jp-pricelist-table{overflow:hidden!important;border:1px solid var(--jp-desktop-line)!important;border-radius:16px!important;background:#fff!important}
+  .jp-pricelist-table-head,.jp-pricelist-table-row{display:grid!important;grid-template-columns:minmax(220px,1.3fr) minmax(150px,.8fr) minmax(120px,.45fr) 20px!important;gap:16px!important;align-items:center!important}
+  .jp-pricelist-table-head{padding:10px 16px!important;background:var(--jp-desktop-soft)!important;font-size:9px!important;font-weight:800!important;letter-spacing:.06em!important;text-transform:uppercase!important;color:#7d8882!important}
+  .jp-pricelist-table-row{width:100%!important;min-height:58px!important;padding:10px 16px!important;box-sizing:border-box!important;border:0!important;border-top:1px solid #edf1ef!important;background:#fff!important;text-align:left!important;font:inherit!important;color:inherit!important}
+  .jp-pricelist-service-name{display:grid!important;gap:3px!important}
+  .jp-pricelist-service-name b{font-size:12px!important}
+  .jp-pricelist-service-name small{font-size:9px!important;color:#8a958f!important}
+  .jp-pricelist-table-row>span:nth-child(2){font-size:10px!important;color:#66736d!important}
+  .jp-pricelist-table-row>strong{font-size:12px!important;color:#07975a!important}
+  .jp-pricelist-open{display:grid!important;place-items:center!important}
+
+  /* Account/payment */
+  .app.route-account .jp-account-bento{width:min(920px,100%)!important;max-width:920px!important;height:auto!important;margin:0 auto!important;display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr)!important;grid-template-rows:auto!important;gap:12px!important}
+  .app.route-account .jp-account-client-card{grid-column:1!important;grid-row:1/4!important;height:auto!important;min-height:300px!important;padding:28px!important;padding-bottom:76px!important}
+  .app.route-account .jp-account-rewards{grid-column:2!important;grid-row:1!important}
+  .app.route-account .account-status-card{grid-column:2!important;grid-row:2!important}
+  .app.route-account .jp-account-referral{grid-column:2!important;grid-row:3!important}
+  .app.route-account .jp-account-password-tile,.app.route-account .jp-account-notification-tile,.app.route-account .jp-account-legal-tile{grid-column:1/-1!important}
+  .jp-payment-desktop-grid{display:grid!important;grid-template-columns:minmax(260px,.68fr) minmax(0,1.32fr)!important;gap:16px!important;align-items:start!important}
+  .jp-payment-desktop-grid>.payment-card{padding:20px!important;margin:0!important}
+  .jp-payment-desktop-grid>.payment-card:first-child{position:relative!important;top:auto!important}
+  .jp-payment-desktop-grid .manual-payment-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:12px!important}
+
+  /* Canonical flow shell */
+  .jp-flow-layer{padding:32px!important;background:var(--jp-desktop-bg)!important;overflow:hidden!important}
+  .jp-flow-phone.jp-flow-simple{width:min(1120px,calc(100vw - 64px))!important;height:calc(100dvh - 64px)!important;max-width:1120px!important;max-height:none!important;margin:0 auto!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+  .jp-flow-simple .jp-flow-header{position:relative!important;top:auto!important;height:52px!important;margin-bottom:12px!important;padding:0 14px!important;box-sizing:border-box!important;border:1px solid var(--jp-desktop-line)!important;border-radius:16px!important;background:#fff!important;backdrop-filter:none!important;box-shadow:none!important}
+  .jp-flow-simple .jp-flow-header>button{width:36px!important;height:36px!important;font-size:21px!important}
+  .jp-flow-simple .jp-flow-body{display:block!important;height:calc(100% - 64px)!important;min-height:0!important}
+  .jp-flow-simple .jp-flow-main{width:100%!important;height:100%!important;min-height:0!important;padding:24px!important;box-sizing:border-box!important;border:1px solid var(--jp-desktop-line)!important;border-radius:20px!important;background:#fff!important;box-shadow:none!important;overflow-y:auto!important;overflow-x:hidden!important}
+
+  /* Cart */
+  .jp-flow-cart .jp-flow-main{display:grid!important;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr)!important;grid-template-rows:auto minmax(0,1fr)!important;gap:16px!important}
+  .jp-flow-cart .jp-flow-title{grid-column:1/-1!important;margin:0!important}
+  .jp-flow-cart .jp-cart-list{grid-column:1!important;grid-row:2!important;display:grid!important;align-content:start!important;gap:10px!important;overflow-y:auto!important;padding-right:4px!important}
+  .jp-flow-cart .jp-cart-item{position:relative!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;gap:16px!important;align-items:center!important;height:auto!important;min-height:78px!important;padding:14px 16px!important;box-sizing:border-box!important;border:1px solid var(--jp-desktop-line)!important;border-radius:14px!important}
+  .jp-flow-cart .jp-cart-copy h3{max-width:none!important;margin:0 0 4px!important;font-size:13px!important}
+  .jp-flow-cart .jp-cart-copy>b{font-size:12px!important}
+  .jp-flow-cart .jp-qty{position:static!important;margin:0!important;display:flex!important;align-items:center!important;gap:7px!important}
+  .jp-flow-cart .jp-cart-remove{position:static!important;width:32px!important;height:32px!important;display:grid!important;place-items:center!important;border:0!important;background:transparent!important}
+  .jp-flow-cart .jp-cart-sticky{grid-column:2!important;grid-row:2!important;position:sticky!important;top:0!important;align-self:start!important;padding:18px!important;border:1px solid var(--jp-desktop-line)!important;border-radius:16px!important;background:var(--jp-desktop-soft)!important;box-shadow:none!important}
+  .jp-flow-cart .jp-promo-row{display:none!important}
+
+  /* Checkout/review */
+  .jp-flow-checkout .jp-flow-main,.jp-flow-terms .jp-flow-main,.jp-flow-processing .jp-flow-main{width:min(760px,100%)!important;margin:0 auto!important}
+  .jp-flow-checkout .jp-step-icon{display:none!important}
+  .jp-flow-checkout .jp-step-copy{text-align:left!important;margin-bottom:20px!important}
+  .jp-flow-checkout .jp-step-copy h1{font-size:24px!important}
+  .jp-flow-checkout .jp-mobile-field{margin-bottom:14px!important}
+  .jp-flow-checkout .jp-review-card{padding:18px!important}
+
+  /* Track */
+  .jp-flow-track .jp-flow-main{width:min(940px,100%)!important;margin:0 auto!important}
+  .jp-flow-track .jp-track-search-card{width:min(620px,100%)!important;margin:12px auto 0!important;padding:24px!important;border:1px solid var(--jp-desktop-line)!important;border-radius:16px!important;background:#fff!important}
+  .jp-flow-track .jp-track-search-card .jp-step-copy{margin-bottom:16px!important}
+  .jp-track-layout{display:grid!important;grid-template-columns:minmax(280px,.42fr) minmax(0,.58fr)!important;gap:16px!important;align-items:start!important}
+  .jp-track-overview{display:grid!important;gap:10px!important}
+  .jp-track-summary{padding:16px!important}
+  .jp-track-summary h2{font-size:18px!important}
+  .jp-track-summary p,.jp-track-summary .meta{font-size:11px!important}
+  .jp-next-step{padding:16px!important}
+  .jp-next-step b{font-size:12px!important}
+  .jp-next-step p{font-size:11px!important}
+  .jp-track-timeline{padding:8px 0!important;border:1px solid var(--jp-desktop-line)!important;border-radius:16px!important;background:#fff!important}
+  .jp-track-node{min-height:64px!important;padding:10px 16px!important;box-sizing:border-box!important}
+  .jp-track-node b{font-size:12px!important}
+  .jp-track-node small{font-size:10px!important}
+
+  /* Receipt */
+  .jp-flow-receipt .jp-flow-main{width:min(760px,100%)!important;margin:0 auto!important;display:grid!important;place-items:start center!important}
+  .jp-flow-receipt .jp-receipt-result{max-width:430px!important}
+  .jp-flow-receipt .jp-thermal-receipt{width:min(100%,390px)!important}
+  .jp-flow-receipt .jp-receipt-actions{grid-template-columns:repeat(4,48px)!important;justify-content:center!important}
+  .jp-flow-receipt .jp-receipt-actions button{min-height:48px!important;height:48px!important}
+
+  /* Product modal */
+  #shopOverlay .shop-detail-sheet{width:min(580px,calc(100vw - 80px))!important;max-height:calc(100dvh - 80px)!important;padding:64px 28px 28px!important;border-radius:20px!important}
+
+  /* No desktop split-ad panels */
+  .jp-guest-feature-panel,.jp-flow-feature-panel{display:none!important}
+}
+
+@media (min-width:900px) and (max-width:1100px){
+  #root{padding:20px!important}
+  .app{width:calc(100vw - 40px)!important;height:calc(100dvh - 40px)!important;grid-template-columns:184px minmax(0,1fr)!important}
+  .app>.nav{width:184px!important;max-width:184px!important}
+  .app>.page{padding:20px!important}
+  .app.route-shop .jp-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .jp-pricelist-packages{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .jp-home-primary-grid,.jp-project-desktop-grid,.jp-payment-desktop-grid{grid-template-columns:1fr 1fr!important}
+  .jp-flow-layer{padding:20px!important}
+  .jp-flow-phone.jp-flow-simple{width:calc(100vw - 40px)!important;height:calc(100dvh - 40px)!important}
+}
