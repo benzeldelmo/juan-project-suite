@@ -957,7 +957,7 @@
 }
 
 /* 2026-09-24 consolidated Online desktop composition */
-html,body,#root,button,input,select,textarea{font-family:"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+html,body,#root,button,input,select,textarea{font-family:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
 
 /* Close controls always live inside the rounded surface. */
 .jp-v2-modal,.overlay .sheet,#shopOverlay .sheet,.jp-popup-ad,.jp-flow-phone{position:relative!important}
@@ -1195,4 +1195,102 @@ html,body,#root,button,input,select,textarea{font-family:"SF Pro Rounded",-apple
   .jp-account-card-meta-simple b{font-size:11px!important;overflow-wrap:anywhere!important}
   .jp-account-rewards .text-button{display:block!important;margin-top:16px!important}
   .jp-account-rewards>small{display:block!important;margin-top:16px!important;line-height:1.45!important}
+}
+
+
+/* 2026-09-28 mobile refinement pass: rounded type, ad rhythm, account identity, date field */
+html,body,#root,button,input,select,textarea{
+  font-family:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+
+@media(max-width:899px){
+  /* Home ad stays in normal flow with a fixed 8px-based rhythm. */
+  .app.client-mode.route-home .page{
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+  .app.client-mode.route-home #jpAdBannerAnchor.jp-home-ad-inline{
+    position:relative!important;
+    inset:auto!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    z-index:auto!important;
+    width:100%!important;
+    margin:24px 0 16px!important;
+    padding:0!important;
+    flex:0 0 auto!important;
+    align-self:auto!important;
+    background:transparent!important;
+    border-radius:16px!important;
+    overflow:hidden!important;
+  }
+  .app.client-mode.route-home #jpAdBannerAnchor.jp-home-ad-inline .jp-house-banner{
+    width:100%!important;
+    margin:0!important;
+    border-radius:16px!important;
+    box-shadow:none!important;
+  }
+
+  /* Compact client identity card. */
+  .jp-account-client-card-simple{
+    position:relative!important;
+    padding:24px!important;
+    padding-bottom:72px!important;
+  }
+  .jp-account-card-identity-simple{
+    display:block!important;
+    margin:24px 0 16px!important;
+  }
+  .jp-account-card-identity-simple h2{
+    margin:0!important;
+    max-width:100%!important;
+    font-size:19px!important;
+    line-height:1.18!important;
+    font-weight:700!important;
+    letter-spacing:-.015em!important;
+    overflow-wrap:anywhere!important;
+  }
+  .jp-account-card-identity-simple .jp-view-qr{
+    position:absolute!important;
+    right:24px!important;
+    bottom:24px!important;
+    width:auto!important;
+    min-width:72px!important;
+    height:36px!important;
+    min-height:36px!important;
+    padding:0 16px!important;
+    border-radius:999px!important;
+    font-size:10px!important;
+    font-weight:700!important;
+  }
+  .jp-account-card-meta-simple{
+    padding-right:104px!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    align-items:end!important;
+  }
+
+  /* Native date input should look like the other controls, not a blank textarea. */
+  #jpRequestedDate{
+    display:block!important;
+    width:100%!important;
+    height:52px!important;
+    min-height:52px!important;
+    max-height:52px!important;
+    padding:0 16px!important;
+    box-sizing:border-box!important;
+    line-height:52px!important;
+    color:#111820!important;
+    background:#fff!important;
+    appearance:auto!important;
+    -webkit-appearance:auto!important;
+  }
+  #jpRequestedDate::-webkit-date-and-time-value{
+    min-height:0!important;
+    text-align:left!important;
+  }
+  #jpRequestedDate::-webkit-calendar-picker-indicator{
+    opacity:1!important;
+    display:block!important;
+  }
 }
