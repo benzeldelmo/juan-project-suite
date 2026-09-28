@@ -545,21 +545,34 @@ function shopRow(x){
   const price=x.kind==='Package'?Number(x.new_price||0):Number(x.price||0),old=x.kind==='Package'?Number(x.original_price||0):0;
   return '<article class="jp-shop-card"><button class="jp-shop-main" data-view-shop="'+esc(x.kind+':'+x.id)+'"><div class="jp-shop-copy"><span>'+esc(x.product_code||'')+' · '+esc(x.kind==='Package'?'Package':categoryName(x.category_id))+'</span><h3>'+esc(x.name)+'</h3><p>'+esc((x.description||'Creative service').slice(0,82))+'</p><div class="jp-shop-price"><b>'+peso(price)+'</b>'+(old>price?'<s>'+peso(old)+'</s>':'')+'</div></div></button><button class="btn primary jp-add-cart" data-add-cart="'+esc(x.kind+':'+x.id)+'">Add to Cart</button></article>';
 }
-function priceListRow(x){
-  const price=x.kind==='Package'?Number(x.new_price||0):Number(x.price||0),old=x.kind==='Package'?Number(x.original_price||0):0,label=x.kind==='Package'?'Package':categoryName(x.category_id);
-  return '<button class="jp-pricelist-row" data-view-shop="'+esc(x.kind+':'+x.id)+'"><div class="jp-pricelist-main"><span>'+esc(x.product_code||label)+'</span><b>'+esc(x.name)+'</b><small>'+esc(label)+'</small></div><div class="jp-pricelist-price">'+(old>price?'<s>'+peso(old)+'</s>':'')+'<strong>'+peso(price)+'</strong></div>'+icon('chevron',16)+'</button>';
+function priceListPackageCard(x){
+  const price=Number(x.new_price||0),old=Number(x.original_price||0);
+  return '<button class="jp-pricelist-package-card" data-view-shop="'+esc('Package:'+x.id)+'"><div><span>'+esc(x.product_code||'PACKAGE')+'</span><h3>'+esc(x.name)+'</h3><p>'+esc((x.description||'Package').slice(0,92))+'</p></div><div class="jp-pricelist-package-price">'+(old>price?'<s>'+peso(old)+'</s>':'')+'<strong>'+peso(price)+'</strong></div><small>View package '+icon('chevron',14)+'</small></button>';
+}
+function priceListServiceRow(x){
+  const price=Number(x.price||0),label=categoryName(x.category_id);
+  return '<button class="jp-pricelist-table-row" data-view-shop="'+esc('Service:'+x.id)+'"><span class="jp-pricelist-service-name"><b>'+esc(x.name)+'</b><small>'+esc(x.product_code||'Service')+'</small></span><span>'+esc(label)+'</span><strong>'+peso(price)+'</strong><span class="jp-pricelist-open">'+icon('chevron',15)+'</span></button>';
 }
 function shop(){
   const packages=[...(state.catalog.packages||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).map(x=>({...x,kind:'Package'}));
   const services=[...(state.catalog.services||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).map(x=>({...x,kind:'Service'}));
   const all=[...packages,...services],active=state.shopCategory||'all',q=String(state.shopQuery||'').trim().toLowerCase(),view=state.shopView||'cards';
-  let items=all.filter(x=>active==='all'||(active==='packages'&&x.kind==='Package')||(x.kind==='Service'&&String(x.category_id)===active));
-  items=items.filter(x=>!q||[x.name,x.description,x.kind,categoryName(x.category_id),x.product_code].some(v=>String(v||'').toLowerCase().includes(q)));
+  const matches=x=>!q||[x.name,x.description,x.kind,categoryName(x.category_id),x.product_code].some(v=>String(v||'').toLowerCase().includes(q));
+  let items=all.filter(x=>active==='all'||(active==='packages'&&x.kind==='Package')||(x.kind==='Service'&&String(x.category_id)===active)).filter(matches);
   const count=window.JPMobileCommerce?.cartCount?.()||0,total=window.JPMobileCommerce?.cartTotal?.()||0;
   const chips='<button data-shop-category="all" class="'+(active==='all'?'active':'')+'">All</button><button data-shop-category="packages" class="'+(active==='packages'?'active':'')+'">Packages</button>'+(state.catalog.categories||[]).map(c=>'<button data-shop-category="'+esc(c.id)+'" class="'+(active===String(c.id)?'active':'')+'">'+esc(c.name)+'</button>').join('');
   const viewToggle='<div class="jp-shop-view-toggle" role="group" aria-label="Shop view"><button id="shopCardsView" class="'+(view==='cards'?'active':'')+'">Shop</button><button id="shopPricelistView" class="'+(view==='pricelist'?'active':'')+'">View Pricelist</button></div>';
+  const packageItems=packages.filter(matches).slice(0,5);
+  const serviceItems=services.filter(x=>(active==='all'||active==='packages'||String(x.category_id)===active)&&matches(x));
+  const pricelist='<div class="jp-pricelist">'+
+    '<div class="jp-pricelist-head"><div><span>CURRENT PRICING</span><h2>JUAN PROJECT Pricelist</h2></div><small>Current catalog prices apply to new orders. Existing project prices stay unchanged unless edited in Workspace.</small></div>'+
+    '<div class="jp-pricelist-section-head"><h3>Packages</h3><span>'+packageItems.length+' package'+(packageItems.length===1?'':'s')+'</span></div>'+
+    '<div class="jp-pricelist-packages">'+(packageItems.map(priceListPackageCard).join('')||'<div class="card empty guided-empty"><b>No matching packages</b></div>')+'</div>'+
+    '<div class="jp-pricelist-section-head"><h3>Individual Services</h3><span>'+serviceItems.length+' service'+(serviceItems.length===1?'':'s')+'</span></div>'+
+    '<div class="jp-pricelist-table"><div class="jp-pricelist-table-head"><span>Service</span><span>Category</span><span>Price</span><span></span></div>'+(serviceItems.map(priceListServiceRow).join('')||'<div class="card empty guided-empty"><b>No matching individual services</b></div>')+'</div>'+
+    '</div>';
   const content=view==='pricelist'
-    ? '<div class="jp-pricelist"><div class="jp-pricelist-head"><div><span>CURRENT PRICING</span><h2>JUAN PROJECT Pricelist</h2></div><small>Prices shown here apply to new orders. Existing project prices stay unchanged unless edited in Workspace.</small></div><div class="jp-pricelist-list">'+(items.map(priceListRow).join('')||'<div class="card empty guided-empty"><b>No matching services</b></div>')+'</div></div>'
+    ? pricelist
     : '<div class="jp-shop-grid">'+(items.map(shopRow).join('')||'<div class="card empty guided-empty"><b>No matching services</b></div>')+'</div>';
   return '<div class="jp-shop-sticky">'+pageHead('Shop',{back:false,more:false})+'<div class="jp-shop-head"><div class="shop-search"><span>'+icon('search',17)+'</span><input id="shopSearch" value="'+esc(state.shopQuery)+'" placeholder="Search services or packages..."></div><button id="shopOrderCart" class="jp-cart-icon" aria-label="Cart">'+icon('cart',20)+'<span>'+count+'</span></button></div>'+viewToggle+'<div class="jp-category-chips">'+chips+'</div></div><div class="jp-shop-scroll"><div id="jpAdBannerAnchor"></div>'+content+'</div><div class="jp-shop-footer">'+(count?'<button id="shopMiniCart" class="jp-mini-cart"><span><b>'+count+' item'+(count===1?'':'s')+'</b><small>'+peso(total)+'</small></span><strong>View Cart →</strong></button>':'<div class="jp-shop-item-indicator">Your cart is empty</div>')+'</div>';
 }
