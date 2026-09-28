@@ -88,19 +88,19 @@ test("project detail helper notes use compact info buttons instead of technical 
 });
 
 
-test("Workspace page headers are sticky and Project Details matches the approved summary layout", async () => {
+test("Workspace page headers scroll normally while Project Details keeps the approved summary layout", async () => {
   const html=await read("index.html");
   const ui=await read("js/workspace-unification-2026-09-22.js");
   const css=await read("css/workspace-unification-2026-09-22.css");
-  assert.match(css,/\.main-content>\.view>\.page-header[\s\S]*?position:sticky!important/);
+  assert.match(css,/\.main-content>\.view>\.page-header,[\s\S]*?position:static!important/);
   assert.match(css,/#view-settings \.jp-settings-header/);
   assert.match(css,/#view-in-house-ads \.jp-ads-heading/);
+  assert.match(css,/#view-project-details>\.page-header[\s\S]*?position:static!important/);
   assert.match(html,/class="project-progress-icon"/);
   assert.match(css,/#view-project-details #jpProjectFinanceSummary \.jp-finance-summary[\s\S]*?grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
   assert.match(ui,/class="jp-finance-icon mint"/);
   assert.match(ui,/class="jp-finance-icon danger"/);
   assert.match(html,/data-project-tab="deliverables"[\s\S]*?<svg/);
-  assert.match(css,/#view-project-details \.project-details-tabs[\s\S]*?width:100%!important/);
 });
 
 test("Deliverables use checkboxes instead of duplicate progress bars", async () => {
@@ -135,4 +135,39 @@ test("Project Details follows the 8px spacing system and one icon language", asy
   assert.match(css,/#view-project-details \.project-overall-progress[\s\S]*?padding:24px!important/);
   assert.match(css,/#view-project-details #jpProjectFinanceSummary \.jp-finance-icon[\s\S]*?width:40px!important/);
   assert.match(css,/#view-project-details \.payment-modular-grid[\s\S]*?gap:16px!important/);
+});
+
+
+test("custom Order Item pricing updates both local and canonical database fields", async () => {
+  const html=await read("index.html");
+  const saveBlock=html.slice(html.indexOf("function saveProjectOrderItem"),html.indexOf("function requestDeleteProjectOrderItem"));
+  assert.match(saveBlock,/qty,quantity:qty,price,unit_price:price,type,item_type:type/);
+  assert.match(html,/item\.price\?\?item\.unit_price/);
+  assert.match(html,/item\.qty\?\?item\.quantity/);
+  assert.doesNotMatch(html,/order-item-actions"><button class="btn btn-secondary btn-sm"[^>]*>Edit<\/button>/);
+  assert.match(html,/Edit Item/);
+});
+
+test("new manual deliverables are saved before success and can use the normal checkbox path", async () => {
+  const html=await read("index.html");
+  const addBlock=html.slice(html.indexOf("async function saveProjectDeliverable"),html.indexOf("function removeProjectDeliverablesByIds"));
+  const toggleBlock=html.slice(html.indexOf("async function toggleDeliverable"),html.indexOf("const WORKSPACE_PAYMENT_INSTITUTIONS"));
+  assert.match(addBlock,/await directProjectWrite\(proj,'Deliverable added',\{structure:true\}\)/);
+  assert.match(addBlock,/Deliverable was not added because it could not be saved to Supabase/);
+  assert.match(toggleBlock,/normalizeProjectDeliverableHierarchy\(proj\)/);
+  assert.match(toggleBlock,/await directProjectWrite\(proj,'Deliverable status update',\{structure:true\}\)/);
+});
+
+test("generic modals do not receive the Project finance summary", async () => {
+  const ui=await read("js/workspace-unification-2026-09-22.js");
+  assert.match(ui,/root\.dataset\.jpProjectFinanceContext!=='1'/);
+  assert.doesNotMatch(ui,/forEach\(d=>\{enhanceProjectDialog\(d\);enhancePaymentReview\(d\)\}\)/);
+});
+
+test("Workspace buttons, sidebar navigation and tabs use one compact component geometry", async () => {
+  const css=await read("css/workspace-unification-2026-09-22.css");
+  assert.match(css,/\.btn\{[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
+  assert.match(css,/\.btn-sm\{[\s\S]*?min-height:32px!important[\s\S]*?border-radius:10px!important/);
+  assert.match(css,/\.sidebar \.nav-item,[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
+  assert.match(css,/\.tabs-nav \.tab-btn,[\s\S]*?min-height:40px!important[\s\S]*?border-radius:12px!important/);
 });

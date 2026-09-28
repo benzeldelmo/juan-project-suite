@@ -34,7 +34,7 @@ function findProjectFromDialog(root){
   return ps.find(p=>text.includes(p.project_code||'__none__')||text.includes(p.id)||text.includes(p.title||'__none__'))||null;
 }
 function enhanceProjectDialog(root){
-  if(!root||root.dataset.jpFinanceEnhanced==='1')return;
+  if(!root||root.dataset.jpProjectFinanceContext!=='1'||root.dataset.jpFinanceEnhanced==='1')return;
   const p=findProjectFromDialog(root);if(!p)return;
   root.dataset.jpFinanceEnhanced='1';
   const target=root.querySelector('.modal-body,.jp-suite-body,.suite-panel>div:not(.suite-head),.project-details-content')||root.querySelector('header')?.nextElementSibling||root;
@@ -177,7 +177,7 @@ function enhanceSettingsPage(){
   view.querySelectorAll('.jp-settings-segment').forEach(seg=>seg.setAttribute('tabindex','-1'));
 }
 function enhanceModals(){
-  document.querySelectorAll('[role="dialog"],.modal,.jp-suite-modal,.suite-panel,.modal-card').forEach(d=>{enhanceProjectDialog(d);enhancePaymentReview(d)});
+  document.querySelectorAll('[role="dialog"],.modal,.jp-suite-modal,.suite-panel,.modal-card').forEach(d=>enhancePaymentReview(d));
 }
 let scheduled=false;
 function run(){

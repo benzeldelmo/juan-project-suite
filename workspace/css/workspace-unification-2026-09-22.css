@@ -1270,3 +1270,152 @@ body.dark-mode #view-in-house-ads .jp-ads-heading{
     padding:16px 0!important;
   }
 }
+
+
+/* ==========================================================================
+   2026-09-28 — Unified controls + scrollable page headers
+   ========================================================================== */
+
+/* Page headers scroll with the page. Only deliberate section rails may remain sticky. */
+.main-content>.view>.page-header,
+#view-settings .jp-settings-header,
+#view-in-house-ads .jp-ads-heading,
+#view-project-details>.page-header{
+  position:static!important;
+  top:auto!important;
+  z-index:auto!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+.main-content>.view>.page-header,
+#view-settings .jp-settings-header,
+#view-in-house-ads .jp-ads-heading{
+  background:transparent!important;
+  border-bottom:0!important;
+}
+
+/* One button geometry across Workspace. */
+.btn{
+  min-height:40px!important;
+  height:40px;
+  padding:0 16px!important;
+  gap:8px!important;
+  border-radius:12px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:13px!important;
+  font-weight:650!important;
+  line-height:1!important;
+}
+.btn-sm{
+  min-height:32px!important;
+  height:32px!important;
+  padding:0 12px!important;
+  border-radius:10px!important;
+  font-size:12px!important;
+}
+.btn-text{
+  min-height:auto!important;
+  height:auto!important;
+  padding:0!important;
+  border-radius:0!important;
+}
+.icon-more-button,.vertical-more,.table-action-button,.jp-icon-button{
+  width:32px!important;
+  height:32px!important;
+  min-width:32px!important;
+  min-height:32px!important;
+  padding:0!important;
+  border-radius:10px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.btn .icon-svg,.btn-sm .icon-svg,.nav-item .icon-svg,.tab-btn .icon-svg{
+  width:16px!important;
+  height:16px!important;
+  flex:0 0 16px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+
+/* Main sidebar and secondary side rails share the same 8px navigation rhythm. */
+.sidebar .nav-menu{
+  gap:8px!important;
+}
+.sidebar .nav-item,
+.jp-settings-nav-item{
+  min-height:40px!important;
+  padding:8px 12px!important;
+  gap:8px!important;
+  border-radius:12px!important;
+  font-size:12px!important;
+  font-weight:650!important;
+}
+.sidebar .nav-item .icon,
+.jp-settings-nav-icon{
+  width:20px!important;
+  height:20px!important;
+  display:grid!important;
+  place-items:center!important;
+}
+.sidebar .nav-item.active,
+.jp-settings-nav-item.active{
+  background:var(--mint-light-bg)!important;
+  color:var(--primary-mint-dark)!important;
+  box-shadow:none!important;
+}
+
+/* Tabs use one compact segmented language everywhere. */
+.tabs-nav,.portal-tabs{
+  gap:8px!important;
+}
+.tabs-nav .tab-btn,
+.portal-tabs button{
+  min-height:40px!important;
+  height:40px!important;
+  padding:0 16px!important;
+  border-radius:12px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  font-size:12px!important;
+  font-weight:650!important;
+  line-height:1!important;
+}
+.tabs-nav .tab-btn.active,
+.portal-tabs button.active{
+  background:var(--mint-light-bg)!important;
+  color:var(--primary-mint-dark)!important;
+  box-shadow:none!important;
+}
+.tabs-nav .tab-btn.active::after,
+.portal-tabs button.active::after{
+  display:none!important;
+}
+
+/* Project Details side rail follows the same component system. */
+#view-project-details .project-details-tabs{
+  gap:8px!important;
+  padding:8px!important;
+  border-radius:16px!important;
+}
+#view-project-details .project-details-tabs .tab-btn{
+  min-height:40px!important;
+  height:40px!important;
+  padding:0 12px!important;
+  gap:8px!important;
+  border-radius:12px!important;
+}
+
+/* Order items: one overflow control instead of competing Edit + overflow buttons. */
+#view-project-details .order-item-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  min-width:32px!important;
+}

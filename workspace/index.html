@@ -1568,7 +1568,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
   <link rel="stylesheet" href="/css/general-update.css?v=20260925-deliverable-payment-rush-1">
   <link rel="stylesheet" href="/css/keyboard-shortcuts.css?v=20260920-1805">
   <link rel="stylesheet" href="/css/consistency-pass.css?v=20260925-deliverable-payment-rush-1">
-  <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260928-project-side-nav-v1">
+  <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260928-ui-consistency-v2">
   <link rel="stylesheet" href="/css/workspace-icon-system-2026-09-22.css?v=20260923-0105">
   <link rel="stylesheet" href="/css/typography-sf-pro.css?v=20260923-1">
 </head>
@@ -8245,8 +8245,10 @@ ${description}`))actionCallback();return;}
         const listedEntries=getProjectListedOrderItemEntries(proj);
         const items=listedEntries.map(entry=>entry.item);
         const rows=listedEntries.length ? listedEntries.map(({item,index})=>{
-          const visibleCategory=String(item.category||'').trim() || (String(item.type||'').toUpperCase()==='PACKAGE'?'Package':'Service');
-          return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)} · Qty ${Math.max(1,Number(item.qty||1))}</span></div><div class="order-item-price"><strong>${formatCurrency(Number(item.price||0)*Math.max(1,Number(item.qty||1)))}</strong><span>${formatCurrency(Number(item.price||0))} each</span></div><div class="order-item-actions"><button class="btn btn-secondary btn-sm" onclick="app.openProjectOrderItemModal(${index})">Edit</button><button class="icon-more-button vertical-more" title="Item options" onclick="app.requestDeleteProjectOrderItem(${index},event)">⋮</button></div></div>`;
+          const visibleCategory=String(item.category||'').trim() || (String(item.type||item.item_type||'').toUpperCase()==='PACKAGE'?'Package':'Service');
+          const qty=Math.max(1,Number(item.qty??item.quantity??1)),unitPrice=Math.max(0,Number(item.price??item.unit_price??0));
+          const menuId=`projectOrderItemMenu_${index}`;
+          return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)} · Qty ${qty}</span></div><div class="order-item-price"><strong>${formatCurrency(unitPrice*qty)}</strong><span>${formatCurrency(unitPrice)} each</span></div><div class="order-item-actions"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Item options" aria-label="Item options" onclick="event.stopPropagation();app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="event.stopPropagation();app.openProjectOrderItemModal(${index});app.closeFloatingActionMenus()">Edit Item</button><button class="popover-action text-danger" onclick="event.stopPropagation();app.requestDeleteProjectOrderItem(${index},event)">Remove Item</button></div></div></div></div>`;
         }).join('') : `<div class="text-muted py-4">No order items recorded. Add items when you are ready.</div>`;
         const subtotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1)),0),discount=Math.max(0,Number(proj.discount_amount||0)),rush=Math.max(0,Number(proj.rush_fee||0)),calculatedRush=Math.max(0,Number(proj.calculated_rush_fee??proj.rush_fee??0)),maintenance=Math.max(0,Number(proj.system_maintenance_fee||0)),workload=Math.max(0,Number(proj.workload_surcharge||0)),otherFees=Array.isArray(proj.additional_fees)?proj.additional_fees.reduce((sum,f)=>sum+Math.max(0,Number(f?.amount||0)),0):0,lateFees=Math.max(0,Number(proj.late_fee_total||0)),total=Number(proj.total_amount||Math.max(0,subtotal-discount+rush+maintenance+workload+otherFees));
         const feeRows=[discount?`<div><span>Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:'',calculatedRush&&proj.rush_fee_enabled===false?`<div class="rush-line"><span>Rush fee <small>Waived · calculated ${formatCurrency(calculatedRush)}</small></span><strong>${formatCurrency(0)}</strong></div>`:rush?`<div class="rush-line"><span>Rush fee</span><strong>+ ${formatCurrency(rush)}</strong></div>`:'',maintenance?`<div><span>System maintenance fee</span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:'',workload?`<div><span>Workload surcharge</span><strong>+ ${formatCurrency(workload)}</strong></div>`:'',otherFees?`<div><span>Additional fees</span><strong>+ ${formatCurrency(otherFees)}</strong></div>`:'',lateFees?`<div><span>Overdue fees</span><strong>+ ${formatCurrency(lateFees)}</strong></div>`:''].filter(Boolean).join('');
@@ -8278,7 +8280,7 @@ ${description}`))actionCallback();return;}
       function renderProjectOrderBatchSelected(){const box=document.getElementById('projectOrderBatchSelected'),count=document.getElementById('projectOrderBatchCount'),totalEl=document.getElementById('projectOrderBatchTotal'),btn=document.getElementById('projectOrderBatchAddBtn'),entries=Object.entries(state.projectOrderBatchSelection||{}),total=entries.reduce((sum,[,x])=>sum+Number(x.price||0)*Math.max(1,Number(x.qty||1)),0);state.projectOrderBatchSelectedKeys=entries.map(([key])=>key);if(count)count.textContent=`${entries.length} item${entries.length===1?'':'s'}`;if(totalEl)totalEl.textContent=formatCurrency(total);if(btn){btn.disabled=!entries.length;btn.textContent=entries.length?`Add ${entries.length} Item${entries.length===1?'':'s'}`:'Add Selected Items';}if(box)box.innerHTML=entries.length?entries.map(([key,x],index)=>`<div class="project-batch-selected-row"><div><strong>${escapeHtml(x.name)}</strong><span>${formatCurrency(x.price||0)} each</span></div><div class="batch-qty-control"><label>Qty</label><input class="form-control" type="number" min="1" value="${Math.max(1,Number(x.qty||1))}" onchange="app.updateProjectOrderBatchQty(${index},this.value)"></div><button type="button" class="icon-more-button" aria-label="Remove selected item" onclick="app.removeProjectOrderBatchChoice(${index})">×</button></div>`).join(''):'';}
       function updateProjectOrderBatchQty(index,value){const key=(state.projectOrderBatchSelectedKeys||[])[Number(index)],item=state.projectOrderBatchSelection?.[key];if(!item)return;item.qty=Math.max(1,Math.round(Number(value||1)));renderProjectOrderBatchSelected();}
       function removeProjectOrderBatchChoice(index){const key=(state.projectOrderBatchSelectedKeys||[])[Number(index)];if(key&&state.projectOrderBatchSelection)delete state.projectOrderBatchSelection[key];renderProjectOrderBatchSelected();renderProjectOrderBatchChoices(document.getElementById('projectOrderBatchSearch')?.value||'');}
-      function commitProjectOrderBatch(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const entries=Object.values(state.projectOrderBatchSelection||{});if(!entries.length)return;if(!Array.isArray(proj.project_items))proj.project_items=[];entries.forEach((item,i)=>proj.project_items.push({id:`oi_${proj.id}_${Date.now()}_${i}_${Math.random().toString(36).slice(2,6)}`,name:item.name,qty:Math.max(1,Number(item.qty||1)),price:Math.max(0,Number(item.price||0)),type:item.type||'SOLO',product_code:item.code||null,category:item.category||''}));recalculateProjectFromOrderItems(proj);syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();scheduleProjectStructureSync(proj,80);closeModal('projectOrderBatchModal');renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderOverviewDashboard();showToast(`${entries.length} item${entries.length===1?'':'s'} added.`);}
+      function commitProjectOrderBatch(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const entries=Object.values(state.projectOrderBatchSelection||{});if(!entries.length)return;if(!Array.isArray(proj.project_items))proj.project_items=[];entries.forEach((item,i)=>{const qty=Math.max(1,Number(item.qty||1)),price=Math.max(0,Number(item.price||0)),type=item.type||'SOLO';proj.project_items.push({id:`oi_${proj.id}_${Date.now()}_${i}_${Math.random().toString(36).slice(2,6)}`,name:item.name,qty,quantity:qty,price,unit_price:price,type,item_type:type,product_code:item.code||null,category:item.category||''});});recalculateProjectFromOrderItems(proj);syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();scheduleProjectStructureSync(proj,80);closeModal('projectOrderBatchModal');renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderOverviewDashboard();showToast(`${entries.length} item${entries.length===1?'':'s'} added.`);}
 
       function selectProjectOrderItemSuggestion(index){
         const x=(state.projectOrderItemSuggestionCache||[])[Number(index)];if(!x)return;document.getElementById('projectOrderItemName').value=x.name;document.getElementById('projectOrderItemPrice').value=x.price;setProjectOrderItemType(x.type);state.projectOrderItemSelected={code:x.code,category:x.category,type:x.type,name:x.name};document.getElementById('projectOrderItemSuggestions')?.classList.remove('open');
@@ -8294,13 +8296,13 @@ ${description}`))actionCallback();return;}
         if(!Array.isArray(proj.project_items)) proj.project_items=[];
         const editing=Number.isInteger(index) && index>=0 && index<proj.project_items.length;
         const item=editing?proj.project_items[index]:{name:'',type:'SOLO',qty:1,price:0};
-        state.projectOrderItemSelected=editing?{code:item.product_code||item.code||'',category:item.category||'',type:item.type||'SOLO',name:item.name||''}:null;
+        state.projectOrderItemSelected=editing?{code:item.product_code||item.code||'',category:item.category||'',type:item.type||item.item_type||'SOLO',name:item.name||''}:null;
         document.getElementById('projectOrderItemModalTitle').textContent=editing?'Edit Order Item':'Add Order Item';
         document.getElementById('projectOrderItemIndex').value=editing?String(index):'';
         document.getElementById('projectOrderItemName').value=item.name||'';
-        document.getElementById('projectOrderItemQty').value=Math.max(1,Number(item.qty||1));
-        document.getElementById('projectOrderItemPrice').value=Math.max(0,Number(item.price||0));
-        setProjectOrderItemType(item.type||'SOLO');document.getElementById('projectOrderItemSuggestions')?.classList.remove('open');openModal('projectOrderItemModal');
+        document.getElementById('projectOrderItemQty').value=Math.max(1,Number(item.qty??item.quantity??1));
+        document.getElementById('projectOrderItemPrice').value=Math.max(0,Number(item.price??item.unit_price??0));
+        setProjectOrderItemType(item.type||item.item_type||'SOLO');document.getElementById('projectOrderItemSuggestions')?.classList.remove('open');openModal('projectOrderItemModal');
       }
       function saveProjectOrderItem(authorized=false){
         const proj=state.projects.find(p=>p.id===state.activeProjectId); if(!proj)return;
@@ -8313,7 +8315,7 @@ ${description}`))actionCallback();return;}
         if(!name){showToast('Item name is required.');return;}
         const selected=state.projectOrderItemSelected&&String(state.projectOrderItemSelected.name||'').toLowerCase()===name.toLowerCase()?state.projectOrderItemSelected:null;
         const raw=document.getElementById('projectOrderItemIndex').value; const index=raw===''?null:Number(raw);
-        const base={name,qty,price,type,product_code:selected?.code||null,category:selected?.category||'',id:index!==null&&proj.project_items[index]?.id?proj.project_items[index].id:`oi_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`};
+        const base={name,qty,quantity:qty,price,unit_price:price,type,item_type:type,product_code:selected?.code||null,category:selected?.category||'',id:index!==null&&proj.project_items[index]?.id?proj.project_items[index].id:`oi_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`};
         if(index===null){ proj.project_items.push(base); }
         else if(proj.project_items[index]){ proj.project_items[index]={...proj.project_items[index],...base}; }
         recalculateProjectFromOrderItems(proj);syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();scheduleProjectStructureSync(proj,80);closeModal('projectOrderItemModal');renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderOverviewDashboard();showToast('Order item saved and synced to Deliverables.');
@@ -8329,13 +8331,21 @@ ${description}`))actionCallback();return;}
       }
       function selectProjectDeliverableSuggestion(index){const x=(state.projectDeliverableSuggestionCache||[])[Number(index)];if(!x)return;state.projectDeliverableSelected=x;document.getElementById('projectDeliverableName').value=x.name;document.getElementById('projectDeliverableSuggestions')?.classList.remove('open');}
       function openProjectDeliverableModal(){state.projectDeliverableSelected=null;const input=document.getElementById('projectDeliverableName');if(input)input.value='';document.getElementById('projectDeliverableSuggestions')?.classList.remove('open');openModal('projectDeliverableModal');setTimeout(()=>renderProjectDeliverableSuggestions(''),30);}
-      function saveProjectDeliverable(authorized=false){
+      async function saveProjectDeliverable(authorized=false){
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-        if(!authorized){requestDestructivePin('Confirm Deliverable Changes','Add this deliverable to the project?',()=>saveProjectDeliverable(true));return;}
+        if(!authorized){requestDestructivePin('Confirm Deliverable Changes','Add this deliverable to the project?',()=>{void saveProjectDeliverable(true)});return;}
         const name=document.getElementById('projectDeliverableName').value.trim();if(!name){showToast('Deliverable name is required.');return;}if(!Array.isArray(proj.deliverables))proj.deliverables=[];
+        const snapshot=proj.deliverables.map(d=>({...d}));
         const selected=state.projectDeliverableSelected&&String(state.projectDeliverableSelected.name||'').toLowerCase()===name.toLowerCase()?state.projectDeliverableSelected:null;const baseId=`del_manual_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
-        if(selected?.type==='PACKAGE'&&Array.isArray(selected.includedServiceNames)&&selected.includedServiceNames.length){const parent={id:baseId,item_name:name,name,source_type:'MANUAL',is_group:true,completed:false,progress:0,status:'Pending'};proj.deliverables.push(parent,...selected.includedServiceNames.map((n,i)=>({id:`${baseId}_child_${i}`,item_name:n,name:n,source_type:'MANUAL',parent_id:baseId,package_name:name,completed:false,progress:0,status:'Pending'})));}else proj.deliverables.push({id:baseId,item_name:name,name,source_type:'MANUAL',completed:false,progress:0,status:'Pending',completed_at:null});
-        proj.updated_at=new Date().toISOString();persistProjectsState();scheduleProjectStructureSync(proj,50);closeModal('projectDeliverableModal');renderProjectDeliverablesList(proj);renderOverviewDashboard();showToast('Deliverable added.');
+        if(selected?.type==='PACKAGE'&&Array.isArray(selected.includedServiceNames)&&selected.includedServiceNames.length){const parent={id:baseId,item_name:name,name,source_type:'MANUAL',is_group:true,completed:false,progress:0,status:'Pending',completed_at:null};proj.deliverables.push(parent,...selected.includedServiceNames.map((n,i)=>({id:`${baseId}_child_${i}`,item_name:n,name:n,source_type:'MANUAL',parent_id:baseId,package_name:name,completed:false,progress:0,status:'Pending',completed_at:null})));}else proj.deliverables.push({id:baseId,item_name:name,name,source_type:'MANUAL',completed:false,progress:0,status:'Pending',completed_at:null});
+        proj.updated_at=new Date().toISOString();persistProjectsState();renderProjectDeliverablesList(proj);renderOverviewDashboard();
+        const saved=await directProjectWrite(proj,'Deliverable added',{structure:true});
+        if(!saved){
+          proj.deliverables=snapshot;persistProjectsState();renderProjectDeliverablesList(proj);renderOverviewDashboard();
+          showToast('Deliverable was not added because it could not be saved to Supabase.');
+          return;
+        }
+        closeModal('projectDeliverableModal');setSyncLastOk();pushSyncActivity('Deliverable added','ok');showToast('Deliverable added and saved.');
       }
       function removeProjectDeliverablesByIds(proj,ids){
         if(!proj||!Array.isArray(proj.deliverables))return;
@@ -8395,7 +8405,7 @@ ${description}`))actionCallback();return;}
 
       async function toggleDeliverable(projId, delId) {
         const proj=state.projects.find(p=>String(p.id)===String(projId));if(!proj)return;
-        const ds=proj.deliverables||[],del=ds.find(d=>String(d.id)===String(delId));if(!del)return;
+        const ds=normalizeProjectDeliverableHierarchy(proj),del=ds.find(d=>String(d.id)===String(delId));if(!del)return;
         const snapshot=ds.map(d=>({id:String(d.id),completed:!!d.completed,progress:Number(d.progress||0),status:d.status||'Pending',completed_at:d.completed_at||null}));
         const target=!del.completed,stamp=target?new Date().toISOString():null;
         const apply=d=>{d.completed=target;d.progress=target?100:0;d.status=target?'Completed':'Pending';d.completed_at=stamp};apply(del);
@@ -9855,7 +9865,7 @@ ${description}`))actionCallback();return;}
 
     document.addEventListener("DOMContentLoaded", () => {
       app.initWorkspace();
-      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-project-side-nav-v1',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
+      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20260928-ui-consistency-v2',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
       setTimeout(()=>{refreshSearchableSelects(document);app.bindEmailDomainSuggestions();if(location.hash==="#online-portal")app.navigateTo("online-portal");},60);
       
       document.addEventListener("click", (e) => {
@@ -10652,7 +10662,7 @@ ${description}`))actionCallback();return;}
 <script type="module" src="/js/keyboard-shortcuts.js?v=20260923-0105"></script>
 <script src="/js/workspace-icon-system-2026-09-22.js?v=20260923-0225"></script>
   <script src="/js/consistency-pass.js?v=20260925-deliverable-payment-rush-1"></script>
-  <script src="/js/workspace-unification-2026-09-22.js?v=20260928-project-header-v2"></script>
+  <script src="/js/workspace-unification-2026-09-22.js?v=20260928-ui-consistency-v2"></script>
 </body>
 </html>
 <style id="v111-maintenance-patch">
