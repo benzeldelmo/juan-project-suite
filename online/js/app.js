@@ -149,28 +149,23 @@ const nav=()=>isLoggedIn()?'<nav class="nav" aria-label="Primary navigation"><di
   :'<nav class="nav guest-nav" aria-label="Guest navigation"><div class="jp-desktop-nav-brand"><b>JUAN PROJECT</b><span>Online</span></div><div class="jp-nav-links">'+
   '<button data-r="home" class="'+(state.route==='home'?'active':'')+'">'+icon('home')+'<span>Home</span></button>'+
   '<button data-r="shop" class="'+(state.route==='shop'?'active':'')+'">'+icon('shop')+'<span>Shop</span></button>'+
-  '<button data-guest-action="track">'+icon('search')+'<span>Track</span></button>'+
+  '<button data-guest-action="track">'+icon('search')+'<span>Track Request</span></button>'+
   '<button data-guest-action="login">'+icon('account')+'<span>Login</span></button></div></nav>';
 
 function welcomeScreen(){
-  root.innerHTML=`<div class="welcome-shell jp-guest-access-shell"><div class="jp-guest-access-grid">
-    <section class="jp-guest-feature-panel jp-welcome-feature" aria-label="JUAN PROJECT Online featured content">
-      <div class="jp-guest-feature-brand"><span>JUAN PROJECT</span><strong>Creative services,<br>made simple.</strong><p>Browse services, submit an Order Request, and manage your project in one place.</p></div>
-      <div id="jpAdBannerAnchor" class="jp-guest-feature-ad"></div>
-    </section>
-    <div class="phone-page welcome-card storefront-welcome jp-welcome-simplified jp-guest-phone-panel">
-      <div class="welcome-copy"><span class="eyebrow">WELCOME</span><h1>Welcome to<br><strong>JUAN PROJECT Online.</strong></h1><p>Choose what you want to do today.</p></div>
+  root.innerHTML=`<div class="welcome-shell jp-guest-access-shell jp-simple-guest-screen">
+    <div class="phone-page welcome-card storefront-welcome jp-welcome-simplified jp-guest-phone-panel jp-simple-guest-card">
+      <div class="welcome-copy"><span class="eyebrow">WELCOME</span><h1>JUAN PROJECT<br><strong>made simple.</strong></h1><p>Shop creative services or track an existing Order Request.</p></div>
       <div class="welcome-actions"><button id="welcomeShop" class="btn primary full">Shop Now</button><button id="welcomeTrack" class="btn full">Track an Order</button><p class="jp-client-login-question">Already a client? <button id="welcomeLogIn" class="text-button">Log In</button></p></div>
-      <div class="version">JUAN PROJECT Online · Order Request Update</div>
+      <div class="version">JUAN PROJECT Online · 2026</div>
     </div>
-  </div></div>`;
+  </div>`;
   document.getElementById('welcomeShop').onclick=()=>{state.route='shop';render();};
   document.getElementById('welcomeLogIn').onclick=()=>authScreen();
   document.getElementById('welcomeTrack').onclick=()=>window.JPMobileCommerce?.openTrack?.();
   window.dispatchEvent(new Event('juan-online-render'));
   
 }
-
 function enterGuest(){state.route='home';state.gateOpen=false;render()}
 
 function setFieldError(id,message=''){
@@ -182,7 +177,7 @@ function setFieldError(id,message=''){
 function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
 
 function authScreen(message=''){
-  root.innerHTML=`<div class="auth-shell jp-guest-access-shell"><div class="jp-guest-access-grid"><section class="jp-guest-feature-panel jp-auth-feature" aria-label="JUAN PROJECT Online featured content"><div class="jp-guest-feature-brand"><span>JUAN PROJECT</span><strong>Your projects,<br>in one place.</strong><p>View orders, payments, invoices, progress, and project files after signing in.</p></div></section><div class="phone-page auth-card jp-guest-phone-panel"><button id="authBack" class="icon-button auth-back" aria-label="Back">${icon('back')}</button><div class="auth-copy auth-copy-top"><span class="eyebrow">CLIENT ACCESS</span><h1>Welcome back</h1><p>Log in to view your projects, payments, invoices, and project files.</p></div><div class="field"><label for="ae">Email Address</label><input id="ae" class="input" type="email" autocomplete="username" placeholder="you@example.com"><div id="emailValidation" class="field-error"></div></div><div class="field password-field"><label for="ap">Password</label><div class="password-input-wrap"><input id="ap" class="input" type="password" autocomplete="current-password" placeholder="Enter your password"><button id="toggleLoginPass" type="button" class="password-eye" aria-label="Show password">${icon('eye',18)}</button></div><div id="loginValidation" class="field-error"></div></div><div class="auth-options persistent-login-note"><span>Your login stays saved on this device.</span><button id="forgotPassword" class="text-button">Forgot password?</button></div><button id="ab" class="btn primary full">Log In</button><div class="info-box">${icon('lock',18)}<span>Use the client login details provided by JUAN PROJECT. You can update your password securely after signing in.</span></div>${message?`<p class="form-message error-message">${esc(message)}</p>`:''}</div></div></div>`;
+  root.innerHTML=`<div class="auth-shell jp-guest-access-shell jp-simple-guest-screen"><div class="phone-page auth-card jp-guest-phone-panel jp-simple-auth-card"><button id="authBack" class="icon-button auth-back" aria-label="Back">${icon('back')}</button><div class="auth-copy auth-copy-top"><span class="eyebrow">CLIENT ACCESS</span><h1>Welcome back</h1><p>Log in to view your projects, payments, invoices, and project files.</p></div><div class="field"><label for="ae">Email Address</label><input id="ae" class="input" type="email" autocomplete="username" placeholder="you@example.com"><div id="emailValidation" class="field-error"></div></div><div class="field password-field"><label for="ap">Password</label><div class="password-input-wrap"><input id="ap" class="input" type="password" autocomplete="current-password" placeholder="Enter your password"><button id="toggleLoginPass" type="button" class="password-eye" aria-label="Show password">${icon('eye',18)}</button></div><div id="loginValidation" class="field-error"></div></div><div class="auth-options persistent-login-note"><span>Your login stays saved on this device.</span><button id="forgotPassword" class="text-button">Forgot password?</button></div><button id="ab" class="btn primary full">Log In</button><div class="info-box">${icon('lock',18)}<span>Use the client login details provided by JUAN PROJECT. You can update your password securely after signing in.</span></div>${message?`<p class="form-message error-message">${esc(message)}</p>`:''}</div></div>`;
   const email=document.getElementById('ae'),pass=document.getElementById('ap'),btn=document.getElementById('ab');
   document.getElementById('authBack').onclick=()=>{state.route='home';state.portal=null;render()};
   email.addEventListener('blur',()=>setFieldError('emailValidation',email.value.trim()&&!validEmail(email.value)?'Enter a valid email address.':''));
@@ -379,10 +374,9 @@ function activityFeed(){
 
 function home(){
   if(!isLoggedIn()){
-    return '<div class="guest-home jp-guest-home-v2 jp-guest-home-centered"><div class="jp-guest-home-split">'+
-      '<section class="jp-guest-phone-panel"><div class="jp-guest-hero"><span class="eyebrow">WELCOME</span><h1>JUAN PROJECT<br><strong>made simple.</strong></h1><p>Shop creative services or track an existing Order Request.</p><div class="guest-actions"><button id="homeShop" class="btn primary full">Shop Now</button><button id="homeTrack" class="btn full">Track an Order</button><p class="jp-client-login-question">Already a client? <button id="homeLogIn" class="text-button">Log In</button></p></div></div><div class="jp-guest-about"><b>About JUAN PROJECT</b><span>Creative services and project management developed by BENZEL DELMO.</span></div></section>'+
-      '<section class="jp-guest-feature-panel"><div class="jp-guest-feature-brand"><span>FEATURED</span><strong>Discover what JUAN PROJECT can do.</strong><p>Promotions and featured services appear here.</p></div><div id="jpAdBannerAnchor" class="jp-guest-feature-ad"></div></section>'+
-      '</div></div>';
+    return '<div class="guest-home jp-guest-home-v2 jp-guest-home-centered jp-guest-home-simple">'+
+      '<section class="jp-guest-phone-panel jp-guest-main-panel"><div class="jp-guest-hero"><span class="eyebrow">WELCOME</span><h1>JUAN PROJECT<br><strong>made simple.</strong></h1><p>Shop creative services or track an existing Order Request.</p><div class="guest-actions"><button id="homeShop" class="btn primary full">Shop Now</button><button id="homeTrack" class="btn full">Track an Order</button><p class="jp-client-login-question">Already a client? <button id="homeLogIn" class="text-button">Log In</button></p></div></div><div class="jp-guest-about"><b>About JUAN PROJECT</b><span>Creative services and project management developed by BENZEL DELMO.</span></div></section>'+
+      '</div>';
   }
   const p=activeProject(),financial=p||latestProject(),feed=activityFeed(),profile=state.portal?.profile||{};
   const avatar=profile.profile_photo_url?'<img src="'+esc(profile.profile_photo_url)+'" alt="Profile photo">':initials();
