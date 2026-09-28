@@ -1413,3 +1413,25 @@ html,body,#root,button,input,select,textarea{
     visibility:visible!important;
   }
 }
+
+
+/* 2026-09-28 Online pricelist view */
+.jp-shop-view-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 24px 8px;padding:4px;border-radius:16px;background:#f2f4f3}
+.jp-shop-view-toggle button{min-height:40px;border:0;border-radius:12px;background:transparent;font:inherit;font-size:13px;font-weight:700;color:#78837d}
+.jp-shop-view-toggle button.active{background:#fff;color:#111820;box-shadow:0 1px 6px rgba(18,32,25,.08)}
+.jp-pricelist{padding:8px 24px 24px}
+.jp-pricelist-head{display:grid;gap:8px;margin:16px 0 24px}
+.jp-pricelist-head span{font-size:10px;font-weight:800;letter-spacing:.12em;color:#8b9690}
+.jp-pricelist-head h2{margin:0;font-size:24px;line-height:1.1;letter-spacing:-.02em}
+.jp-pricelist-head small{color:#7f8b85;line-height:1.45}
+.jp-pricelist-list{overflow:hidden;border:1px solid #e2e8e5;border-radius:20px;background:#fff}
+.jp-pricelist-row{width:100%;min-height:72px;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) auto 16px;gap:16px;align-items:center;border:0;border-bottom:1px solid #edf1ef;background:#fff;color:inherit;text-align:left;font:inherit}
+.jp-pricelist-row:last-child{border-bottom:0}
+.jp-pricelist-main{min-width:0;display:grid;gap:4px}
+.jp-pricelist-main span,.jp-pricelist-main small{font-size:10px;color:#8a958f}
+.jp-pricelist-main span{font-weight:800;letter-spacing:.08em}
+.jp-pricelist-main b{font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.jp-pricelist-price{display:grid;gap:4px;justify-items:end;white-space:nowrap}
+.jp-pricelist-price s{font-size:10px;color:#9ca59f}
+.jp-pricelist-price strong{font-size:15px;color:#07975a}
+@media(min-width:900px){.jp-shop-view-toggle{max-width:360px;margin:16px 0 8px}.jp-pricelist{padding:16px 0 32px}.jp-pricelist-row{padding:16px 24px}}
