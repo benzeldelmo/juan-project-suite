@@ -2006,7 +2006,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
                   <label class="toggle-switch"><input type="checkbox" id="projectDataPriority"><span class="toggle-slider"></span></label>
                 </div>
                 <div class="project-priority-toggle-row">
-                  <div><strong class="jp-label-with-info">Apply Rush Fee <button type="button" class="jp-info-button" aria-label="About rush fees" data-info="Turn this off to waive the charge while keeping the calculated rush timeline.">i</button></strong></div>
+                  <div><strong class="jp-label-with-info">Apply Rush Fee <button type="button" class="jp-info-button" aria-label="About rush fees" data-info="Turn this off to waive the charge while keeping the calculated rush timeline.">i</button></strong><button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="app.recalculateProjectRushFee()">Recalculate</button></div>
                   <label class="toggle-switch"><input type="checkbox" id="projectDataRushFeeEnabled" onchange="app.setProjectRushFeeEnabled(this.checked)"><span class="toggle-slider"></span></label>
                 </div>
               </div>
@@ -6634,7 +6634,7 @@ ${description}`))actionCallback();return;}
       function rootPricingItems(items=[]){return (items||[]).filter(item=>{const type=String(item?.item_type||item?.type||'').trim().toUpperCase();return !item?.parent_item_id&&!item?.parent_id&&!item?.parent_key&&type!=='PACKAGE_COMPONENT'&&type!=='COMPONENT';});}
       function countDeliverablesFromItems(items=[]){return rootPricingItems(items).reduce((total,item)=>{const qty=Math.max(1,Math.round(Number(item?.qty??item?.quantity??1))),isPackage=String(item?.type||item?.item_type||'').toUpperCase()==='PACKAGE'||String(item?.product_code||'').toUpperCase().startsWith('PKG-');if(!isPackage)return total+qty;const pkg=(state.packagesList||[]).find(p=>String(p.product_code||'')===String(item.product_code||'')||String(p.name||'').trim().toLowerCase()===String(item.name||'').trim().toLowerCase());const inclusions=pkg?.includedServiceNames||item?.includedItems||item?.included_items||[];const count=Math.max(1,Array.isArray(inclusions)?inclusions.length:0);return total+(count*qty);},0);}
       function pricingStandardDays(items=[],projectNo=null){return 14;}
-      function pricingRushRate(){return 500;}
+      function pricingRushRate(items=[],projectNo=null){if(Number(projectNo)<51)return 500;const count=countDeliverablesFromItems(items);return count<=3?500:count<=8?800:count<=12?1000:1200;}
       function calculateRushForProject(projectOrItems,startValue,deadlineValue,projectNo=null){const items=Array.isArray(projectOrItems)?projectOrItems:(projectOrItems?.project_items||[]),no=projectNo??(Array.isArray(projectOrItems)?null:projectNumber(projectOrItems));const start=parseDateSafe(startValue),due=parseDateSafe(deadlineValue);const standard=pricingStandardDays(items,no);if(!start||!due)return {duration:null,daysEarly:0,fee:0,standard,deliverableCount:countDeliverablesFromItems(items),rate:pricingRushRate(items,no)};const duration=Math.max(0,Math.round((due-start)/86400000)),daysEarly=Math.max(0,standard-duration),rate=pricingRushRate(items,no),fee=daysEarly>0?Math.ceil(daysEarly/4)*rate:0;return {duration,daysEarly,fee,standard,deliverableCount:countDeliverablesFromItems(items),rate};}
       function nextProjectNumber(){const used=state.projects.filter(p=>!p.deleted).map(projectNumber).filter(Number.isFinite);return used.length?Math.max(...used)+1:1;}
       function automaticMaintenanceFee(items=[],projectNo=null,explicitSubtotal=null){
@@ -8084,7 +8084,7 @@ ${description}`))actionCallback();return;}
         try{
           proj.title=name;proj.client_name=document.getElementById('projectDataClientName')?.value.trim()||'';proj.client_email=email;proj.client_phone=document.getElementById('projectDataClientPhone')?.value.trim()||'';proj.client_address=document.getElementById('projectDataClientAddress')?.value.trim()||'';proj.start_date=document.getElementById('projectDataStartDate')?.value||'';proj.deadline_date=document.getElementById('projectDataDeadline')?.value||'';proj.payment_due_date=proj.deadline_date||null;proj.invoice_due_date=proj.payment_due_date||'';
           const start=parseDateSafe(proj.start_date),due=parseDateSafe(proj.deadline_date),dateChanged=previousStart!==proj.start_date||previousDeadline!==proj.deadline_date,rushCalc=pricingVersionForProject(proj)==='v2'?calculateRushForProject(proj,proj.start_date,proj.deadline_date):calculateRushFromTimeline(proj.start_date,proj.deadline_date);
-          if(dateChanged&&start&&due){proj.rush_days_early=rushCalc.daysEarly;proj.calculated_rush_fee=rushCalc.fee;proj.rush_fee_enabled=proj.rush_fee_enabled!==false;proj.rush_fee=proj.rush_fee_enabled?rushCalc.fee:0;if(Array.isArray(proj.project_items)&&proj.project_items.length)recalculateProjectFromOrderItems(proj);setProjectDataAutosaveStatus('Rush fee recalculated · saving…','saving');}
+          if((dateChanged||options.forceRushRecalc===true)&&start&&due){proj.rush_days_early=rushCalc.daysEarly;proj.calculated_rush_fee=rushCalc.fee;proj.rush_fee_enabled=proj.rush_fee_enabled!==false;proj.rush_fee=proj.rush_fee_enabled?rushCalc.fee:0;if(Array.isArray(proj.project_items)&&proj.project_items.length)recalculateProjectFromOrderItems(proj);setProjectDataAutosaveStatus('Rush fee recalculated · saving…','saving');}
           const autoPriority=Number(proj.rush_fee||0)>0||Number(proj.rush_days_early||0)>0||!!(start&&due&&Math.ceil((due-start)/86400000)<14);
           proj.priority=autoPriority||!!document.getElementById('projectDataPriority')?.checked;proj.updated_at=new Date().toISOString();
           let client=null,cloudSynced=false;
@@ -8618,6 +8618,8 @@ ${description}`))actionCallback();return;}
           }catch(e){console.error('Payment delete failed:',e);showToast(`Delete payment failed: ${e?.message||e}`);}
         });
       }
+
+      async function recalculateProjectRushFee(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;if(pricingVersionForProject(proj)!=='v2'){showToast('The updated rush fee system applies to JP-051 onward.');return;}await saveProjectData({forceRushRecalc:true});}
 
       async function setProjectRushFeeEnabled(enabled){
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
