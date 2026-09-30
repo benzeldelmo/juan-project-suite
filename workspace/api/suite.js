@@ -212,7 +212,7 @@ async function submitOrder(b,svc){
   const subtotal=Math.round(items.reduce((s,i)=>s+i.price*i.qty,0)*100)/100;
   const standardDays=14;
   const deliverableCount=items.reduce((sum,i)=>sum+(String(i.type||'').toLowerCase()==='package'?Math.max(1,(Array.isArray(i.includedItems)?i.includedItems.length:0))*Math.max(1,Number(i.qty||1)):Math.max(1,Number(i.qty||1))),0);
-  const rushRate=deliverableCount<=3?500:deliverableCount<=7?800:deliverableCount<=11?1000:1200;
+  const rushRate=deliverableCount<=3?500:deliverableCount<=8?800:deliverableCount<=12?1000:1200;
   let rush=0;
   if(b.deadline){
     const deadline=new Date(String(b.deadline)+'T00:00:00');if(Number.isNaN(deadline.getTime()))fail('Invalid requested date.');
