@@ -998,7 +998,7 @@
     @media(max-width:900px){.sync-center-grid{grid-template-columns:1fr 1fr}}
     @media(max-width:600px){.sync-center-head{align-items:flex-start}.sync-queue-notice{display:block}.sync-queue-notice .btn{margin-top:12px;width:100%}.sync-center-actions .btn{width:100%}}
 </style>
-  <link rel="stylesheet" href="/css/v1-2-ux.css">
+  <link rel="stylesheet" href="/css/v1-2-ux.css?v=20261001-nav-render-hotfix-1">
 
   <style id="v1332-payment-review-table-fix">
     .portal-payment-review-table-wrap{overflow:visible!important;width:100%;max-width:100%}
@@ -5328,18 +5328,39 @@ ${description}`))actionCallback();return;}
         });
       }
 
+      function renderViewFailure(viewId,error){
+        console.error("Workspace view render failed:",viewId,error);
+        const target=document.getElementById(`view-${viewId}`);
+        if(!target)return;
+        let host=target.querySelector(".jp-view-render-error");
+        if(!host){
+          host=document.createElement("div");
+          host.className="card reports-error-state jp-view-render-error";
+          target.appendChild(host);
+        }
+        host.innerHTML=`<strong>This section could not be displayed.</strong><span>${escapeHtml(error?.message||"A Workspace UI error occurred.")}</span><div style="margin-top:12px"><button class="btn btn-secondary btn-sm" type="button" onclick="app.navigateTo('${viewId}')">Retry</button></div>`;
+      }
+
       function renderCurrentView() {
         loadTaskStateOnce();
-        if (state.activeView === "my-works") { renderMyWorks(); renderOverviewDashboard(); }
-        if (state.activeView === "new-order") renderNewOrderView();
-        if (state.activeView === "projects") renderProjects();
-        if (state.activeView === "payments") renderPaymentsView();
-        if (state.activeView === "reports") renderReportsView();
-        if (state.activeView === "calendar") renderCalendar();
-        if (state.activeView === "clients") renderClients();
-        if (state.activeView === "client-profile") renderClientProfile();
-        if (state.activeView === "pricelist") renderPricelist();
-        if (state.activeView === "online-portal") renderOnlinePortal();
+        const view=state.activeView;
+        try{
+          if (view === "my-works") { renderMyWorks(); renderOverviewDashboard(); return; }
+          if (view === "new-order") { renderNewOrderView(); return; }
+          if (view === "projects") { renderProjects(); return; }
+          if (view === "orders") { window.JPGeneral?.renderOrders?.(true); return; }
+          if (view === "clients") { renderClients(); return; }
+          if (view === "client-profile") { renderClientProfile(); return; }
+          if (view === "payments") { renderPaymentsView(); return; }
+          if (view === "reports") { renderReportsView(); return; }
+          if (view === "calendar") { renderCalendar(); return; }
+          if (view === "pricelist") { renderPricelist(); return; }
+          if (view === "in-house-ads") { window.JPGeneral?.renderAds?.(); return; }
+          if (view === "online-portal") { renderOnlinePortal(); return; }
+          if (view === "settings") { window.JPSettingsBuild?.(); return; }
+        }catch(error){
+          renderViewFailure(view,error);
+        }
       }
 
 
@@ -9820,7 +9841,7 @@ ${description}`))actionCallback();return;}
       });
     });
   </script>
-  <script src="/js/v1-2-ux.js?v=20260923-ads-nav-fix-1"></script>
+  <script src="/js/v1-2-ux.js?v=20261001-nav-render-hotfix-1"></script>
 
 <style>
 @media (max-width: 720px) {
@@ -10032,7 +10053,7 @@ ${description}`))actionCallback();return;}
 @media(max-width:980px){.portal-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.portal-drive-input{min-width:240px}}
 @media(max-width:650px){.portal-summary-grid{grid-template-columns:1fr 1fr}.online-portal-intro{align-items:flex-start}.portal-tabs{display:grid;grid-template-columns:1fr 1fr}.portal-drive-input{min-width:210px}}
 </style>
-<link rel="stylesheet" href="/css/v1-3-ux.css"><script src="/js/v1-3-ux.js" defer></script>
+<link rel="stylesheet" href="/css/v1-3-ux.css?v=20261001-nav-render-hotfix-1"><script src="/js/v1-3-ux.js?v=20261001-nav-render-hotfix-1" defer></script>
 <style>
 .project-data-autosave-row{display:flex;justify-content:flex-end;padding:4px 2px 0}.project-data-autosave-status{font-size:11px;color:var(--text-tertiary);display:inline-flex;align-items:center;gap:6px;min-height:24px}.project-data-autosave-status.saving{color:var(--text-secondary)}.project-data-autosave-status.saved{color:var(--primary-mint-dark)}.project-data-autosave-status.warning{color:var(--status-orange)}.project-data-autosave-status.error{color:var(--status-red)}
 @media(max-width:720px){.project-data-autosave-row{justify-content:flex-start}.project-data-autosave-status{font-size:10px}}
@@ -10595,10 +10616,10 @@ ${description}`))actionCallback();return;}
 <script src="/js/jsQR.js"></script>
 <script type="module" src="/js/suite-prod.js"></script>
 <script type="module" src="/js/workspace-redesign.js"></script>
-<script type="module" src="/js/general-update.js?v=20260923-ui2"></script>
+<script type="module" src="/js/general-update.js?v=20261001-nav-render-hotfix-1"></script>
 <script type="module" src="/js/keyboard-shortcuts.js?v=20260923-0105"></script>
 <script src="/js/workspace-icon-system-2026-09-22.js?v=20260923-0225"></script>
-  <script src="/js/consistency-pass.js?v=20260925-deliverable-payment-rush-1"></script>
+  <script src="/js/consistency-pass.js?v=20261001-nav-render-hotfix-1"></script>
   <script src="/js/workspace-unification-2026-09-22.js?v=20260928-ui-consistency-v2"></script>
 </body>
 </html>
