@@ -1,0 +1,34 @@
+name: Workspace Regression Tests
+
+on:
+  push:
+    branches:
+      - workspace-stabilization-2026-10-01
+      - main
+    paths:
+      - "workspace/**"
+      - "online/**"
+      - "supabase/**"
+      - ".github/workflows/workspace-tests.yml"
+  pull_request:
+    paths:
+      - "workspace/**"
+      - "online/**"
+      - "supabase/**"
+
+jobs:
+  test-workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Syntax check Workspace scripts
+        run: |
+          for file in workspace/js/*.js; do
+            node --check "$file"
+          done
+      - name: Run Workspace regression tests
+        run: node --test workspace/tests/*.test.mjs
