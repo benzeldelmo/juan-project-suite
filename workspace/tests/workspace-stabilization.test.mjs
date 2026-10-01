@@ -12,7 +12,7 @@ test("core Workspace sections have render targets or explicit injected views", a
   }
   assert.match(general, /function ensureOrdersView\(\)/);
   assert.ok(general.includes('s.id="view-orders"'));
-  assert.match(general, /function renderOrders\(\)/);
+  assert.match(general, /async function renderOrders\(reload\)/);
 });
 
 test("Operations Tasks and Deliverables are restored as reachable nonblank views", async () => {
