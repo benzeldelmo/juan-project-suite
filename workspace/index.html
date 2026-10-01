@@ -5171,7 +5171,7 @@ ${description}`))actionCallback();return;}
         }
         if (btn) { btn.disabled = true; btn.textContent = "Signing in…"; }
         try {
-          const loginRes=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});const loginJson=await loginRes.json().catch(()=>({}));if(!loginRes.ok)throw new Error(loginJson.error||'Email or password is incorrect.');const setRes=await supabaseClient.auth.setSession({access_token:loginJson.access_token,refresh_token:loginJson.refresh_token});if(setRes.error)throw setRes.error;
+          const loginRes=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});const loginJson=await loginRes.json().catch(()=>({}));if(!loginRes.ok){if(loginRes.status===429){const secs=Math.max(1,Number(loginJson.retry_after_seconds||loginRes.headers.get('Retry-After')||900)),mins=Math.max(1,Math.ceil(secs/60));throw new Error(`Too many sign-in attempts. Try again in about ${mins} minute${mins===1?'':'s'}.`);}throw new Error(loginJson.error||'Email or password is incorrect.');}const setRes=await supabaseClient.auth.setSession({access_token:loginJson.access_token,refresh_token:loginJson.refresh_token});if(setRes.error)throw setRes.error;
           const allowed = await verifyWorkspaceAdmin();
           if (!allowed) {
             await supabaseClient.auth.signOut();
