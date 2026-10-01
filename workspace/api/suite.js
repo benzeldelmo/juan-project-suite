@@ -560,7 +560,7 @@ export default async function handler(req,res){
     }
     if(action==='survey-responses'){
       const promotionId=String(b.promotion_id||b.id||'').trim();if(!promotionId)fail('Campaign is required.');
-      const campaign=await svc.from('promotions').select('id,title,channel,content_type').eq('id',promotionId).maybeSingle();
+      const campaign=await svc.from('promotions').select('id,title,channel,content_type,survey_config').eq('id',promotionId).maybeSingle();
       if(campaign.error)throw campaign.error;if(!campaign.data)fail('Campaign not found.',404);
       if(campaign.data.channel!=='web'||campaign.data.content_type!=='survey')fail('This campaign does not collect Web survey responses.');
       const rows=await svc.from('web_survey_responses').select('id,answers,visitor_id,source_url,created_at').eq('promotion_id',promotionId).order('created_at',{ascending:false}).limit(250);
