@@ -138,3 +138,40 @@ test("navigation guard prevents silent blank screens", async () => {
   assert.match(js, /This Workspace section is not available yet/);
   assert.match(js, /return false/);
 });
+
+
+test("every visible desktop Workspace destination has an explicit render path", async () => {
+  const html = await read("index.html");
+  for (const needle of [
+    'view === "orders"',
+    'view === "clients"',
+    'view === "payments"',
+    'view === "reports"',
+    'view === "pricelist"',
+    'view === "in-house-ads"',
+    'view === "online-portal"',
+    'view === "settings"'
+  ]) assert.ok(html.includes(needle), "missing "+needle);
+  assert.match(html, /JPGeneral\?\.renderOrders/);
+  assert.match(html, /JPGeneral\?\.renderAds/);
+  assert.match(html, /JPSettingsBuild/);
+  assert.match(html, /function renderViewFailure/);
+});
+
+test("desktop navigation groups are visible labels, not empty collapsible controls", async () => {
+  const js = await read("js/v1-2-ux.js");
+  const css = await read("css/v1-2-ux.css");
+  assert.match(js, /jp-nav-group-label/);
+  assert.match(js, /menu\.addEventListener\('click'/);
+  assert.match(js, /cloneNode\(true\)/);
+  assert.doesNotMatch(js, /jp-nav-group-toggle/);
+  assert.match(css, /\.jp-nav-group-items\{display:grid/);
+  assert.doesNotMatch(css, /\.jp-nav-group-items\{display:none/);
+});
+
+test("Workspace navigation assets are cache-busted after the render hotfix", async () => {
+  const html = await read("index.html");
+  assert.match(html, /v1-2-ux\.js\?v=20261001-nav-render-hotfix-1/);
+  assert.match(html, /general-update\.js\?v=20261001-nav-render-hotfix-1/);
+  assert.match(html, /consistency-pass\.js\?v=20261001-nav-render-hotfix-1/);
+});
