@@ -144,3 +144,23 @@ body.jp-general-modal-open{overflow:hidden}
 .jp-survey-response-modal{width:min(760px,calc(100vw - 36px))!important}
 @media(max-width:1180px){.jp-campaign-filters{justify-content:flex-start}}
 @media(max-width:720px){.jp-campaign-filters{display:grid;grid-template-columns:1fr 1fr;width:100%}.jp-campaign-filters .compact-sort{min-width:0;width:100%}.jp-section-heading-inline{align-items:center}.jp-survey-question-row .jp-ad-editor-grid{grid-template-columns:1fr}.jp-survey-response-modal{width:100%!important}}
+
+
+/* Project-first Workspace refinements */
+.order-step-label{display:block;margin-bottom:4px;font-size:9px;font-weight:800;letter-spacing:.09em;color:var(--text-tertiary)}
+.project-finance-invoice{overflow:hidden}
+.project-finance-invoice .invoice-paper{margin-top:14px}
+.project-activity-list{display:grid;gap:0}
+.project-activity-row{display:grid;grid-template-columns:12px minmax(0,1fr);gap:10px;padding:11px 2px;border-bottom:1px solid var(--border-subtle)}
+.project-activity-row:last-child{border-bottom:0}
+.project-activity-row .activity-dot{width:8px;height:8px;margin-top:5px;border-radius:999px;background:var(--primary-mint)}
+.project-activity-row>div{display:grid;gap:2px}
+.project-activity-row strong{font-size:11px;color:var(--text-primary)}
+.project-activity-row span{font-size:10px;color:var(--text-secondary)}
+.project-activity-row small{font-size:9px;color:var(--text-tertiary)}
+.overview-task-item[role="button"]{cursor:pointer}
+.overview-task-item[role="button"]:hover{background:var(--bg-subtle)}
+@media(max-width:760px){
+  .project-finance-invoice .invoice-actions-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .project-finance-invoice .invoice-actions-bar .btn{width:100%}
+}
