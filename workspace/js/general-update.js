@@ -12,7 +12,7 @@
   };
   var dateTime=function(v){if(!v)return "—";var d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString("en-PH",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});};
   var toast=function(m){if(window.showToast)window.showToast(m);};
-  var orders=[],filter="active",query="",overlay=null;
+  var orders=[],filter="new",query="",overlay=null;
 
   function ready(fn,n){n=n||0;if(window.app&&window.JuanSuiteRuntime)return fn();if(n<60)setTimeout(function(){ready(fn,n+1);},100);}
   function closeOverlay(){if(overlay)overlay.remove();overlay=null;document.body.classList.remove("jp-general-modal-open");}
@@ -69,15 +69,19 @@
   function effectiveStatus(o){return o.archived_at?"Archived":(o.status||"Order Received");}
   function drawFilters(){
     var host=document.getElementById("ordersPageFilters");if(!host)return;
-    var opts=[["active","Active"],["all","All"],["approved","Approved"],["rejected","Rejected"],["archived","Archived"]];
+    var opts=[["new","New"],["ongoing","Ongoing"],["completed","Completed"],["all","All"],["rejected","Rejected"],["archived","Archived"]];
     host.innerHTML=opts.map(function(x){return '<button class="filter-pill '+(filter===x[0]?"active":"")+'" data-filter="'+x[0]+'">'+x[1]+"</button>";}).join("");
     host.querySelectorAll("[data-filter]").forEach(function(b){b.onclick=function(){filter=b.dataset.filter;renderOrders(false);};});
   }
   function visibleOrders(){
     return orders.filter(function(o){
       var s=effectiveStatus(o).toLowerCase();
-      if(filter==="active"&&(o.archived_at||s==="rejected"||s==="project created"))return false;
-      if(filter==="approved"&&s!=="approved")return false;
+      var isCompleted=s==="project created"||!!o.project_id;
+      var isOngoing=s==="approved"&&!isCompleted&&!o.archived_at;
+      var isNew=!o.archived_at&&!isCompleted&&!isOngoing&&s!=="rejected";
+      if(filter==="new"&&!isNew)return false;
+      if(filter==="ongoing"&&!isOngoing)return false;
+      if(filter==="completed"&&!isCompleted)return false;
       if(filter==="rejected"&&s!=="rejected")return false;
       if(filter==="archived"&&s!=="archived")return false;
       if(query&&((o.code||"")+" "+(o.name||"")+" "+(o.email||"")+" "+(o.title||"")+" "+s).toLowerCase().indexOf(query)<0)return false;
@@ -102,7 +106,7 @@
         '<td><span class="badge '+(status==="Rejected"?"badge-red":status==="Approved"?"badge-green":"badge-neutral")+'">'+esc(status)+"</span></td>"+
         '<td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="'+menu+'"><button class="icon-more-button vertical-more" aria-label="Order actions" onclick="app.togglePopover(\''+menu+'\',event)">⋮</button><div class="popover-panel client-row-menu">'+
         '<button class="popover-action" onclick="window.JPGeneral.openOrder(\''+id+'\',true)">Edit Order</button>'+
-        (o.project_id?"":'<button class="popover-action text-danger" onclick="window.JPGeneral.archiveOrder(\''+id+'\')">Delete Order</button>')+
+        (o.project_id?"":'<button class="popover-action" onclick="window.JPGeneral.archiveOrder(\''+id+'\')">Archive Order</button>')+
         "</div></div></td></tr>";
     }).join("")||'<tr><td colspan="7" class="text-center text-muted py-4">No matching orders.</td></tr>';
   }
@@ -164,13 +168,13 @@
   }
   async function archiveOrder(id){
     var o=findOrder(id);if(!o)return;
-    if(!(await confirmAction({title:"Delete "+o.code+"?",message:"It will disappear from Active Orders and remain archived for history.",confirmLabel:"Delete Order",danger:true})))return;
+    if(!(await confirmAction({title:"Archive "+o.code+"?",message:"It will disappear from Active Orders and remain archived for history.",confirmLabel:"Archive Order",danger:false})))return;
     var index=orders.findIndex(function(x){return String(x.id)===String(id);});
     var snapshot=index>=0?Object.assign({},orders[index]):null;
     if(index>=0){orders[index].archived_at=new Date().toISOString();orders[index].status="Archived";}
-    closeOverlay();renderOrders(false);toast("Order removed.");
+    closeOverlay();renderOrders(false);toast("Order archived.");
     try{await API({action:"archive-order",id:id});}
-    catch(e){if(index>=0&&snapshot)orders[index]=snapshot;renderOrders(false);toast("Delete failed: "+(e.message||e));}
+    catch(e){if(index>=0&&snapshot)orders[index]=snapshot;renderOrders(false);toast("Archive failed: "+(e.message||e));}
   }
 
   function renderEditableClient(){
@@ -224,90 +228,154 @@
     document.getElementById("onlinePortalAdsPanel")?.remove();
     return document.getElementById("jpAdsAdmin");
   }
+  const ONLINE_PUBLIC_URL="https://juan-project-online-juan-codes.vercel.app/";
+  const WEB_PUBLIC_URL="https://juanproject-com.vercel.app/";
   function adStatus(a){
-    if(a.archived_at||a.status==="archived")return "Archived";if(a.status==="paused")return "Paused";var now=Date.now(),start=a.start_at?new Date(a.start_at).getTime():0,end=a.end_at?new Date(a.end_at).getTime():0;
-    if(end&&!a.no_expiration&&end<=now)return "Expired";if(start&&start>now)return "Scheduled";if(a.status==="published"&&a.enabled!==false)return "Live";return a.status==="draft"?"Draft":(a.status||"Draft");
+    if(a.archived_at||a.status==="archived")return "Archived";
+    if(a.status==="paused")return "Paused";
+    var now=Date.now(),start=a.start_at?new Date(a.start_at).getTime():0,end=a.end_at?new Date(a.end_at).getTime():0;
+    if(end&&!a.no_expiration&&end<=now)return "Expired";
+    if(start&&start>now)return "Scheduled";
+    if(a.status==="published"&&a.enabled!==false)return "Live";
+    return a.status==="draft"?"Draft":(a.status||"Draft");
   }
-  function adPlacementLabel(v){return ({homepage_banner:"Home Banner",guest_home_banner:"Guest Home",guest_shop_banner:"Guest Shop",client_home_banner:"Client Home",client_shop_banner:"Client Shop",homepage_popup:"Home Popup",guest_home_popup:"Guest Home Popup",client_home_popup:"Client Home Popup"})[v]||String(v||"—").replace(/_/g," ");}
-  function adAudienceLabel(v){return ({all:"Everyone",guest:"Guests",client:"Clients"})[v]||"Everyone";}
-  function adDestinationLabel(a){var type=String(a.destination_type||"no_action"),value=String(a.destination_value||"").trim(),label=({no_action:"No action",shop:"Shop",package:"Package",service:"Service",referral:"Referral",loyalty:"Loyalty",page:"Online page",external_url:"External URL"})[type]||type;return label+(value?" · "+value:"");}
+  function campaignSurface(a){return String(a.channel||"online")==="web"?"Web":"Online";}
+  function campaignKind(a){
+    if(String(a.channel||"online")==="web")return String(a.content_type||"flyer")==="survey"?"Survey":"Flyer";
+    return a.ad_type==="popup"?"Popup":"Banner";
+  }
+  function adPlacementLabel(v){return ({web_home_flyer:"Web Home",homepage_banner:"Home Banner",guest_home_banner:"Guest Home",guest_shop_banner:"Guest Shop",client_home_banner:"Client Home",client_shop_banner:"Client Shop",homepage_popup:"Home Popup",guest_home_popup:"Guest Home Popup",client_home_popup:"Client Home Popup"})[v]||String(v||"—").replace(/_/g," ");}
+  function adDestinationLabel(a){
+    var type=String(a.destination_type||"no_action"),value=String(a.destination_value||"").trim();
+    if(type==="external_url"&&value.indexOf("juan-project-online")>=0)return "JUAN PROJECT Online";
+    var label=({no_action:"No link",shop:"Shop",package:"Package",service:"Service",referral:"Referral",loyalty:"Loyalty",page:"Online page",external_url:"External URL"})[type]||type;
+    return label+(value&&type!=="external_url"?" · "+value:"");
+  }
+  function campaignBodyPreview(a){var t=String(a.body||"").trim();return t?(t.length>80?t.slice(0,77)+"…":t):"No description";}
   async function renderAds(){
-    var host=ensureAdsPage();if(!host)return;host.innerHTML='<div class="jp-ad-loading"><span class="portal-loading-spinner"></span><div><strong>Loading Ad Management</strong><small>Syncing campaigns…</small></div></div>';
+    var host=ensureAdsPage();if(!host)return;
+    host.innerHTML='<div class="jp-ad-loading"><span class="portal-loading-spinner"></span><div><strong>Loading campaigns</strong><small>Syncing Web and Online campaigns…</small></div></div>';
     try{
-      var d=await API({action:"ad-dashboard"}),ads=d.ads||[],settings=d.settings||{enabled:true,rotation_seconds:8,max_active_popups:1,auto_archive_expired:true};
-      host.innerHTML='<div class="jp-ads-page"><div class="jp-ads-heading"><div><span class="section-kicker">ONLINE PORTAL</span><h1>Ad Management</h1><p>Control banners and popups shown in JUAN PROJECT Online.</p></div><div class="jp-ads-heading-actions"><label class="jp-ad-master-toggle"><span>In-house Ads</span><span class="toggle-switch"><input id="jpAdsMaster" type="checkbox" '+(settings.enabled!==false?'checked':'')+'><span class="toggle-slider"></span></span></label><button class="btn btn-secondary" id="jpBannerSettings">Ad Settings</button><button class="btn btn-primary" id="jpCreateAd">+ New Ad</button></div></div>'+
-        '<section class="jp-ad-management"><div class="jp-ad-toolbar"><div class="jp-ad-search-wrap"><span aria-hidden="true">⌕</span><input id="jpAdSearch" class="form-control" placeholder="Search ad or destination…"></div><div class="filter-pills" id="jpAdFilters"><button class="filter-pill active">All</button><button class="filter-pill">Active</button><button class="filter-pill">Scheduled</button><button class="filter-pill">Draft</button><button class="filter-pill">Paused</button><button class="filter-pill">Expired</button><button class="filter-pill">Archived</button></div></div>'+
-        '<div class="jp-ad-table-wrap"><table class="data-table unified-table jp-ad-table"><thead><tr><th>Ad Name</th><th>Type</th><th>Placement</th><th>Status</th><th>Schedule</th><th>Destination</th><th class="table-actions-col"></th></tr></thead><tbody id="jpAdRows"></tbody></table></div></section>'+
-        '<div class="jp-ad-rules"><div><strong>Display rules</strong><span>Banners rotate and cannot be dismissed. Only one popup may be active at a time.</span></div><small>Rotation: '+Number(settings.rotation_seconds||8)+' seconds</small></div></div>';
-      var current="All",search=document.getElementById("jpAdSearch"),filters=document.getElementById("jpAdFilters"),rows=document.getElementById("jpAdRows");
+      var d=await API({action:"ad-dashboard"}),ads=d.ads||[],counts=d.survey_counts||{};
+      host.innerHTML='<div class="jp-ads-page"><div class="jp-ads-heading"><div><span class="section-kicker">MARKETING</span><h1>Flyers & Campaigns</h1><p>Publish public Web flyers, collect survey responses, or manage JUAN PROJECT Online promotions from one place.</p></div><div class="jp-ads-heading-actions"><button class="btn btn-secondary" id="jpOpenPublicWeb">View Web</button><button class="btn btn-primary" id="jpCreateAd">+ New Campaign</button></div></div>'+
+        '<section class="jp-ad-management"><div class="jp-ad-toolbar"><div class="jp-ad-search-wrap"><span aria-hidden="true">⌕</span><input id="jpAdSearch" class="form-control" placeholder="Search campaign, message, or destination…"></div><div class="jp-campaign-filters"><select id="jpCampaignSurface" class="compact-sort"><option value="all">All surfaces</option><option value="web">Web</option><option value="online">Online</option></select><select id="jpCampaignStatus" class="compact-sort"><option value="all">All statuses</option><option>Live</option><option>Scheduled</option><option>Draft</option><option>Paused</option><option>Expired</option><option>Archived</option></select></div></div>'+
+        '<div class="jp-ad-table-wrap"><table class="data-table unified-table jp-ad-table"><thead><tr><th>Campaign</th><th>Surface</th><th>Type</th><th>Status</th><th>Schedule</th><th>Destination</th><th>Responses</th><th class="table-actions-col"></th></tr></thead><tbody id="jpAdRows"></tbody></table></div></section>'+
+        '<div class="jp-ad-rules"><div><strong>Publishing model</strong><span>Web campaigns appear on juanproject-com. Online campaigns remain inside JUAN PROJECT Online. Survey responses are stored separately from client records.</span></div></div></div>';
+      var search=document.getElementById("jpAdSearch"),surface=document.getElementById("jpCampaignSurface"),statusFilter=document.getElementById("jpCampaignStatus"),rows=document.getElementById("jpAdRows");
       function draw(){
-        var q=(search.value||"").toLowerCase().trim(),list=ads.filter(function(a){var s=adStatus(a),match=current==="All"||current==="Active"&&s==="Live"||s===current;if(!match)return false;return !q||((a.title||"")+" "+adPlacementLabel(a.placement)+" "+adDestinationLabel(a)).toLowerCase().indexOf(q)>=0;});
-        rows.innerHTML=list.map(function(a){var status=adStatus(a),menu="adMenu_"+String(a.id).replace(/-/g,""),statusClass=status==="Live"?"badge-green":status==="Expired"?"badge-red":status==="Scheduled"?"badge-orange":"badge-neutral",schedule=(a.start_at?esc(dateTime(a.start_at)):"Now")+'<span class="jp-secondary-cell">'+(a.no_expiration?"No expiration":a.end_at?"Ends "+esc(dateTime(a.end_at)):"No end date")+"</span>",archiveAction=status==="Archived"?"":'<button class="popover-action" data-aarchive="'+a.id+'">Archive</button>',deleteAction='<div class="jp-popover-separator"></div><button class="popover-action text-danger" data-adelete="'+a.id+'">Delete Campaign</button>';return '<tr><td><strong>'+esc(a.title||"Untitled ad")+'</strong></td><td><span class="badge badge-neutral">'+esc(a.ad_type==="popup"?"Popup":"Banner")+'</span></td><td><strong class="jp-ad-cell-primary">'+esc(adPlacementLabel(a.placement))+'</strong></td><td><span class="badge '+statusClass+'">'+esc(status==="Live"?"Active":status)+'</span></td><td>'+schedule+'</td><td>'+esc(adDestinationLabel(a))+'</td><td class="table-row-actions"><div class="popover-wrap" id="'+menu+'"><button class="icon-more-button vertical-more" aria-label="Ad actions" onclick="app.togglePopover(\''+menu+'\',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" data-aedit="'+a.id+'">Edit</button><button class="popover-action" data-aduplicate="'+a.id+'">Duplicate</button><button class="popover-action" data-atoggle="'+a.id+'">'+(status==="Live"?"Pause":"Publish")+'</button>'+archiveAction+deleteAction+'</div></div></td></tr>';}).join("")||'<tr><td colspan="7" class="text-center text-muted py-4">No matching ads.</td></tr>';
+        var q=(search.value||"").toLowerCase().trim(),surfaceValue=surface.value,statusValue=statusFilter.value;
+        var list=ads.filter(function(a){
+          var s=adStatus(a),ch=String(a.channel||"online");
+          if(surfaceValue!=="all"&&ch!==surfaceValue)return false;
+          if(statusValue!=="all"&&s!==statusValue)return false;
+          return !q||((a.title||"")+" "+(a.body||"")+" "+adDestinationLabel(a)).toLowerCase().indexOf(q)>=0;
+        });
+        rows.innerHTML=list.map(function(a){
+          var s=adStatus(a),menu="campaignMenu_"+String(a.id).replace(/-/g,""),statusClass=s==="Live"?"badge-green":s==="Expired"?"badge-red":s==="Scheduled"?"badge-orange":"badge-neutral";
+          var schedule=(a.start_at?esc(dateTime(a.start_at)):"Now")+'<span class="jp-secondary-cell">'+(a.no_expiration?"No expiration":a.end_at?"Ends "+esc(dateTime(a.end_at)):"No end date")+"</span>";
+          var responses=String(a.content_type||"flyer")==="survey"?Number(counts[a.id]||0):null;
+          var responseAction=responses!==null?'<button class="popover-action" data-aresponses="'+a.id+'">View Responses ('+responses+')</button>':"";
+          var archiveAction=s==="Archived"?"":'<button class="popover-action" data-aarchive="'+a.id+'">Archive</button>';
+          return '<tr><td><strong>'+esc(a.title||"Untitled campaign")+'</strong><span class="jp-secondary-cell">'+esc(campaignBodyPreview(a))+'</span></td><td><span class="badge badge-neutral">'+esc(campaignSurface(a))+'</span></td><td>'+esc(campaignKind(a))+'</td><td><span class="badge '+statusClass+'">'+esc(s)+'</span></td><td>'+schedule+'</td><td>'+esc(adDestinationLabel(a))+'</td><td>'+(responses===null?"—":String(responses))+'</td><td class="table-row-actions"><div class="popover-wrap" id="'+menu+'"><button class="icon-more-button vertical-more" aria-label="Campaign actions" onclick="app.togglePopover(\''+menu+'\',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" data-aedit="'+a.id+'">Edit</button><button class="popover-action" data-aduplicate="'+a.id+'">Duplicate</button>'+responseAction+'<button class="popover-action" data-atoggle="'+a.id+'">'+(s==="Live"?"Pause":"Publish")+'</button>'+archiveAction+'</div></div></td></tr>';
+        }).join("")||'<tr><td colspan="8" class="text-center text-muted py-4"><strong>No matching campaigns</strong><div class="text-sm text-muted mt-1">Create a Web flyer, survey, or Online promotion.</div></td></tr>';
         rows.querySelectorAll("[data-aedit]").forEach(function(btn){btn.onclick=function(){openAd(ads.find(function(a){return a.id===btn.dataset.aedit;}),renderAds);};});
-        rows.querySelectorAll("[data-aduplicate]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.aduplicate;});if(!a)return;try{var copy=Object.assign({},a,{id:null,title:(a.title||"Ad")+" Copy",status:"draft",enabled:false,published_at:null,archived_at:null});await API({action:"save-ad",ad:copy});toast("Ad duplicated as draft.");renderAds();}catch(e){toast(e.message);}};});
-        rows.querySelectorAll("[data-atoggle]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.atoggle;}),wasLive=adStatus(a)==="Live";try{await API({action:"save-ad",ad:Object.assign({},a,{status:wasLive?"paused":"published"})});toast(wasLive?"Ad paused.":"Ad published.");renderAds();}catch(e){toast(e.message);}};});
-        rows.querySelectorAll("[data-aarchive]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.aarchive;});if(!(await confirmAction({title:"Archive "+(a?.title||"ad")+"?",message:"The ad will stop appearing in JUAN PROJECT Online and remain in Archived.",confirmLabel:"Archive",danger:false})))return;try{await API({action:"archive-ad",id:btn.dataset.aarchive});toast("Ad archived.");renderAds();}catch(e){toast(e.message);}};});
-        rows.querySelectorAll("[data-adelete]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.adelete;});var ok=await confirmAction({title:"Delete "+(a?.title||"campaign")+"?",message:"This permanently removes the campaign. This action cannot be undone.",confirmLabel:"Delete permanently",danger:true,action:async function(){await API({action:"delete-ad",id:btn.dataset.adelete});}});if(ok){toast("Campaign deleted.");renderAds();}};});
+        rows.querySelectorAll("[data-aduplicate]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.aduplicate;});if(!a)return;try{var copy=Object.assign({},a,{id:null,title:(a.title||"Campaign")+" Copy",status:"draft",enabled:false,published_at:null,archived_at:null});await API({action:"save-ad",ad:copy});toast("Campaign duplicated as draft.");renderAds();}catch(e){toast(e.message);}};});
+        rows.querySelectorAll("[data-atoggle]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.atoggle;}),live=adStatus(a)==="Live";try{await API({action:"save-ad",ad:Object.assign({},a,{status:live?"paused":"published"})});toast(live?"Campaign paused.":"Campaign published.");renderAds();}catch(e){toast(e.message);}};});
+        rows.querySelectorAll("[data-aarchive]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.aarchive;});if(!(await confirmAction({title:"Archive "+(a?.title||"campaign")+"?",message:"It will stop appearing publicly but remain in campaign history.",confirmLabel:"Archive",danger:false})))return;try{await API({action:"archive-ad",id:btn.dataset.aarchive});toast("Campaign archived.");renderAds();}catch(e){toast(e.message);}};});
+        rows.querySelectorAll("[data-aresponses]").forEach(function(btn){btn.onclick=function(){openSurveyResponses(ads.find(function(a){return a.id===btn.dataset.aresponses;}));};});
       }
-      filters.querySelectorAll("button").forEach(function(btn){btn.onclick=function(){current=btn.textContent.trim();filters.querySelectorAll("button").forEach(function(x){x.classList.toggle("active",x===btn);});draw();};});search.oninput=draw;draw();
+      search.oninput=draw;surface.onchange=draw;statusFilter.onchange=draw;draw();
       document.getElementById("jpCreateAd").onclick=function(){openAd(null,renderAds);};
-      document.getElementById("jpBannerSettings").onclick=function(){bannerSettings(settings,renderAds);};
-      document.getElementById("jpAdsMaster").onchange=async function(){var enabled=this.checked;this.disabled=true;try{await API({action:"ad-settings",enabled:enabled,rotation_seconds:Number(settings.rotation_seconds||8),max_active_popups:1,auto_archive_expired:settings.auto_archive_expired!==false});toast(enabled?"In-house ads enabled.":"In-house ads disabled.");settings.enabled=enabled;}catch(e){this.checked=!enabled;toast(e.message);}finally{this.disabled=false;}};
-    }catch(e){host.innerHTML='<div class="card text-danger">'+esc(e.message)+"</div>";}
+      document.getElementById("jpOpenPublicWeb").onclick=function(){window.open(WEB_PUBLIC_URL,"_blank","noopener");};
+    }catch(e){host.innerHTML='<div class="card reports-error-state"><strong>Campaigns could not be loaded.</strong><span>'+esc(e.message||"Check the Workspace connection and try again.")+'</span><div style="margin-top:12px"><button class="btn btn-secondary btn-sm" onclick="JPGeneral.renderAds()">Retry</button></div></div>';}
   }
-  async function uploadAd(file,type){
+  async function uploadAd(file,channel,type){
     if(!/^image\/(jpeg|png|webp)$/.test(file.type))throw new Error("Use JPG, PNG, or WEBP.");
     var bitmap=await createImageBitmap(file),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");
-    if(type==="banner"){
+    if(channel==="web"){
+      canvas.width=1600;canvas.height=900;
+      var scale=Math.max(canvas.width/bitmap.width,canvas.height/bitmap.height),dw=bitmap.width*scale,dh=bitmap.height*scale;ctx.drawImage(bitmap,(canvas.width-dw)/2,(canvas.height-dh)/2,dw,dh);
+    }else if(type==="banner"){
       canvas.width=1800;canvas.height=600;
-      var scale=Math.max(canvas.width/bitmap.width,canvas.height/bitmap.height),dw=bitmap.width*scale,dh=bitmap.height*scale,dx=(canvas.width-dw)/2,dy=(canvas.height-dh)/2;
-      ctx.drawImage(bitmap,dx,dy,dw,dh);
+      var scale2=Math.max(canvas.width/bitmap.width,canvas.height/bitmap.height),dw2=bitmap.width*scale2,dh2=bitmap.height*scale2;ctx.drawImage(bitmap,(canvas.width-dw2)/2,(canvas.height-dh2)/2,dw2,dh2);
     }else{
-      var scale=Math.min(1,1600/bitmap.width);canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+      var scale3=Math.min(1,1600/bitmap.width);canvas.width=Math.max(1,Math.round(bitmap.width*scale3));canvas.height=Math.max(1,Math.round(bitmap.height*scale3));ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
     }
     bitmap.close();
-    var blob=await new Promise(function(r){canvas.toBlob(r,"image/webp",.84);});if(!blob||blob.size>2097152)throw new Error("Promotional image must be 2 MB or smaller after compression.");
-    var db=window.app.getDatabaseClient();if(!db)throw new Error("Database is not connected.");var name="ads/"+Date.now()+"-"+(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2))+".webp",up=await db.storage.from("juan-ad-assets").upload(name,blob,{contentType:"image/webp",upsert:false});if(up.error)throw up.error;return db.storage.from("juan-ad-assets").getPublicUrl(name).data.publicUrl;
+    var blob=await new Promise(function(r){canvas.toBlob(r,"image/webp",.84);});if(!blob||blob.size>2097152)throw new Error("Campaign image must be 2 MB or smaller after compression.");
+    var db=window.app.getDatabaseClient();if(!db)throw new Error("Database is not connected.");
+    var name="ads/"+Date.now()+"-"+(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2))+".webp",up=await db.storage.from("juan-ad-assets").upload(name,blob,{contentType:"image/webp",upsert:false});
+    if(up.error)throw up.error;return db.storage.from("juan-ad-assets").getPublicUrl(name).data.publicUrl;
+  }
+  async function openSurveyResponses(a){
+    if(!a)return;
+    var m=modal('<header class="jp-general-modal-head"><div><span class="section-kicker">WEB SURVEY</span><h2>'+esc(a.title||"Survey")+'</h2></div><button class="jp-general-x" aria-label="Close">×</button></header><div id="jpSurveyResponseBody" class="jp-survey-responses"><div class="jp-ad-loading"><span class="portal-loading-spinner"></span><div><strong>Loading responses</strong><small>Retrieving submitted answers…</small></div></div></div>',"jp-survey-response-modal");
+    m.querySelector(".jp-general-x").onclick=closeOverlay;
+    try{
+      var d=await API({action:"survey-responses",promotion_id:a.id}),questions=(d.campaign?.survey_config?.questions||[]),labels={};questions.forEach(function(q){labels[q.id]=q.prompt||q.label||q.id;});
+      var host=document.getElementById("jpSurveyResponseBody"),responses=d.responses||[];
+      host.innerHTML=responses.length?'<div class="jp-survey-response-summary"><strong>'+responses.length+' response'+(responses.length===1?"":"s")+'</strong><span>Newest first</span></div>'+responses.map(function(r){var ans=r.answers||{};return '<article class="jp-survey-response-card"><header><strong>'+esc(dateTime(r.created_at))+'</strong><span>'+esc(r.visitor_id||"Anonymous")+'</span></header>'+Object.keys(ans).map(function(k){var v=Array.isArray(ans[k])?ans[k].join(", "):String(ans[k]??"");return '<div><small>'+esc(labels[k]||k)+'</small><p>'+esc(v||"—")+'</p></div>';}).join("")+'</article>';}).join(""):'<div class="card text-center text-muted py-4">No survey responses yet.</div>';
+    }catch(e){document.getElementById("jpSurveyResponseBody").innerHTML='<div class="card text-danger">'+esc(e.message||"Could not load responses.")+'</div>';}
   }
   function openAd(a,done){
-    a=a||{ad_type:"banner",status:"draft",placement:"guest_home_banner",audience:"all",destination_type:"no_action",priority:0,no_expiration:false};
-    var existingMode=a.destination_type==="external_url"?"external_url":a.destination_type==="no_action"?"no_action":"page";
+    a=a||{channel:"web",content_type:"flyer",ad_type:"banner",status:"draft",placement:"web_home_flyer",audience:"all",destination_type:"no_action",priority:0,no_expiration:true,survey_config:{questions:[]}};
+    var channel=String(a.channel||"online"),kind=String(a.content_type||"flyer"),onlineMatch=a.destination_type==="external_url"&&String(a.destination_value||"").indexOf("juan-project-online")>=0;
+    var existingMode=onlineMatch?"online_link":a.destination_type==="external_url"?"external_url":a.destination_type==="no_action"?"no_action":"page";
     var existingPage=a.destination_type==="page"?a.destination_value:(["shop","loyalty","referral"].includes(a.destination_type)?({shop:"shop",loyalty:"loyalty",referral:"rewards"}[a.destination_type]):"home");
     var m=modal('<header class="jp-general-modal-head"><div><span class="section-kicker">'+(a.id?"EDIT CAMPAIGN":"CREATE CAMPAIGN")+'</span><h2>'+(a.id?esc(a.title):"New Campaign")+'</h2></div><button class="jp-general-x" aria-label="Close">×</button></header>'+
       '<div class="jp-ad-editor-simple">'+
-      '<section class="jp-ad-editor-section"><h3>Campaign</h3><div class="jp-ad-editor-grid"><div class="form-group"><label class="form-label">Campaign Name</label><input id="adTitle" class="form-control" value="'+esc(a.title||"")+'" placeholder="e.g. Most Sulit Package"><div id="adTitleError" class="jp-field-error"></div></div><div class="form-group"><label class="form-label">Ad Type</label><select id="adType" class="form-control"><option value="banner">Banner</option><option value="popup">Popup</option></select></div></div></section>'+
-      '<section class="jp-ad-editor-section"><h3>Creative</h3><div class="form-group"><label class="form-label">Promotional Image</label><input id="adFile" class="form-control" type="file" accept="image/jpeg,image/png,image/webp"><small class="text-muted">'+(a.image?"Current image will stay unless you replace it.":"Banner images are prepared at 1800 × 600 px automatically.")+'</small><div id="adImageError" class="jp-field-error"></div></div><div class="form-group"><label class="form-label">Alt Text</label><input id="adAlt" class="form-control" value="'+esc(a.image_alt||a.title||"")+'" placeholder="Describe the image briefly"></div></section>'+
-      '<section class="jp-ad-editor-section"><h3>Destination</h3><div class="form-group"><label class="form-label">When clicked</label><select id="adDestMode" class="form-control"><option value="no_action">No Link</option><option value="page">JUAN PROJECT Page</option><option value="external_url">External Website</option></select></div><div id="adPageGroup" class="form-group"><label class="form-label">Page</label><select id="adPage" class="form-control"><option value="home">Home</option><option value="shop">Shop</option><option value="track">Track Request</option><option value="login">Login</option><option value="orders">Orders</option><option value="payment">Payment</option><option value="account">Account</option><option value="loyalty">Loyalty / Rewards</option></select></div><div id="adUrlGroup" class="form-group"><label class="form-label">Website URL</label><input id="adUrl" class="form-control" inputmode="url" placeholder="https://example.com" value="'+esc(a.destination_type==="external_url"?a.destination_value||"":"")+'"><div id="adDestError" class="jp-field-error"></div></div></section>'+
+      '<section class="jp-ad-editor-section"><h3>Campaign</h3><div class="jp-ad-editor-grid"><div class="form-group"><label class="form-label">Campaign Name</label><input id="adTitle" class="form-control" value="'+esc(a.title||"")+'" placeholder="e.g. October Broadcast Promo"><div id="adTitleError" class="jp-field-error"></div></div><div class="form-group"><label class="form-label">Publish To</label><select id="adChannel" class="form-control"><option value="web">JUAN Web</option><option value="online">JUAN PROJECT Online</option></select></div><div id="adContentTypeGroup" class="form-group"><label class="form-label">Web Content Type</label><select id="adContentType" class="form-control"><option value="flyer">Flyer</option><option value="survey">Survey</option></select></div><div class="form-group"><label class="form-label">Priority</label><input id="adPriority" class="form-control" type="number" min="0" max="1000" value="'+Number(a.priority||0)+'"></div></div></section>'+
+      '<section class="jp-ad-editor-section"><h3>Content</h3><div class="form-group"><label class="form-label">Description</label><textarea id="adBody" class="form-control" rows="3" maxlength="2000" placeholder="Short public message">'+esc(a.body||"")+'</textarea></div><div class="jp-ad-editor-grid"><div class="form-group"><label class="form-label">Button Label</label><input id="adCta" class="form-control" maxlength="80" value="'+esc(a.cta||"Learn more")+'" placeholder="Order Online"></div><div class="form-group"><label class="form-label">Image</label><input id="adFile" class="form-control" type="file" accept="image/jpeg,image/png,image/webp"><small class="text-muted">'+(a.image?"Current image stays unless replaced.":"Flyers use a 16:9 image on the Web site.")+'</small><div id="adImageError" class="jp-field-error"></div></div></div><div class="form-group"><label class="form-label">Image Alt Text</label><input id="adAlt" class="form-control" value="'+esc(a.image_alt||a.title||"")+'" placeholder="Describe the image briefly"></div></section>'+
+      '<section id="adSurveySection" class="jp-ad-editor-section"><div class="jp-section-heading-inline"><div><h3>Survey Questions</h3><small class="text-muted">Up to 10 questions. Use single choice or short text.</small></div><button id="adAddQuestion" class="btn btn-secondary btn-sm" type="button">+ Add Question</button></div><div id="adSurveyQuestions" class="jp-survey-builder"></div><div class="form-group"><label class="form-label">Thank-you Message</label><input id="adSurveySuccess" class="form-control" maxlength="300" value="'+esc(a.survey_config?.success_message||"Thank you for sharing your feedback.")+'"></div><div id="adSurveyError" class="jp-field-error"></div></section>'+
+      '<section class="jp-ad-editor-section"><h3>Destination</h3><div class="form-group"><label class="form-label">When the flyer/button is clicked</label><select id="adDestMode" class="form-control"><option value="no_action">No Link</option><option value="online_link">JUAN PROJECT Online</option><option value="page">JUAN PROJECT Online Page</option><option value="external_url">External Website</option></select></div><div id="adPageGroup" class="form-group"><label class="form-label">Online Page</label><select id="adPage" class="form-control"><option value="home">Home</option><option value="shop">Order / Shop</option><option value="track">Track Request</option><option value="login">Client Login</option><option value="orders">Orders</option><option value="payment">Payment</option><option value="account">Account</option><option value="loyalty">Loyalty / Rewards</option></select></div><div id="adUrlGroup" class="form-group"><label class="form-label">Website URL</label><input id="adUrl" class="form-control" inputmode="url" placeholder="https://example.com" value="'+esc(a.destination_type==="external_url"&&!onlineMatch?a.destination_value||"":"")+'"><div id="adDestError" class="jp-field-error"></div></div></section>'+
       '<section class="jp-ad-editor-section"><h3>Schedule</h3><div class="jp-ad-editor-grid"><div class="form-group"><label class="form-label">Start</label><input id="adStart" class="form-control" type="datetime-local"></div><div class="form-group"><label class="form-label">End</label><input id="adEnd" class="form-control" type="datetime-local"><div id="adScheduleError" class="jp-field-error"></div></div></div><label class="jp-check-row"><input id="adNoExpiry" type="checkbox"> No expiration</label></section>'+
-      '<details class="jp-ad-advanced"><summary>Advanced Settings</summary><div class="jp-ad-editor-grid"><div class="form-group"><label class="form-label">Audience</label><select id="adAudience" class="form-control"><option value="all">Everyone</option><option value="guest">Guests only</option><option value="client">Signed-in clients only</option></select></div><div class="form-group"><label class="form-label">Placement</label><select id="adPlacement" class="form-control"><optgroup label="Banner"><option value="guest_home_banner">Guest Home</option><option value="guest_shop_banner">Guest Shop</option><option value="client_home_banner">Client Home</option><option value="client_shop_banner">Client Shop</option></optgroup><optgroup label="Popup"><option value="guest_home_popup">Guest Home Popup</option><option value="client_home_popup">Client Home Popup</option></optgroup></select></div><div class="form-group"><label class="form-label">Priority</label><input id="adPriority" class="form-control" type="number" min="0" max="1000" value="'+Number(a.priority||0)+'"></div></div></details>'+
+      '<details id="adOnlineAdvanced" class="jp-ad-advanced"><summary>Online Display Settings</summary><div class="jp-ad-editor-grid"><div class="form-group"><label class="form-label">Ad Type</label><select id="adType" class="form-control"><option value="banner">Banner</option><option value="popup">Popup</option></select></div><div class="form-group"><label class="form-label">Audience</label><select id="adAudience" class="form-control"><option value="all">Everyone</option><option value="guest">Guests only</option><option value="client">Signed-in clients only</option></select></div><div class="form-group"><label class="form-label">Placement</label><select id="adPlacement" class="form-control"><optgroup label="Banner"><option value="guest_home_banner">Guest Home</option><option value="guest_shop_banner">Guest Shop</option><option value="client_home_banner">Client Home</option><option value="client_shop_banner">Client Shop</option></optgroup><optgroup label="Popup"><option value="guest_home_popup">Guest Home Popup</option><option value="client_home_popup">Client Home Popup</option></optgroup></select></div></div></details>'+
       '</div><footer class="jp-order-preview-actions"><button id="adDraft" class="btn btn-secondary">Save Draft</button><button id="adPublish" class="btn btn-primary">Publish</button></footer>',"jp-ad-editor-modal");
     m.querySelector(".jp-general-x").onclick=closeOverlay;
-    document.getElementById("adType").value=a.ad_type||"banner";document.getElementById("adDestMode").value=existingMode;document.getElementById("adPage").value=existingPage||"home";document.getElementById("adAudience").value=a.audience||"all";document.getElementById("adPlacement").value=a.placement||((a.ad_type||"banner")==="popup"?"client_home_popup":"client_home_banner");document.getElementById("adNoExpiry").checked=!!a.no_expiration;
+    var surveyQuestions=(Array.isArray(a.survey_config?.questions)?a.survey_config.questions:[]).map(function(q,i){return {id:q.id||("q"+(i+1)),prompt:q.prompt||q.label||"",type:q.type==="single"?"single":"text",options:Array.isArray(q.options)?q.options:[]};});
+    function renderQuestions(){
+      var box=document.getElementById("adSurveyQuestions");
+      box.innerHTML=surveyQuestions.map(function(q,i){return '<div class="jp-survey-question-row" data-survey-index="'+i+'"><div class="jp-survey-question-head"><strong>Question '+(i+1)+'</strong><button type="button" class="jp-survey-remove" data-remove-question="'+i+'" aria-label="Remove question">×</button></div><input class="form-control" data-qprompt="'+i+'" maxlength="300" value="'+esc(q.prompt||"")+'" placeholder="Question"><div class="jp-ad-editor-grid"><select class="form-control" data-qtype="'+i+'"><option value="text" '+(q.type!=="single"?"selected":"")+'>Short text</option><option value="single" '+(q.type==="single"?"selected":"")+'>Single choice</option></select><input class="form-control" data-qoptions="'+i+'" value="'+esc((q.options||[]).join(", "))+'" placeholder="Choices separated by commas" '+(q.type==="single"?"":"disabled")+'></div></div>';}).join("")||'<div class="jp-survey-empty">No questions yet. Add a question to publish a survey.</div>';
+      box.querySelectorAll("[data-remove-question]").forEach(function(btn){btn.onclick=function(){surveyQuestions.splice(Number(btn.dataset.removeQuestion),1);renderQuestions();};});
+      box.querySelectorAll("[data-qtype]").forEach(function(sel){sel.onchange=function(){surveyQuestions[Number(sel.dataset.qtype)].type=sel.value;renderQuestions();};});
+      box.querySelectorAll("[data-qprompt]").forEach(function(input){input.oninput=function(){surveyQuestions[Number(input.dataset.qprompt)].prompt=input.value;};});
+      box.querySelectorAll("[data-qoptions]").forEach(function(input){input.oninput=function(){surveyQuestions[Number(input.dataset.qoptions)].options=input.value.split(",").map(function(x){return x.trim();}).filter(Boolean);};});
+    }
+    document.getElementById("adAddQuestion").onclick=function(){if(surveyQuestions.length>=10){toast("A survey can have up to 10 questions.");return;}surveyQuestions.push({id:"q"+(surveyQuestions.length+1)+"_"+Date.now().toString(36),prompt:"",type:"text",options:[]});renderQuestions();};
+    document.getElementById("adChannel").value=channel;document.getElementById("adContentType").value=kind;document.getElementById("adType").value=a.ad_type||"banner";document.getElementById("adDestMode").value=existingMode;document.getElementById("adPage").value=existingPage||"home";document.getElementById("adAudience").value=a.audience||"all";document.getElementById("adPlacement").value=a.placement&&a.placement!=="web_home_flyer"?a.placement:((a.ad_type||"banner")==="popup"?"client_home_popup":"client_home_banner");document.getElementById("adNoExpiry").checked=a.no_expiration!==false;
     function dt(v){if(!v)return "";var d=new Date(v),off=d.getTimezoneOffset();return new Date(d.getTime()-off*60000).toISOString().slice(0,16);}document.getElementById("adStart").value=dt(a.start_at);document.getElementById("adEnd").value=dt(a.end_at);
     function syncDestination(){var mode=document.getElementById("adDestMode").value;document.getElementById("adPageGroup").classList.toggle("hidden",mode!=="page");document.getElementById("adUrlGroup").classList.toggle("hidden",mode!=="external_url");}
-    function syncAdPlacement(){var type=document.getElementById("adType").value,placement=document.getElementById("adPlacement"),isPopup=type==="popup";Array.from(placement.options).forEach(function(o){o.disabled=isPopup?!o.value.endsWith("_popup"):o.value.endsWith("_popup");});if(placement.selectedOptions[0]?.disabled)placement.value=isPopup?"client_home_popup":"client_home_banner";}
-    document.getElementById("adDestMode").onchange=syncDestination;document.getElementById("adType").onchange=syncAdPlacement;syncDestination();syncAdPlacement();
+    function syncPlacement(){var type=document.getElementById("adType").value,placement=document.getElementById("adPlacement"),popup=type==="popup";Array.from(placement.options).forEach(function(o){o.disabled=popup?!o.value.endsWith("_popup"):o.value.endsWith("_popup");});if(placement.selectedOptions[0]?.disabled)placement.value=popup?"client_home_popup":"client_home_banner";}
+    function syncSurface(){
+      var isWeb=document.getElementById("adChannel").value==="web",isSurvey=isWeb&&document.getElementById("adContentType").value==="survey";
+      document.getElementById("adContentTypeGroup").classList.toggle("hidden",!isWeb);
+      document.getElementById("adSurveySection").classList.toggle("hidden",!isSurvey);
+      document.getElementById("adOnlineAdvanced").classList.toggle("hidden",isWeb);
+      if(!isWeb)document.getElementById("adContentType").value="flyer";
+    }
+    document.getElementById("adDestMode").onchange=syncDestination;document.getElementById("adType").onchange=syncPlacement;document.getElementById("adChannel").onchange=syncSurface;document.getElementById("adContentType").onchange=syncSurface;syncDestination();syncPlacement();syncSurface();renderQuestions();
     document.getElementById("adUrl").onblur=function(){var raw=this.value.trim();if(raw&&!/^https?:\/\//i.test(raw))this.value="https://"+raw;};
-    ["adTitle","adUrl","adStart","adEnd"].forEach(function(id){document.getElementById(id)?.addEventListener("input",function(){document.getElementById("adTitleError").textContent="";document.getElementById("adImageError").textContent="";document.getElementById("adDestError").textContent="";document.getElementById("adScheduleError").textContent="";});});
     async function save(status){
-      var get=function(id){return document.getElementById(id).value;},title=get("adTitle").trim(),mode=get("adDestMode"),url=get("adUrl").trim(),start=get("adStart"),end=get("adEnd"),noExpiry=document.getElementById("adNoExpiry").checked,file=document.getElementById("adFile").files[0],image=a.image||null,valid=true;
+      var get=function(id){return document.getElementById(id).value;},title=get("adTitle").trim(),ch=get("adChannel"),content=ch==="web"?get("adContentType"):"flyer",mode=get("adDestMode"),url=get("adUrl").trim(),start=get("adStart"),end=get("adEnd"),noExpiry=document.getElementById("adNoExpiry").checked,file=document.getElementById("adFile").files[0],image=a.image||null,valid=true;
+      document.querySelectorAll(".jp-field-error").forEach(function(x){x.textContent="";});
       if(!title){document.getElementById("adTitleError").textContent="Enter a campaign name.";valid=false;}
-      if(status==="published"&&!image&&!file){document.getElementById("adImageError").textContent="Add a promotional image before publishing.";valid=false;}
+      if(status==="published"&&content==="flyer"&&!image&&!file){document.getElementById("adImageError").textContent="Add a flyer image before publishing.";valid=false;}
       if(mode==="external_url"&&!/^https:\/\/[^\s]+$/i.test(url)){document.getElementById("adDestError").textContent="Enter a complete secure URL beginning with https://";valid=false;}
       if(!noExpiry&&start&&end&&new Date(end)<=new Date(start)){document.getElementById("adScheduleError").textContent="End must be later than Start.";valid=false;}
-      if(!valid){var first=m.querySelector(".jp-field-error:not(:empty)");first?.scrollIntoView({block:"center",behavior:"smooth"});return;}
+      var questions=surveyQuestions.map(function(q){return {id:q.id,prompt:String(q.prompt||"").trim(),type:q.type==="single"?"single":"text",options:q.type==="single"?(q.options||[]).map(function(x){return String(x).trim();}).filter(Boolean):[]};}).filter(function(q){return q.prompt;});
+      if(status==="published"&&content==="survey"&&!questions.length){document.getElementById("adSurveyError").textContent="Add at least one survey question before publishing.";valid=false;}
+      if(!valid){m.querySelector(".jp-field-error:not(:empty)")?.scrollIntoView({block:"center",behavior:"smooth"});return;}
       try{
-        if(file)image=await uploadAd(file,get("adType"));
-        var destValue=mode==="page"?get("adPage"):mode==="external_url"?url:"";
-        await API({action:"save-ad",ad:Object.assign({},a,{id:a.id||null,title:title,ad_type:get("adType"),status:status,image:image,placement:get("adPlacement"),destination_type:mode,destination_value:destValue,start_at:start?new Date(start).toISOString():null,end_at:!noExpiry&&end?new Date(end).toISOString():null,no_expiration:noExpiry,priority:Number(get("adPriority")||0),image_alt:get("adAlt").trim()||title,audience:get("adAudience")})});
+        if(file)image=await uploadAd(file,ch,get("adType"));
+        var destType="no_action",destValue="";
+        if(mode==="online_link"){destType="external_url";destValue=ONLINE_PUBLIC_URL;}
+        else if(mode==="page"){destType="page";destValue=get("adPage");}
+        else if(mode==="external_url"){destType="external_url";destValue=url;}
+        await API({action:"save-ad",ad:Object.assign({},a,{id:a.id||null,title:title,body:get("adBody"),cta:get("adCta"),channel:ch,content_type:content,survey_config:{questions:questions,success_message:get("adSurveySuccess")},ad_type:ch==="web"?"banner":get("adType"),status:status,image:image,placement:ch==="web"?"web_home_flyer":get("adPlacement"),destination_type:destType,destination_value:destValue,start_at:start?new Date(start).toISOString():null,end_at:!noExpiry&&end?new Date(end).toISOString():null,no_expiration:noExpiry,priority:Number(get("adPriority")||0),image_alt:get("adAlt").trim()||title,audience:ch==="web"?"all":get("adAudience")})});
         toast(status==="published"?"Campaign published.":"Draft saved.");closeOverlay();done();
       }catch(e){document.getElementById("adTitleError").textContent=e?.message||"Campaign could not be saved.";}
     }
     document.getElementById("adDraft").onclick=function(){save("draft");};document.getElementById("adPublish").onclick=function(){save("published");};
-  }
-  function bannerSettings(settings,done){
-    var m=modal('<header class="jp-general-modal-head"><div><span class="section-kicker">GLOBAL SETTINGS</span><h2>Ad Settings</h2></div><button class="jp-general-x">×</button></header><div class="form-group"><label class="form-label">Banner Rotation Interval</label><input id="bannerSeconds" class="form-control" type="number" min="3" max="120" value="'+Number(settings.rotation_seconds||8)+'"><small class="text-muted">Seconds before the next active banner appears.</small></div><div class="form-group"><label class="form-label">Maximum Active Popups</label><input class="form-control" value="1" readonly></div><label class="jp-check-row"><input id="adAutoArchive" type="checkbox" '+(settings.auto_archive_expired!==false?'checked':'')+'> Automatically archive expired ads</label><footer class="jp-order-preview-actions"><button id="bannerSave" class="btn btn-primary">Save Settings</button></footer>',"jp-banner-settings-modal");
-    m.querySelector(".jp-general-x").onclick=closeOverlay;document.getElementById("bannerSave").onclick=async function(){try{await API({action:"ad-settings",enabled:settings.enabled!==false,rotation_seconds:Number(document.getElementById("bannerSeconds").value||8),max_active_popups:1,auto_archive_expired:document.getElementById("adAutoArchive").checked});toast("Ad settings saved.");closeOverlay();done();}catch(e){toast(e.message);}};
   }
 
   function install(){

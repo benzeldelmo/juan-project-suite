@@ -154,7 +154,7 @@ async function publicAds(req,svc){
     if(data){audience='client';clientId=data.client_id}
   }
   const [adsRes,settingsRes]=await Promise.all([
-    svc.from('promotions').select('*').neq('status','archived').order('priority',{ascending:false}).order('created_at',{ascending:false}),
+    svc.from('promotions').select('*').eq('channel','online').neq('status','archived').order('priority',{ascending:false}).order('created_at',{ascending:false}),
     svc.from('ad_settings').select('*').eq('id',1).maybeSingle()
   ]);
   if(adsRes.error)throw adsRes.error;if(settingsRes.error)throw settingsRes.error;
@@ -356,9 +356,14 @@ export default async function handler(req,res){
         const expired=await svc.from('promotions').update({status:'archived',enabled:false,archived_at:now()}).lt('end_at',now()).eq('no_expiration',false).neq('status','archived');
         if(expired.error)throw expired.error;
       }
-      const ads=await svc.from('promotions').select('*').order('created_at',{ascending:false});
-      if(ads.error)throw ads.error;
-      return res.status(200).json({ads:ads.data||[],settings:cfg});
+      const [ads,responses]=await Promise.all([
+        svc.from('promotions').select('*').order('created_at',{ascending:false}),
+        svc.from('web_survey_responses').select('promotion_id')
+      ]);
+      if(ads.error)throw ads.error;if(responses.error)throw responses.error;
+      const survey_counts={};
+      for(const row of (responses.data||[])){const key=String(row.promotion_id||'');if(key)survey_counts[key]=(survey_counts[key]||0)+1}
+      return res.status(200).json({ads:ads.data||[],settings:cfg,survey_counts});
     }
     if(action==='revise-order'){
       const {data:o,error}=await svc.from('incoming_orders').select('*').eq('id',b.id).maybeSingle();if(error)throw error;
@@ -553,29 +558,64 @@ export default async function handler(req,res){
       const up=await svc.from('clients').update({classification:b.value}).eq('id',b.id).select('id').maybeSingle();if(up.error)throw up.error;if(!up.data)fail('Client not found.',404);
       await audit(svc,'Client classified '+b.value,String(b.id),user.id);return res.status(200).json({ok:true});
     }
+    if(action==='survey-responses'){
+      const promotionId=String(b.promotion_id||b.id||'').trim();if(!promotionId)fail('Campaign is required.');
+      const campaign=await svc.from('promotions').select('id,title,channel,content_type,survey_config').eq('id',promotionId).maybeSingle();
+      if(campaign.error)throw campaign.error;if(!campaign.data)fail('Campaign not found.',404);
+      if(campaign.data.channel!=='web'||campaign.data.content_type!=='survey')fail('This campaign does not collect Web survey responses.');
+      const rows=await svc.from('web_survey_responses').select('id,answers,visitor_id,source_url,created_at').eq('promotion_id',promotionId).order('created_at',{ascending:false}).limit(250);
+      if(rows.error)throw rows.error;
+      return res.status(200).json({campaign:campaign.data,responses:rows.data||[]});
+    }
     if(action==='save-ad'){
-      const a=b.ad||{},title=String(a.title||'').trim(),type=String(a.ad_type||a.type||'banner'),status=String(a.status||'draft');
-      if(!title)fail('Ad name is required.');
-      if(!['banner','popup'].includes(type))fail('Choose Banner or Popup.');
+      const a=b.ad||{},title=String(a.title||'').trim(),status=String(a.status||'draft');
+      const channel=String(a.channel||'online').toLowerCase(),contentType=String(a.content_type||'flyer').toLowerCase();
+      let type=String(a.ad_type||a.type||'banner'),placement=String(a.placement||'');
+      if(!title)fail('Campaign name is required.');
+      if(!['online','web'].includes(channel))fail('Choose Web or Online for this campaign.');
+      if(!['flyer','survey'].includes(contentType))fail('Choose Flyer or Survey.');
       if(!['draft','scheduled','published','paused','expired','archived'].includes(status))fail('Invalid campaign status.');
+      if(channel==='web'){type='banner';placement='web_home_flyer'}
+      else{
+        if(!['banner','popup'].includes(type))fail('Choose Banner or Popup.');
+        if(!placement)placement='popup'===type?'homepage_popup':'homepage_banner';
+      }
+
       const destinationType=String(a.destination_type||'no_action'),destinationValue=String(a.destination_value||'').trim();
-      if(!['no_action','shop','package','service','referral','loyalty','page','external_url'].includes(destinationType))fail('Invalid ad destination.');
-      if(destinationType==='external_url'&&!/^https:\/\//i.test(destinationValue))fail('External ad URLs must use HTTPS.');
+      if(!['no_action','shop','package','service','referral','loyalty','page','external_url'].includes(destinationType))fail('Invalid campaign destination.');
+      if(destinationType==='external_url'&&!/^https:\/\//i.test(destinationValue))fail('External campaign URLs must use HTTPS.');
       if(['package','service','page'].includes(destinationType)&&!destinationValue)fail('Choose a valid destination before publishing.');
+
+      const body=String(a.body||'').trim().slice(0,2000),cta=String(a.cta||'Learn more').trim().slice(0,80)||'Learn more';
+      const rawSurvey=a.survey_config&&typeof a.survey_config==='object'?a.survey_config:{};
+      const rawQuestions=Array.isArray(rawSurvey.questions)?rawSurvey.questions.slice(0,10):[];
+      const questions=rawQuestions.map((q,index)=>{
+        const prompt=String(q?.prompt||q?.label||'').trim().slice(0,300);
+        const qType=String(q?.type||'text')==='single'?'single':'text';
+        const options=qType==='single'&&Array.isArray(q?.options)?q.options.map(x=>String(x||'').trim().slice(0,120)).filter(Boolean).slice(0,12):[];
+        return {id:String(q?.id||('q'+(index+1))).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,40)||('q'+(index+1)),prompt,type:qType,options};
+      }).filter(q=>q.prompt);
+      if(contentType==='survey'&&status==='published'&&!questions.length)fail('Add at least one survey question before publishing.');
+      const surveyConfig={questions,success_message:String(rawSurvey.success_message||'Thank you for sharing your feedback.').trim().slice(0,300)||'Thank you for sharing your feedback.'};
+
       const startAt=a.start_at||null,endAt=a.no_expiration?null:(a.end_at||null),priority=Math.max(0,Math.min(1000,Math.trunc(Number(a.priority||0))));
       if(startAt&&Number.isNaN(new Date(startAt).getTime()))fail('Invalid campaign start date.');
       if(endAt&&Number.isNaN(new Date(endAt).getTime()))fail('Invalid campaign end date.');
       if(startAt&&endAt&&new Date(endAt)<=new Date(startAt))fail('Campaign end must be after the start.');
-      if(status==='published'&&!String(a.image||'').trim())fail('Upload a promotional image before publishing.');
+      if(status==='published'&&contentType==='flyer'&&!String(a.image||'').trim())fail('Upload a promotional image before publishing a flyer.');
+
       const row={
-        title,body:String(a.body||''),cta:String(a.cta||'Learn more'),url:destinationType==='external_url'?destinationValue:null,image:String(a.image||'').trim()||null,
-        audience:a.audience||'all',enabled:!['paused','archived','expired','draft'].includes(status),
-        ad_type:type,status,placement:String(a.placement||('popup'===type?'homepage_popup':'homepage_banner')),
+        title,body,cta,url:destinationType==='external_url'?destinationValue:null,image:String(a.image||'').trim()||null,
+        audience:channel==='web'?'all':(a.audience||'all'),enabled:!['paused','archived','expired','draft'].includes(status),
+        ad_type:type,status,placement,channel,content_type:contentType,survey_config:surveyConfig,
         destination_type:destinationType,destination_value:destinationValue||null,start_at:startAt,end_at:endAt,no_expiration:Boolean(a.no_expiration),
-        priority,image_alt:String(a.image_alt||title).slice(0,240),published_at:status==='published'?(a.published_at||now()):null,archived_at:status==='archived'?now():null
+        priority,image_alt:String(a.image_alt||title).slice(0,240),published_at:status==='published'?(a.published_at||now()):null,archived_at:status==='archived'?now():null,
+        updated_at:now()
       };
       let q=a.id?svc.from('promotions').update(row).eq('id',a.id):svc.from('promotions').insert(row);
-      const {data,error}=await q.select('*').single();if(error)throw error;return res.status(200).json({ok:true,ad:data});
+      const {data,error}=await q.select('*').single();if(error)throw error;
+      await audit(svc,(a.id?'Campaign updated':'Campaign created')+' · '+channel.toUpperCase(),title,user.id);
+      return res.status(200).json({ok:true,ad:data});
     }
     if(action==='ad-settings'){
       const seconds=Math.max(3,Math.min(120,Math.trunc(Number(b.rotation_seconds||8))));
