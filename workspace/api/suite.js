@@ -419,13 +419,9 @@ export default async function handler(req,res){
     if(action==='convert')fail('Direct conversion is disabled. Approve the request, preload it into New Order, then create the project.',409);
     if(action==='project-financial-history'){
       const projectId=String(b.project_id||b.projectId||'').trim();if(!projectId)fail('Project is required.');
-      const [ledger,invoices,notifications]=await Promise.all([
-        svc.from('financial_ledger').select('id,entry_type,direction,amount,note,metadata,occurred_at').eq('project_id',projectId).order('occurred_at',{ascending:false}).limit(100),
-        svc.from('invoices').select('id,invoice_number,status,total,amount_paid,balance,due_date,issued_at,voided_at').eq('project_id',projectId).order('issued_at',{ascending:false}).limit(25),
-        svc.from('client_notifications').select('id,type,title,body,severity,created_at').eq('project_id',projectId).order('created_at',{ascending:false}).limit(50)
-      ]);
-      if(ledger.error)throw ledger.error;if(invoices.error)throw invoices.error;if(notifications.error)throw notifications.error;
-      return res.status(200).json({ok:true,ledger:ledger.data||[],invoices:invoices.data||[],notifications:notifications.data||[]});
+      const invoices=await svc.from('invoices').select('id,invoice_number,status,total,amount_paid,balance,due_date,issued_at,voided_at').eq('project_id',projectId).order('issued_at',{ascending:false}).limit(25);
+      if(invoices.error)throw invoices.error;
+      return res.status(200).json({ok:true,invoices:invoices.data||[]});
     }
     if(action==='issue-invoice'){
       const projectId=String(b.project_id||b.projectId||'').trim();if(!projectId)fail('Project is required.');
