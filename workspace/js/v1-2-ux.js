@@ -40,14 +40,12 @@
     return a;
   }
 
-  function makeGroup(label,items,open=true){
-    const group=document.createElement('div');group.className='jp-nav-group'+(open?' open':'');
-    const button=document.createElement('button');button.type='button';button.className='jp-nav-group-toggle';button.setAttribute('aria-expanded',open?'true':'false');
-    button.innerHTML='<span>'+label+'</span><span class="jp-nav-chevron" aria-hidden="true">⌄</span>';
+  function makeGroup(label,items){
+    const group=document.createElement('div');group.className='jp-nav-group open';
+    const heading=document.createElement('div');heading.className='jp-nav-group-label';heading.textContent=label;
     const body=document.createElement('div');body.className='jp-nav-group-items';
     items.filter(Boolean).forEach(item=>body.append(item));
-    button.addEventListener('click',()=>{const next=!group.classList.contains('open');group.classList.toggle('open',next);button.setAttribute('aria-expanded',next?'true':'false')});
-    group.append(button,body);return group;
+    group.append(heading,body);return group;
   }
 
   function setNavLabel(el,label){
@@ -59,8 +57,14 @@
   }
 
   function restructureSidebar(){
-    const menu=q('.nav-menu');if(!menu||menu.dataset.stabilized==='2')return;menu.dataset.stabilized='2';
-    const items={};qa('.nav-item',menu).forEach(el=>{const key=el.dataset.view||el.id;if(key)items[key]=el});
+    const menu=q('.nav-menu');if(!menu||menu.dataset.stabilized==='3')return;menu.dataset.stabilized='3';
+    const items={};
+    qa('.nav-item',menu).forEach(el=>{
+      const key=el.dataset.view||el.id;if(!key)return;
+      const clone=el.cloneNode(true);
+      clone.removeAttribute('onclick');
+      items[key]=clone;
+    });
     menu.innerHTML='';
 
     setNavLabel(items['my-works'],'Dashboard');
@@ -75,12 +79,20 @@
     setNavLabel(items.settings,'Settings');
 
     menu.append(
-      makeGroup('WORK',[items['my-works'],items.projects,items.orders,items.clients],true),
-      makeGroup('FINANCE',[items.payments,items.reports],true),
-      makeGroup('BUSINESS',[items.pricelist,items['in-house-ads']],false),
-      makeGroup('PORTAL',[items['online-portal']],false),
-      makeGroup('SYSTEM',[items.settings],false)
+      makeGroup('WORK',[items['my-works'],items.projects,items.orders,items.clients]),
+      makeGroup('FINANCE',[items.payments,items.reports]),
+      makeGroup('BUSINESS',[items.pricelist,items['in-house-ads']]),
+      makeGroup('PORTAL',[items['online-portal']]),
+      makeGroup('SYSTEM',[items.settings])
     );
+
+    menu.addEventListener('click',e=>{
+      const link=e.target.closest('.nav-item[data-view]');
+      if(!link||!menu.contains(link))return;
+      e.preventDefault();
+      const view=link.dataset.view;
+      if(view&&window.app?.navigateTo)window.app.navigateTo(view);
+    });
 
     qa('.nav-item',menu).forEach(el=>{const key=el.dataset.view||el.id,ic=q('.icon',el),path=iconPaths[key];if(ic&&path)ic.innerHTML=svg(path);el.setAttribute('aria-label',el.textContent.trim())});
   }
