@@ -5592,10 +5592,11 @@ ${description}`))actionCallback();return;}
           (p.deliverables || []).forEach(d => {
             if (!d.completed) {
               rows.push({
+                project_id: p.id,
                 project: p.title,
                 client: p.client_name || "",
                 name: d.item_name || d.name || "Deliverable",
-                deadline: p.deadline_date || "No deadline"
+                deadline: d.due_date || p.deadline_date || "No deadline"
               });
             }
           });
@@ -5614,7 +5615,7 @@ ${description}`))actionCallback();return;}
           </div>
           <div class="overview-task-list">
             ${rows.slice(0, 5).map(d => `
-              <div class="overview-task-item">
+              <div class="overview-task-item" role="button" tabindex="0" onclick="app.openProjectDetails('${d.project_id}','deliverables')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();app.openProjectDetails('${d.project_id}','deliverables')}">
                 <span class="overview-task-check">
                   <svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
                 </span>
@@ -5628,6 +5629,18 @@ ${description}`))actionCallback();return;}
           </div>`;
       }
 
+      function renderProjectActivity(proj){
+        const box=document.getElementById('projectActivityList');if(!box||!proj)return;
+        const events=[];
+        if(proj.created_at)events.push({time:proj.created_at,title:'Project created',detail:formatProjectId(proj)});
+        (proj.deliverables||[]).filter(d=>d.completed).forEach(d=>events.push({time:d.completed_at||proj.updated_at,title:'Deliverable completed',detail:d.item_name||d.name||'Deliverable'}));
+        (proj.payments||[]).filter(p=>!p.deleted_at).forEach(p=>events.push({time:p.created_at||p.payment_date,title:'Payment recorded',detail:formatCurrency(p.amount_paid||p.amount||0)}));
+        if(proj.drive_url)events.push({time:proj.updated_at,title:'Project files configured',detail:'Client delivery link is available'});
+        if(proj.archived_at)events.push({time:proj.archived_at,title:'Project archived',detail:'Record retained for history'});
+        events.sort((a,b)=>new Date(b.time||0)-new Date(a.time||0));
+        box.innerHTML=events.slice(0,12).map(e=>`<div class="project-activity-row"><span class="activity-dot"></span><div><strong>${escapeHtml(e.title)}</strong><span>${escapeHtml(e.detail||'')}</span><small>${e.time?escapeHtml(new Date(e.time).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'})):''}</small></div></div>`).join('')||`<div class="empty-compact-state"><strong>No project activity yet</strong><span>Payments and completed deliverables will appear here.</span></div>`;
+      }
+
       function renderRecentActivity() {
         const box=document.getElementById("recentActivityList"); if(!box) return;
         const events=[];
@@ -5637,7 +5650,6 @@ ${description}`))actionCallback();return;}
           (p.deliverables||[]).forEach(d=>{ if(d.completed) events.push({time:d.completed_at||p.updated_at||p.created_at,title:"Deliverable completed",sub:`${d.item_name||d.name||"Deliverable"} — ${p.title}`}); });
           if(isProjectOverdue(p)) events.push({time:p.payment_due_date,title:"Payment overdue",sub:`${p.client_name||"Client"} has ${formatCurrency(getProjectBalance(p))} outstanding`});
         });
-        state.tasks.forEach(t=>{ if(t.created_at) events.push({time:t.created_at,title:"Task created",sub:t.name}); });
         events.sort((a,b)=>new Date(b.time)-new Date(a.time));
         box.innerHTML=events.slice(0,8).map(e=>`<div class="activity-item"><span class="activity-dot"></span><div><div class="activity-title">${escapeHtml(e.title)}</div><div class="activity-sub">${escapeHtml(e.sub)}</div><div class="activity-time">${e.time?new Date(e.time).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}):""}</div></div></div>`).join("")||`<div class="text-muted py-4">No activity available yet.</div>`;
       }
@@ -6278,26 +6290,31 @@ ${description}`))actionCallback();return;}
       /* ==========================================================================
          DELETE RECOVERY / UNDO MECHANISM
          ========================================================================== */
-      function deleteCurrentProject() {
+      function archiveCurrentProject() {
         if (!state.activeProjectId) return;
         const proj = state.projects.find(p => p.id === state.activeProjectId);if (!proj) return;
-        requestDestructivePin('Delete Project',`Delete "${proj.title}"? The remaining Project IDs will be resequenced.`,async()=>{proj.deleted=true;state.lastDeletedProject=proj;renumberProjectSequence();persistProjectsState();await syncRenumberedProjects();showToast(`Project "${proj.title}" deleted.`,"Undo",()=>undoDeleteProject(proj.id));navigateTo('projects');renderProjects();renderOverviewDashboard();});
+        requestDestructivePin('Archive Project',`Archive "${proj.title}"? It will leave active work but its history, payments, invoice, files, and deliverables will be preserved.`,async()=>{
+          if(!supabaseClient||!state.isConnected){showToast('Supabase connection required before archiving a project.');return;}
+          const previous=proj.archived_at||null,archivedAt=new Date().toISOString();
+          try{
+            const result=await supabaseClient.from('projects').update({archived_at:archivedAt,updated_at:archivedAt}).eq('id',proj.id).select('id').single();
+            if(result.error)throw result.error;
+            proj.archived_at=archivedAt;proj.updated_at=archivedAt;persistProjectsState();
+            showToast(`Project "${proj.title}" archived.`);
+            navigateTo('projects');renderProjects();renderOverviewDashboard();
+          }catch(error){
+            proj.archived_at=previous;
+            console.error('Archive project failed:',error);
+            showToast(`Project archive failed: ${error?.message||error}`);
+          }
+        });
       }
 
-      function deleteProjectById(projId){state.activeProjectId=projId;deleteCurrentProject();}
+      function archiveProjectById(projId){state.activeProjectId=projId;archiveCurrentProject();}
 
-      function undoDeleteProject(projId) {
-        const proj = state.projects.find(p => p.id === projId);
-        if (proj) {
-          proj.deleted = false;
-          state.lastDeletedProject = null;
-          renumberProjectSequence();
-          persistProjectsState();
-          syncRenumberedProjects();
-          renderCurrentView();
-          showToast(`Project "${proj.title}" restored.`);
-        }
-      }
+      // Compatibility aliases: older controls now archive instead of destroying history.
+      function deleteCurrentProject(){archiveCurrentProject();}
+      function deleteProjectById(projId){archiveProjectById(projId);}
 
       /* ==========================================================================
          NEW ORDER & CART PERSISTENCE WORKFLOW
@@ -7862,7 +7879,7 @@ ${description}`))actionCallback();return;}
         if(Array.isArray(proj.project_items)&&proj.project_items.some(i=>String(i.type||'').toUpperCase()==='HISTORY')&&Array.isArray(proj.deliverables)&&proj.deliverables.length===1&&String(proj.deliverables[0].item_name||proj.deliverables[0].name||'')===String(proj.project_type||'')){proj.deliverables=[];persistProjectsState();}
         const hasOldAutoDeliverables=Array.isArray(proj.deliverables)&&proj.deliverables.some(d=>d.order_item_id&&String(d.source_type||'').toUpperCase()!=='ORDER_ITEM');
         if(hasOldAutoDeliverables&&Array.isArray(proj.project_items)&&!proj.project_items.some(i=>String(i.type||'').toUpperCase()==='HISTORY')){syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();}
-        document.getElementById('projDetailTitle').innerText=proj.title||'Untitled Project';document.getElementById('projDetailClient').innerText=[formatProjectId(proj),proj.client_email||'No email'].join('  |  ');populateProjectData(proj);renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);document.getElementById('projectNotesTextarea').value=proj.notes||'';navigateTo('project-details');switchProjectTab(initialTab||'deliverables');
+        document.getElementById('projDetailTitle').innerText=proj.title||'Untitled Project';document.getElementById('projDetailClient').innerText=[formatProjectId(proj),proj.client_email||'No email'].join('  |  ');populateProjectData(proj);renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);document.getElementById('projectNotesTextarea').value=proj.notes||'';renderProjectFilesAccess(proj);renderProjectActivity(proj);navigateTo('project-details');switchProjectTab(initialTab||'project-data');
       }
 
       let projectDataAutosaveTimer=null;
@@ -8964,8 +8981,8 @@ ${description}`))actionCallback();return;}
               renderClients();
               showToast('Client archived.');
             }catch(error){
-              console.error('Delete client failed:',error);
-              showToast(`Delete client failed: ${error.message||error}`);
+              console.error('Archive client failed:',error);
+              showToast(`Archive client failed: ${error.message||error}`);
             }
           }
         );
