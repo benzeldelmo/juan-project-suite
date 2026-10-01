@@ -98,11 +98,15 @@ export async function ensurePortalAccount(user, svc) {
   return insertedAccount.data;
 }
 
-export async function enforceRateLimit(req, svc, scope, subject='', maxHits=6, windowSeconds=900){const forwarded=String(req.headers['x-forwarded-for']||'').split(',')[0].trim(),ip=forwarded||String(req.headers['x-real-ip']||req.socket?.remoteAddress||'unknown'),raw=`${scope}|${ip}|${String(subject||'').trim().toLowerCase()}`,key=`${scope}:${createHash('sha256').update(raw).digest('hex')}`;const {data,error}=await svc.rpc('consume_juan_rate_limit',{p_key:key,p_window_seconds:windowSeconds,p_max_hits:maxHits});if(error)throw Object.assign(new Error('Security rate-limit check is unavailable. Please try again.'),{status:503});if(data!==true)throw Object.assign(new Error('Too many attempts. Please wait and try again.'),{status:429});}
+export async function enforceRateLimit(req, svc, scope, subject='', maxHits=6, windowSeconds=900){const forwarded=String(req.headers['x-forwarded-for']||'').split(',')[0].trim(),ip=forwarded||String(req.headers['x-real-ip']||req.socket?.remoteAddress||'unknown'),raw=`${scope}|${ip}|${String(subject||'').trim().toLowerCase()}`,key=`${scope}:${createHash('sha256').update(raw).digest('hex')}`;const {data,error}=await svc.rpc('consume_juan_rate_limit',{p_key:key,p_window_seconds:windowSeconds,p_max_hits:maxHits});if(error)throw Object.assign(new Error('Security rate-limit check is unavailable. Please try again.'),{status:503});if(data!==true)throw Object.assign(new Error('Too many attempts. Please wait before trying again.'),{status:429,retryAfter:windowSeconds});}
 
 export function sendError(res, error) {
   console.error(error);
-  return res.status(error?.status || 500).json({ error: error?.message || 'Unexpected server error.' });
+  const status=error?.status||500;
+  if(status===429&&Number(error?.retryAfter)>0)res.setHeader('Retry-After',String(Math.ceil(Number(error.retryAfter))));
+  const payload={error:error?.message||'Unexpected server error.'};
+  if(status===429&&Number(error?.retryAfter)>0)payload.retry_after_seconds=Math.ceil(Number(error.retryAfter));
+  return res.status(status).json(payload);
 }
 
 
