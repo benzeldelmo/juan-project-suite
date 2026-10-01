@@ -2,6 +2,7 @@
 (function(){
   "use strict";
   var API=function(body){return window.JuanSuiteRuntime.request("/api/suite",body);};
+  filter="new";
   var esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
   var peso=function(v){return new Intl.NumberFormat("en-PH",{style:"currency",currency:"PHP"}).format(Number(v||0));};
   var dateText=function(v){
@@ -69,15 +70,19 @@
   function effectiveStatus(o){return o.archived_at?"Archived":(o.status||"Order Received");}
   function drawFilters(){
     var host=document.getElementById("ordersPageFilters");if(!host)return;
-    var opts=[["active","Active"],["all","All"],["approved","Approved"],["rejected","Rejected"],["archived","Archived"]];
+    var opts=[["new","New"],["ongoing","Ongoing"],["completed","Completed"],["all","All"],["rejected","Rejected"],["archived","Archived"]];
     host.innerHTML=opts.map(function(x){return '<button class="filter-pill '+(filter===x[0]?"active":"")+'" data-filter="'+x[0]+'">'+x[1]+"</button>";}).join("");
     host.querySelectorAll("[data-filter]").forEach(function(b){b.onclick=function(){filter=b.dataset.filter;renderOrders(false);};});
   }
   function visibleOrders(){
     return orders.filter(function(o){
       var s=effectiveStatus(o).toLowerCase();
-      if(filter==="active"&&(o.archived_at||s==="rejected"||s==="project created"))return false;
-      if(filter==="approved"&&s!=="approved")return false;
+      var isCompleted=s==="project created"||!!o.project_id;
+      var isOngoing=s==="approved"&&!isCompleted&&!o.archived_at;
+      var isNew=!o.archived_at&&!isCompleted&&!isOngoing&&s!=="rejected";
+      if(filter==="new"&&!isNew)return false;
+      if(filter==="ongoing"&&!isOngoing)return false;
+      if(filter==="completed"&&!isCompleted)return false;
       if(filter==="rejected"&&s!=="rejected")return false;
       if(filter==="archived"&&s!=="archived")return false;
       if(query&&((o.code||"")+" "+(o.name||"")+" "+(o.email||"")+" "+(o.title||"")+" "+s).toLowerCase().indexOf(query)<0)return false;
@@ -102,7 +107,7 @@
         '<td><span class="badge '+(status==="Rejected"?"badge-red":status==="Approved"?"badge-green":"badge-neutral")+'">'+esc(status)+"</span></td>"+
         '<td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="'+menu+'"><button class="icon-more-button vertical-more" aria-label="Order actions" onclick="app.togglePopover(\''+menu+'\',event)">⋮</button><div class="popover-panel client-row-menu">'+
         '<button class="popover-action" onclick="window.JPGeneral.openOrder(\''+id+'\',true)">Edit Order</button>'+
-        (o.project_id?"":'<button class="popover-action text-danger" onclick="window.JPGeneral.archiveOrder(\''+id+'\')">Delete Order</button>')+
+        (o.project_id?"":'<button class="popover-action" onclick="window.JPGeneral.archiveOrder(\''+id+'\')">Archive Order</button>')+
         "</div></div></td></tr>";
     }).join("")||'<tr><td colspan="7" class="text-center text-muted py-4">No matching orders.</td></tr>';
   }
@@ -164,13 +169,13 @@
   }
   async function archiveOrder(id){
     var o=findOrder(id);if(!o)return;
-    if(!(await confirmAction({title:"Delete "+o.code+"?",message:"It will disappear from Active Orders and remain archived for history.",confirmLabel:"Delete Order",danger:true})))return;
+    if(!(await confirmAction({title:"Archive "+o.code+"?",message:"It will disappear from Active Orders and remain archived for history.",confirmLabel:"Archive Order",danger:false})))return;
     var index=orders.findIndex(function(x){return String(x.id)===String(id);});
     var snapshot=index>=0?Object.assign({},orders[index]):null;
     if(index>=0){orders[index].archived_at=new Date().toISOString();orders[index].status="Archived";}
-    closeOverlay();renderOrders(false);toast("Order removed.");
+    closeOverlay();renderOrders(false);toast("Order archived.");
     try{await API({action:"archive-order",id:id});}
-    catch(e){if(index>=0&&snapshot)orders[index]=snapshot;renderOrders(false);toast("Delete failed: "+(e.message||e));}
+    catch(e){if(index>=0&&snapshot)orders[index]=snapshot;renderOrders(false);toast("Archive failed: "+(e.message||e));}
   }
 
   function renderEditableClient(){
