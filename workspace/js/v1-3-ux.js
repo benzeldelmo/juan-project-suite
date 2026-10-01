@@ -33,9 +33,9 @@
   function mobileMore(){
     if($('#jpMobileMore'))return;
     const links=[
-      ['orders','Orders'],['new-order','New Order'],['reports','Reports'],
-      ['tasks','Tasks'],['deliverables','Deliverables'],['calendar','Calendar'],
-      ['pricelist','Shop'],['online-portal','Online Management'],['in-house-ads','In-House Ads'],['settings','Settings']
+      ['new-order','New Order'],['orders','Orders'],['reports','Reports'],
+      ['calendar','Deadline Calendar'],['pricelist','Services'],
+      ['in-house-ads','Flyers & Campaigns'],['online-portal','Online Portal'],['settings','Settings']
     ];
     document.body.insertAdjacentHTML('beforeend',`<div id="jpMobileMore" class="mobile-workspace-more" aria-hidden="true"><button type="button" class="mobile-more-scrim" data-close-more aria-label="Close menu"></button><section class="mobile-more-sheet" role="dialog" aria-modal="true" aria-label="More Workspace tools"><header><div><span>WORKSPACE</span><strong>More</strong></div><button type="button" data-close-more aria-label="Close">×</button></header><div class="mobile-more-grid">${links.map(([v,l])=>`<button type="button" data-more-v="${v}">${l}</button>`).join('')}</div></section></div>`);
     const sheet=$('#jpMobileMore');
