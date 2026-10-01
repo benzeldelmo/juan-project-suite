@@ -93,3 +93,21 @@ test("navigation guard prevents missing destinations from becoming silent blank 
   assert.match(js, /This Workspace section is not available yet/);
   assert.match(js, /return false/);
 });
+
+
+test("Workspace login validates required fields before consuming rate limits", async () => {
+  const login = await read("api/login.js");
+  const required=login.indexOf("if(!email||!password)");
+  const ipLimit=login.indexOf("workspace-login-ip");
+  const emailLimit=login.indexOf("workspace-login-email");
+  assert.ok(required>=0 && required<ipLimit && required<emailLimit);
+});
+
+test("Workspace rate-limit responses provide retry guidance", async () => {
+  const lib = await read("api/_lib.js");
+  const html = await read("index.html");
+  assert.match(lib, /retryAfter:windowSeconds/);
+  assert.match(lib, /Retry-After/);
+  assert.match(lib, /retry_after_seconds/);
+  assert.match(html, /Too many sign-in attempts\. Try again in about/);
+});
