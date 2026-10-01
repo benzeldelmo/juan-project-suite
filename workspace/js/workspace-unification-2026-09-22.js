@@ -317,7 +317,7 @@ function reportRowsHTML(data){
     const ref=pay.reference_no||pay.reference_number||'—';
     const clientName=client?.name||p?.client_name||'—',projectTitle=p?.title||'—',projectCode=reportProjectCode(p);
     const action=p?'<button type="button" class="jp-open-record" data-project-id="'+esc(p.id)+'" aria-label="Open payment record">'+navIcon('reports')+'</button>':'—';
-    return '<tr><td class="jp-date-cell">'+date(pay.payment_date||pay.created_at)+'</td><td><span class="jp-activity-ref">'+esc(ref)+'</span></td><td>'+esc(clientName)+'</td><td class="jp-activity-project"><strong>'+esc(projectTitle)+'</strong><small>'+esc(projectCode)+'</small></td><td>'+esc(method)+'</td><td>'+esc(type)+'</td><td><strong>'+peso(Number(pay.amount_paid??pay.amount||0))+'</strong></td><td><span class="jp-payment-status">'+esc(status)+'</span></td><td>'+action+'</td></tr>';
+    return '<tr><td class="jp-date-cell">'+date(pay.payment_date||pay.created_at)+'</td><td><span class="jp-activity-ref">'+esc(ref)+'</span></td><td>'+esc(clientName)+'</td><td class="jp-activity-project"><strong>'+esc(projectTitle)+'</strong><small>'+esc(projectCode)+'</small></td><td>'+esc(method)+'</td><td>'+esc(type)+'</td><td><strong>'+peso(Number(pay.amount_paid??pay.amount??0))+'</strong></td><td><span class="jp-payment-status">'+esc(status)+'</span></td><td>'+action+'</td></tr>';
   }).join('');
 }
 function drawReportRows(data){
