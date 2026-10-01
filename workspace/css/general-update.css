@@ -41,7 +41,7 @@ body.jp-general-modal-open{overflow:hidden}
 @keyframes jpPrepareSpin{to{transform:rotate(360deg)}}
 .jp-inline-form-footer{min-height:34px!important;justify-content:flex-start!important}
 #inlineClientSaveState{font-size:10px;color:var(--text-tertiary)}
-/* Standalone In-House Ads page · 2026-09-20 */
+/* Flyers & Campaigns page · Web + Online */
 #view-in-house-ads{padding-bottom:18px}.jp-ads-page{display:grid;gap:14px;min-width:0}.jp-ads-heading{margin:0!important;align-items:center!important}.jp-ads-heading h1{margin:2px 0 4px;font-size:28px;line-height:1.08;letter-spacing:-.035em}.jp-ads-heading p{font-size:12px!important}.jp-ads-heading-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .jp-ad-kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}.jp-ad-kpis>div{min-height:86px;padding:14px 16px;border:1px solid var(--border-subtle);border-radius:14px;background:var(--bg-card);display:grid;align-content:center;gap:3px}.jp-ad-kpis span{font-size:9px!important;font-weight:750;text-transform:uppercase;letter-spacing:.06em}.jp-ad-kpis strong{font-size:25px!important;line-height:1.05}.jp-ad-kpis small{font-size:9px;color:var(--text-tertiary)}
 .jp-ad-management{border:1px solid var(--border-subtle);border-radius:14px;background:var(--bg-card);overflow:visible}.jp-ad-toolbar{display:grid;grid-template-columns:minmax(250px,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border-subtle)}.jp-ad-search-wrap{position:relative}.jp-ad-search-wrap>span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-tertiary);font-size:17px;pointer-events:none}.jp-ad-search-wrap input{height:38px!important;padding-left:36px!important;border-radius:9px!important;font-size:11px!important}.jp-ad-toolbar .filter-pills{justify-content:flex-end;flex-wrap:wrap}
@@ -120,3 +120,27 @@ body.jp-general-modal-open{overflow:hidden}
   .workspace-receipt-actions{justify-content:flex-start}
   .workspace-institution-menu{position:fixed;left:16px;right:16px;top:18%;max-height:64vh}
 }
+
+
+/* Web flyers + survey campaign editor */
+.jp-campaign-filters{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.jp-campaign-filters .compact-sort{min-width:132px}
+.jp-section-heading-inline{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}
+.jp-section-heading-inline h3{margin:0 0 3px!important}
+.jp-survey-builder{display:grid;gap:9px;margin-bottom:12px}
+.jp-survey-question-row{display:grid;gap:8px;padding:11px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-subtle)}
+.jp-survey-question-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.jp-survey-question-head strong{font-size:10px;color:var(--text-secondary)}
+.jp-survey-remove{width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--text-tertiary);font-size:18px;cursor:pointer}
+.jp-survey-remove:hover{background:rgba(180,35,24,.08);color:var(--status-red)}
+.jp-survey-empty{padding:16px;border:1px dashed var(--border-medium);border-radius:12px;color:var(--text-tertiary);font-size:10px;text-align:center}
+.jp-survey-responses{display:grid;gap:10px}
+.jp-survey-response-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-card)}
+.jp-survey-response-summary strong{font-size:12px}.jp-survey-response-summary span{font-size:9px;color:var(--text-tertiary)}
+.jp-survey-response-card{display:grid;gap:9px;padding:13px;border:1px solid var(--border-subtle);border-radius:13px;background:var(--bg-card)}
+.jp-survey-response-card header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--border-subtle)}
+.jp-survey-response-card header strong{font-size:10px}.jp-survey-response-card header span{font-size:9px;color:var(--text-tertiary)}
+.jp-survey-response-card>div{display:grid;gap:3px}.jp-survey-response-card small{font-size:9px;font-weight:750;color:var(--text-tertiary)}.jp-survey-response-card p{margin:0;font-size:11px;line-height:1.45;white-space:pre-wrap}
+.jp-survey-response-modal{width:min(760px,calc(100vw - 36px))!important}
+@media(max-width:1180px){.jp-campaign-filters{justify-content:flex-start}}
+@media(max-width:720px){.jp-campaign-filters{display:grid;grid-template-columns:1fr 1fr;width:100%}.jp-campaign-filters .compact-sort{min-width:0;width:100%}.jp-section-heading-inline{align-items:center}.jp-survey-question-row .jp-ad-editor-grid{grid-template-columns:1fr}.jp-survey-response-modal{width:100%!important}}
