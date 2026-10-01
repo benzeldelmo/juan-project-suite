@@ -160,11 +160,45 @@ test("Client Home pins 1800x600 ad and footer above navigation without body whit
 });
 
 
-test("legacy sidebar enhancement preserves In-House Ads and future navigation items", async () => {
+test("Workspace sidebar uses grouped navigation without losing management destinations", async () => {
   const js = await read("js/v1-2-ux.js");
-  assert.ok(js.includes("append(labels.operations,['calendar','pricelist','online-portal','in-house-ads'])"));
-  assert.ok(js.includes("const placed=new Set()"));
-  assert.ok(js.includes("if(!placed.has(key))menu.append(el)"));
+  assert.ok(js.includes("makeGroup('WORKSPACE'"));
+  assert.ok(js.includes("makeGroup('FINANCE'"));
+  assert.ok(js.includes("makeGroup('OPERATIONS'"));
+  assert.ok(js.includes("makeGroup('SHOP & ONLINE'"));
+  assert.ok(js.includes("makeGroup('SYSTEM'"));
+  assert.ok(js.includes("items['online-portal']"));
+  assert.ok(js.includes("items['in-house-ads']"));
+  assert.ok(js.includes("items.settings"));
+});
+
+test("Workspace stabilization restores Tasks and Deliverables instead of navigating to blank views", async () => {
+  const js = await read("js/v1-2-ux.js");
+  const css = await read("css/v1-2-ux.css");
+  assert.match(js, /id='view-tasks'/);
+  assert.match(js, /id='view-deliverables'/);
+  assert.match(js, /id="tasksList"/);
+  assert.match(js, /id="allDeliverablesByProject"/);
+  assert.match(js, /if\(view==='tasks'\)window\.app\.renderTasks/);
+  assert.match(js, /if\(view==='deliverables'\)window\.app\.renderDeliverablesView/);
+  assert.match(css, /#view-tasks\.active,#view-deliverables\.active\{display:block!important\}/);
+});
+
+test("Reports stabilization keeps three KPIs and replaces the trend graph with scrollable recent payments", async () => {
+  const js = await read("js/v1-2-ux.js");
+  const css = await read("css/v1-2-ux.css");
+  assert.match(js, /q\('\.report-chart-card-v2',root\)\?\.remove\(\)/);
+  assert.match(js, /root\.append\(recent\)/);
+  assert.match(js, /status\.classList\.add\('report-status-full'\)/);
+  assert.match(css, /#reportsContent \.report-kpi-grid-v2\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/);
+  assert.match(css, /#reportsContent \.report-recent-v2 \.table-responsive\{max-height:360px;overflow-y:auto/);
+});
+
+test("Workspace API refreshes an expired Supabase session before surfacing 401", async () => {
+  const runtime = await read("js/suite-prod.js");
+  assert.match(runtime, /if\(r\.status===401&&__JUAN_SB\?\.auth\?\.refreshSession\)/);
+  assert.match(runtime, /await __JUAN_SB\.auth\.refreshSession\(\)/);
+  assert.match(runtime, /Your Workspace session expired\. Please sign in again\./);
 });
 
 

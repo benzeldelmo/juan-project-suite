@@ -32,21 +32,57 @@
   const svg=path=>`<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
 
   function makeLabel(text){const d=document.createElement('div');d.className='nav-section-label';d.textContent=text;return d}
+  function ensureOperationalViews(){
+    const main=q('.main-content');if(!main)return;
+    if(!q('#view-tasks')){
+      const s=document.createElement('section');s.id='view-tasks';s.className='view';
+      s.innerHTML='<header class="page-header"><div><div class="greeting-subtitle">Operations</div><h1 class="page-title">Tasks</h1><div class="page-description">Track operational work connected to projects and deliverables.</div></div><button class="btn btn-primary" type="button" onclick="app.openTaskModal()">+ New Task</button></header><div class="view-toolbar unified-toolbar"><input id="tasksSearch" class="form-control" placeholder="Search tasks, projects, or deliverables..." oninput="app.renderTasks()"><div id="taskFilters" class="filter-pills"></div></div><div class="card"><div id="tasksList"></div></div>';
+      const calendar=q('#view-calendar');calendar?main.insertBefore(s,calendar):main.append(s);
+    }
+    if(!q('#view-deliverables')){
+      const s=document.createElement('section');s.id='view-deliverables';s.className='view';
+      s.innerHTML='<header class="page-header"><div><div class="greeting-subtitle">Operations</div><h1 class="page-title">Deliverables</h1><div class="page-description">See active project deliverables without opening projects one by one.</div></div></header><div id="allDeliverablesByProject"></div>';
+      const calendar=q('#view-calendar');calendar?main.insertBefore(s,calendar):main.append(s);
+    }
+    // Older CSS intentionally hid these retired views. They are active again in the stabilized Workspace.
+    q('#view-tasks')?.style.removeProperty('display');
+    q('#view-deliverables')?.style.removeProperty('display');
+  }
+
+  function makeNavItem(view,label,path){
+    const a=document.createElement('a');a.href='#';a.className='nav-item';a.dataset.view=view;
+    a.innerHTML='<span class="icon">'+svg(path||'<circle cx="12" cy="12" r="8"/>')+'</span>'+label;
+    a.setAttribute('aria-label',label);
+    a.addEventListener('click',e=>{e.preventDefault();window.app?.navigateTo?.(view)});
+    return a;
+  }
+
+  function makeGroup(label,items,open=true){
+    const group=document.createElement('div');group.className='jp-nav-group'+(open?' open':'');
+    const button=document.createElement('button');button.type='button';button.className='jp-nav-group-toggle';button.setAttribute('aria-expanded',open?'true':'false');
+    button.innerHTML='<span>'+label+'</span><span class="jp-nav-chevron" aria-hidden="true">⌄</span>';
+    const body=document.createElement('div');body.className='jp-nav-group-items';
+    items.filter(Boolean).forEach(item=>body.append(item));
+    button.addEventListener('click',()=>{const next=!group.classList.contains('open');group.classList.toggle('open',next);button.setAttribute('aria-expanded',next?'true':'false')});
+    group.append(button,body);return group;
+  }
+
   function restructureSidebar(){
-    const menu=q('.nav-menu');if(!menu||menu.dataset.v12==='1')return;menu.dataset.v12='1';
-    const items={};
-    qa('.nav-item',menu).forEach(el=>{const key=el.dataset.view||el.id;if(key)items[key]=el});
+    const menu=q('.nav-menu');if(!menu||menu.dataset.stabilized==='1')return;menu.dataset.stabilized='1';
+    const items={};qa('.nav-item',menu).forEach(el=>{const key=el.dataset.view||el.id;if(key)items[key]=el});
+    if(!items.tasks)items.tasks=makeNavItem('tasks','Tasks','<path d="M5 4h14v16H5z"/><path d="m8 9 2 2 4-4M8 15h8"/>');
+    if(!items.deliverables)items.deliverables=makeNavItem('deliverables','Deliverables','<path d="M4 6h16v14H4z"/><path d="M8 3v6M16 3v6M8 14l2 2 5-5"/>');
     menu.innerHTML='';
-    const placed=new Set();
-    const append=(label,views)=>{menu.append(makeLabel(label));views.forEach(v=>{const el=items[v];if(el){menu.append(el);placed.add(v)}})};
-    append(labels.work,['my-works','projects','clients','new-order','orders']);
     if(items['new-order'])items['new-order'].classList.remove('workspace-primary-action');
-    append(labels.finance,['payments','reports']);
-    append(labels.operations,['calendar','pricelist','online-portal','in-house-ads']);
-    append(labels.system,['settings']);
-    // Never delete newly added navigation destinations just because this legacy enhancer
-    // does not know about them yet. Preserve any remaining items after the known groups.
-    Object.entries(items).forEach(([key,el])=>{if(!placed.has(key))menu.append(el)});
+
+    menu.append(
+      makeGroup('WORKSPACE',[items['my-works'],items.projects,items.clients,items.orders,items['new-order']],true),
+      makeGroup('FINANCE',[items.payments,items.reports],true),
+      makeGroup('OPERATIONS',[items.tasks,items.deliverables,items.calendar],false),
+      makeGroup('SHOP & ONLINE',[items.pricelist,items['online-portal'],items['in-house-ads']],false),
+      makeGroup('SYSTEM',[items.settings],false)
+    );
+
     qa('.nav-item',menu).forEach(el=>{const key=el.dataset.view||el.id,ic=q('.icon',el),path=iconPaths[key];if(ic&&path)ic.innerHTML=svg(path);el.setAttribute('aria-label',el.textContent.trim())});
   }
 
@@ -107,12 +143,59 @@
     qa('td.text-center.text-muted').forEach(td=>{const t=td.textContent.trim();if(t==='No projects found.')td.innerHTML='<strong>No matching projects</strong><div class="text-sm text-muted mt-1">Try another filter or create a new order.</div>';if(t==='No matching clients.')td.innerHTML='<strong>No matching clients</strong><div class="text-sm text-muted mt-1">Try a different name, email, or Client ID.</div>'});
   }
 
+  function simplifyReports(){
+    const root=q('#reportsContent .reports-v2');if(!root||root.dataset.stabilized==='1')return;
+    root.dataset.stabilized='1';
+    q('#view-reports .report-range-control')?.classList.add('hidden');
+    const grid=q('.report-main-grid-v2',root),status=q('.report-status-card-v2',root),recent=q('.report-recent-v2',root);
+    q('.report-chart-card-v2',root)?.remove();
+    if(grid){
+      if(status)grid.removeChild(status);
+      grid.remove();
+    }
+    if(recent)root.append(recent);
+    if(status){status.classList.add('report-status-full');root.append(status);}
+    const recentHead=q('.report-card-head-v2 h2',recent);if(recentHead)recentHead.textContent='Recent Payments';
+  }
+
+  function installReportGuard(){
+    const box=q('#reportsContent');if(!box||box.dataset.stabilizationObserver==='1')return;
+    box.dataset.stabilizationObserver='1';
+    let scheduled=false;
+    new MutationObserver(()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;simplifyReports()})}).observe(box,{childList:true,subtree:true});
+  }
+
+  function patchNavigation(){
+    if(!window.app||window.app.__stabilizedNavigation)return;
+    window.app.__stabilizedNavigation=true;
+    const original=window.app.navigateTo.bind(window.app);
+    window.app.navigateTo=function(view){
+      ensureOperationalViews();
+      const target=q('#view-'+view);
+      if(!target){
+        window.showToast?.('This Workspace section is not available yet.');
+        return false;
+      }
+      const result=original(view);
+      requestAnimationFrame(()=>{
+        if(view==='tasks')window.app.renderTasks?.();
+        if(view==='deliverables')window.app.renderDeliverablesView?.();
+        if(view==='reports')simplifyReports();
+      });
+      return result;
+    };
+    const originalReports=window.app.renderReportsView?.bind(window.app);
+    if(originalReports)window.app.renderReportsView=function(...args){const out=originalReports(...args);requestAnimationFrame(simplifyReports);return out};
+  }
+
   function install(){
-    restructureSidebar();addDescriptions();improveAccessibility();setupValidation();decorateSnapshot();upgradeEmptyStates();wrapValidation();
+    ensureOperationalViews();restructureSidebar();patchNavigation();installReportGuard();
+    addDescriptions();improveAccessibility();setupValidation();decorateSnapshot();upgradeEmptyStates();wrapValidation();
     wrapAsync('confirmAndCreateOrder','Creating project…','Saving the client, order items, timeline, and pricing.');
     wrapAsync('saveProjectData','Saving project…','Updating project information and connected records.');
     wrapAsync('finalizePaymentRecord','Recording payment…','Updating payment history and project balance.');
     wrapAsync('saveInvoicePDF','Preparing invoice…','Formatting the JUAN PROJECT invoice for export.');
+    if(q('#view-reports.active'))simplifyReports();
   }
   document.addEventListener('DOMContentLoaded',()=>setTimeout(install,120));
   window.addEventListener('juan:realtime-sync',()=>requestAnimationFrame(()=>{decorateSnapshot();upgradeEmptyStates();}));

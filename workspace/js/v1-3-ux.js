@@ -2,7 +2,12 @@
 (()=>{
   const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
   let draftId=null,drafts=[];
-  async function adminSession(){const cfg=await fetch('/api/supabase-config',{cache:'no-store'}).then(r=>r.json());if(!window.__jpV13Sb)window.__jpV13Sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});return (await window.__jpV13Sb.auth.getSession()).data.session}
+  async function adminSession(){
+    if(window.JuanSuiteRuntime?.getSession)return await window.JuanSuiteRuntime.getSession();
+    const shared=window.supabaseClient;
+    if(shared?.auth?.getSession)return (await shared.auth.getSession()).data?.session||null;
+    return null;
+  }
   async function draftApi(method='GET',body){const ses=await adminSession();if(!ses)throw Error('Admin log in required.');const r=await fetch('/api/drafts',{method,headers:{Authorization:`Bearer ${ses.access_token}`,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||'Draft request failed.');return j}
   function collect(){const gv=id=>$(id)?.value??'',ck=id=>!!$(id)?.checked;return {project_name:gv('#orderProjectName'),existing_client_id:gv('#orderClientSelect'),existing_client_search:gv('#orderClientSearch'),new_client_name:gv('#newClientName'),new_client_email:gv('#newClientEmail'),new_client_phone:gv('#newClientPhone'),new_client_address:gv('#newClientAddress'),start_date:gv('#orderStartDate'),deadline_date:gv('#orderDeadlineDate'),priority:ck('#priorityProjectToggle'),notes:gv('#orderNotes'),client_mode:$('#clientNewMode')?.classList.contains('hidden')?'existing':'new'}}
   function hydrate(d){const set=(id,v)=>{const el=$(id);if(el)el.value=v??''};set('#orderProjectName',d.project_name);set('#orderClientSelect',d.existing_client_id);set('#orderClientSearch',d.existing_client_search);set('#newClientName',d.new_client_name);set('#newClientEmail',d.new_client_email);set('#newClientPhone',d.new_client_phone);set('#newClientAddress',d.new_client_address);set('#orderStartDate',d.start_date);set('#orderDeadlineDate',d.deadline_date);set('#orderNotes',d.notes);const pr=$('#priorityProjectToggle');if(pr)pr.checked=!!d.priority;if(window.app?.setClientMode)window.app.setClientMode(d.client_mode==='new'?'new':'existing')}
@@ -10,9 +15,9 @@
   async function loadDrafts(){ensureModal();$('#jpDraftList').innerHTML='<div class="draft-empty">Loading drafts…</div>';$('#jpDraftModal').classList.add('show');try{drafts=(await draftApi()).drafts||[];renderDrafts()}catch(e){$('#jpDraftList').innerHTML=`<div class="draft-empty">${e.message}</div>`}}
   function renderDrafts(){const box=$('#jpDraftList');box.innerHTML=drafts.length?drafts.map(d=>`<div class="draft-row"><div><strong>${escapeHtml(d.project_name||d.title||'Untitled Draft')}</strong><span>${escapeHtml(d.client_name||'Client not selected')} · Saved ${new Date(d.updated_at||d.created_at).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span></div><div><button class="btn btn-secondary btn-sm" data-resume-draft="${d.id}">Resume</button><button class="btn btn-text btn-sm text-danger" data-delete-draft="${d.id}">Delete</button></div></div>`).join(''):'<div class="draft-empty"><strong>No saved drafts</strong><span>Use Save Draft while preparing a new order.</span></div>';$$('[data-resume-draft]').forEach(b=>b.onclick=()=>resume(b.dataset.resumeDraft));$$('[data-delete-draft]').forEach(b=>b.onclick=()=>remove(b.dataset.deleteDraft))}
   const escapeHtml=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  async function save(){const d=collect(),title=d.project_name||'Untitled Draft';const body={id:draftId,title,client_name:d.client_mode==='new'?d.new_client_name:d.existing_client_search,project_name:d.project_name,draft_data:d};try{const j=await draftApi('POST',body);draftId=j.draft.id;window.app?.showToast?.('Draft saved.')||console.log('Draft saved')}catch(e){alert(e.message)}}
+  async function save(){const d=collect(),title=d.project_name||'Untitled Draft';const body={id:draftId,title,client_name:d.client_mode==='new'?d.new_client_name:d.existing_client_search,project_name:d.project_name,draft_data:d};try{const j=await draftApi('POST',body);draftId=j.draft.id;window.app?.showToast?.('Draft saved.')||console.log('Draft saved')}catch(e){window.showToast?.(e.message||'Could not save draft.')}}
   function resume(id){const row=drafts.find(x=>String(x.id)===String(id));if(!row)return;draftId=row.id;$('#jpDraftModal').classList.remove('show');window.app?.navigateTo?.('new-order');setTimeout(()=>hydrate(row.draft_data||{}),60)}
-  async function remove(id){if(!confirm('Delete this draft?'))return;try{await draftApi('POST',{action:'delete',id});drafts=drafts.filter(x=>String(x.id)!==String(id));renderDrafts()}catch(e){alert(e.message)}}
+  async function remove(id){if(!confirm('Delete this draft?'))return;try{await draftApi('POST',{action:'delete',id});drafts=drafts.filter(x=>String(x.id)!==String(id));renderDrafts()}catch(e){window.showToast?.(e.message||'Could not delete draft.')}}
   async function mobileApprovalRequest(method='GET',body){const ses=await adminSession();if(!ses)throw Error('Admin log in required.');const r=await fetch('/api/admin-portal',{method,headers:{Authorization:`Bearer ${ses.access_token}`,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||'Approval request failed.');return j}
   async function loadMobileApprovals(){const box=$('#mobilePaymentApprovals');if(!box||window.innerWidth>720)return;box.innerHTML='<div class="mobile-approval-loading">Checking payment approvals…</div>';try{const data=await mobileApprovalRequest(),pending=(data.submissions||[]).filter(x=>String(x.status||'').toLowerCase()==='pending'),projects=new Map((data.projects||[]).map(p=>[String(p.id),p])),clients=new Map((data.clients||[]).map(c=>[String(c.id),c]));box.innerHTML=`<div class="mobile-approval-head"><div><span>ONLINE PAYMENTS</span><strong>Pending reviews</strong></div><b>${pending.length}</b></div>${pending.length?pending.slice(0,8).map(x=>{const p=projects.get(String(x.project_id)),c=clients.get(String(x.client_id)),ok=x.verification?.passed;return `<div class="mobile-approval-card"><div><strong>${escapeHtml(p?.project_code||p?.title||'Project')}</strong><span>${escapeHtml(c?.name||c?.email||'Client')} · ${new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(Number(x.submitted_amount||0))}</span><small class="${ok?'verify-ok':'verify-warn'}">${ok?'System verified':'Needs attention'}</small></div><div class="mobile-approval-actions"><button class="approve" data-review-open="${escapeHtml(x.id)}">Open Reviews</button></div></div>`}).join(''):'<div class="mobile-approval-empty">No payments waiting for review.</div>'}`;$$('[data-review-open]',box).forEach(b=>b.onclick=()=>{window.app?.navigateTo?.('online-portal');setTimeout(()=>{window.app?.setOnlinePortalTab?.('payments')},140)})}catch(e){box.innerHTML=`<div class="mobile-approval-empty">${escapeHtml(e.message||'Could not load approvals.')}</div>`}}
   function mobileNavigate(view){
@@ -21,7 +26,50 @@
     const target=document.getElementById(`view-${view}`);if(target){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));target.classList.add('active');return true}
     return false
   }
-  function mobileNav(){if($('#jpMobileWorkspaceNav'))return;const icons={home:'⌂',projects:'▣',payments:'₱',reports:'▥',settings:'⚙'};document.body.insertAdjacentHTML('beforeend',`<nav id="jpMobileWorkspaceNav" class="mobile-workspace-nav" aria-label="Workspace mobile navigation"><button type="button" data-v="my-works" aria-label="Home"><span>${icons.home}</span><small>Home</small></button><button type="button" data-v="projects" aria-label="Projects"><span>${icons.projects}</span><small>Projects</small></button><button type="button" data-v="payments" aria-label="Payments and approvals"><span>${icons.payments}</span><small>Payments</small></button><button type="button" data-v="reports" aria-label="Financial reports"><span>${icons.reports}</span><small>Reports</small></button><button type="button" data-v="settings" aria-label="Settings"><span>${icons.settings}</span><small>Settings</small></button></nav>`);const nav=$('#jpMobileWorkspaceNav');nav.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;e.preventDefault();e.stopPropagation();mobileNavigate(b.dataset.v);$$('button',nav).forEach(x=>x.classList.toggle('active',x===b));if(b.dataset.v==='payments')setTimeout(loadMobileApprovals,120)},{passive:false});if(window.innerWidth<=720){const observer=new MutationObserver(()=>{const active=document.querySelector('.view.active')?.id?.replace('view-','');$('#jpMobileWorkspaceNav [data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===active));if(active==='payments')setTimeout(loadMobileApprovals,80)});observer.observe(document.querySelector('.main-content')||document.body,{subtree:true,attributes:true,attributeFilter:['class']});}const initial=document.querySelector('.view.active')?.id?.replace('view-','');$$('#jpMobileWorkspaceNav [data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===initial))}
+  function closeMobileMore(){
+    $('#jpMobileMore')?.classList.remove('show');
+    $('#jpMobileWorkspaceNav [data-more]')?.setAttribute('aria-expanded','false');
+  }
+  function mobileMore(){
+    if($('#jpMobileMore'))return;
+    const links=[
+      ['orders','Orders'],['new-order','New Order'],['reports','Reports'],
+      ['tasks','Tasks'],['deliverables','Deliverables'],['calendar','Calendar'],
+      ['pricelist','Shop'],['online-portal','Online Management'],['in-house-ads','In-House Ads'],['settings','Settings']
+    ];
+    document.body.insertAdjacentHTML('beforeend',`<div id="jpMobileMore" class="mobile-workspace-more" aria-hidden="true"><button type="button" class="mobile-more-scrim" data-close-more aria-label="Close menu"></button><section class="mobile-more-sheet" role="dialog" aria-modal="true" aria-label="More Workspace tools"><header><div><span>WORKSPACE</span><strong>More</strong></div><button type="button" data-close-more aria-label="Close">×</button></header><div class="mobile-more-grid">${links.map(([v,l])=>`<button type="button" data-more-v="${v}">${l}</button>`).join('')}</div></section></div>`);
+    const sheet=$('#jpMobileMore');
+    sheet.addEventListener('click',e=>{
+      if(e.target.closest('[data-close-more]')){closeMobileMore();return}
+      const b=e.target.closest('[data-more-v]');if(!b)return;
+      closeMobileMore();mobileNavigate(b.dataset.moreV);
+    });
+  }
+  function mobileNav(){
+    if($('#jpMobileWorkspaceNav'))return;
+    mobileMore();
+    const icons={home:'⌂',projects:'▣',clients:'◉',payments:'₱',more:'•••'};
+    document.body.insertAdjacentHTML('beforeend',`<nav id="jpMobileWorkspaceNav" class="mobile-workspace-nav" aria-label="Workspace mobile navigation"><button type="button" data-v="my-works" aria-label="Dashboard"><span>${icons.home}</span><small>Home</small></button><button type="button" data-v="projects" aria-label="Projects"><span>${icons.projects}</span><small>Projects</small></button><button type="button" data-v="clients" aria-label="Clients"><span>${icons.clients}</span><small>Clients</small></button><button type="button" data-v="payments" aria-label="Finance"><span>${icons.payments}</span><small>Finance</small></button><button type="button" data-more aria-expanded="false" aria-label="More Workspace tools"><span>${icons.more}</span><small>More</small></button></nav>`);
+    const nav=$('#jpMobileWorkspaceNav');
+    nav.addEventListener('click',e=>{
+      const more=e.target.closest('button[data-more]');
+      if(more){e.preventDefault();e.stopPropagation();const sheet=$('#jpMobileMore'),open=!sheet?.classList.contains('show');sheet?.classList.toggle('show',open);sheet?.setAttribute('aria-hidden',open?'false':'true');more.setAttribute('aria-expanded',open?'true':'false');return}
+      const b=e.target.closest('button[data-v]');if(!b)return;
+      e.preventDefault();e.stopPropagation();closeMobileMore();mobileNavigate(b.dataset.v);
+      $('button[data-v]',nav).forEach(x=>x.classList.toggle('active',x===b));
+      if(b.dataset.v==='payments')setTimeout(loadMobileApprovals,120);
+    },{passive:false});
+    if(window.innerWidth<=720){
+      const observer=new MutationObserver(()=>{
+        const active=document.querySelector('.view.active')?.id?.replace('view-','');
+        $('#jpMobileWorkspaceNav [data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===active));
+        if(active==='payments')setTimeout(loadMobileApprovals,80);
+      });
+      observer.observe(document.querySelector('.main-content')||document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+    }
+    const initial=document.querySelector('.view.active')?.id?.replace('view-','');
+    $('#jpMobileWorkspaceNav [data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===initial));
+  }
 
   function install(){const d=$('#openDraftsBtn'),s=$('#saveDraftBtn');if(d)d.onclick=loadDrafts;if(s)s.onclick=save;mobileNav();const brand=$('.sidebar-brand-subtitle');if(brand)brand.textContent='Workspace';$$('[style*="linear-gradient"].metric-card,[style*="linear-gradient"].card').forEach(x=>x.style.background='');}
   window.addEventListener('juan:realtime-sync',e=>{const entity=String(e.detail?.entity||'');if(entity==='order_drafts'&&$('#jpDraftModal')?.classList.contains('show'))loadDrafts();if(['payment_submissions','payments','projects','clients'].includes(entity)&&window.innerWidth<=720)setTimeout(loadMobileApprovals,60)});

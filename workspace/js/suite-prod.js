@@ -37,11 +37,26 @@ async function __juanGetSession(){
   }catch(e){console.warn('JUAN Suite session unavailable:',e?.message||e);return null}
 }
 async function __juanRequest(path,body){
- const session=await __juanGetSession();
- const headers={'Content-Type':'application/json'};if(session?.access_token)headers.Authorization='Bearer '+session.access_token;
- const r=await fetch(path,{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined,cache:'no-store'});
- const type=r.headers.get('content-type')||'';const j=type.includes('application/json')?await r.json():{error:await r.text()};
- if(!r.ok)throw Error(j.error||'Request failed');return j;
+ const send=async(session)=>{
+   const headers={'Content-Type':'application/json'};if(session?.access_token)headers.Authorization='Bearer '+session.access_token;
+   const r=await fetch(path,{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined,cache:'no-store'});
+   const type=r.headers.get('content-type')||'';const j=type.includes('application/json')?await r.json():{error:await r.text()};
+   return {r,j};
+ };
+ let session=await __juanGetSession();
+ let {r,j}=await send(session);
+ if(r.status===401&&__JUAN_SB?.auth?.refreshSession){
+   try{
+     const refreshed=await __JUAN_SB.auth.refreshSession();
+     const next=refreshed?.data?.session||null;
+     if(next?.access_token){__JUAN_SESSION=next;({r,j}=await send(next));}
+   }catch(_){}
+ }
+ if(!r.ok){
+   const e=Error(j.error||(r.status===401?'Your Workspace session expired. Please sign in again.':'Request failed'));
+   e.status=r.status;e.code=j.code||null;throw e;
+ }
+ return j;
 }
 window.JuanSuiteRuntime={app:__JUAN_APP,session:()=>__JUAN_SESSION,getSession:__juanGetSession,request:__juanRequest,preview:false,onlineUrl:'https://juan-project-online.vercel.app',workspaceUrl:'https://juan-project-workspace-v2.vercel.app',refresh:async()=>{if(__JUAN_APP==='workspace')return window.app?.refreshSharedTest?.();return window.juanOnlineRefresh?.()}};
 
