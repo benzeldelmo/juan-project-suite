@@ -11,7 +11,7 @@ test("core Workspace sections have render targets or explicit injected views", a
     assert.ok(html.includes(`id="${id}"`), `missing ${id}`);
   }
   assert.match(general, /function ensureOrdersView\(\)/);
-  assert.match(general, /section\.id="view-orders"/);
+  assert.match(general, /s\\.id="view-orders"/);
   assert.match(general, /function renderOrders\(\)/);
 });
 
