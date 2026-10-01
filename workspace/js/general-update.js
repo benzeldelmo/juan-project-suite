@@ -51,16 +51,20 @@
   }
 
   function ensureOrdersView(){
-    if(document.getElementById("view-orders"))return;
-    var s=document.createElement("section");s.id="view-orders";s.className="view";
-    s.innerHTML=
-      '<header class="page-header"><div><div class="greeting-subtitle">Online Intake</div><h1 class="page-title">Orders</h1><div class="page-description">Review Order Requests before turning them into projects.</div></div><button class="btn btn-secondary" id="ordersRefreshBtn">Refresh</button></header>'+
-      '<div class="view-toolbar unified-toolbar jp-orders-toolbar"><input class="form-control" id="ordersPageSearch" placeholder="Search Order ID, client, email, or request..."><div class="toolbar-actions"><div class="filter-pills" id="ordersPageFilters"></div></div></div>'+
-      '<div class="card table-card"><div class="table-responsive"><table class="data-table unified-table jp-orders-page-table" data-keyboard-table="orders"><thead><tr><th>Order ID</th><th>Client</th><th>Request</th><th>Amount</th><th>Submitted</th><th>Status</th><th class="table-actions-col"></th></tr></thead><tbody id="ordersPageRows"></tbody></table></div></div>';
-    var clients=document.getElementById("view-clients"),parent=clients?clients.parentNode:document.querySelector(".main-content");
-    if(clients)parent.insertBefore(s,clients);else parent.appendChild(s);
-    document.getElementById("ordersRefreshBtn").onclick=function(){renderOrders(true);};
-    document.getElementById("ordersPageSearch").oninput=function(e){query=e.target.value.trim().toLowerCase();renderOrders(false);};
+    var s=document.getElementById("view-orders");
+    if(!s){
+      s=document.createElement("section");s.id="view-orders";s.className="view";
+      s.innerHTML=
+        '<header class="page-header"><div><div class="greeting-subtitle">Online Intake</div><h1 class="page-title">Orders</h1><div class="page-description">Review Order Requests before turning them into projects.</div></div><button class="btn btn-secondary" id="ordersRefreshBtn" type="button">Refresh</button></header>'+
+        '<div class="view-toolbar unified-toolbar jp-orders-toolbar"><input class="form-control" id="ordersPageSearch" placeholder="Search Order ID, client, email, or request..."><div class="toolbar-actions"><div class="filter-pills" id="ordersPageFilters"></div></div></div>'+
+        '<div class="card table-card"><div class="table-responsive"><table class="data-table unified-table jp-orders-page-table" data-keyboard-table="orders"><thead><tr><th>Order ID</th><th>Client</th><th>Request</th><th>Amount</th><th>Submitted</th><th>Status</th><th class="table-actions-col"></th></tr></thead><tbody id="ordersPageRows"></tbody></table></div></div>';
+      var clients=document.getElementById("view-clients"),parent=clients?clients.parentNode:document.querySelector(".main-content");
+      if(clients)parent.insertBefore(s,clients);else parent.appendChild(s);
+    }
+    var refresh=document.getElementById("ordersRefreshBtn");
+    if(refresh&&!refresh.dataset.ordersBound){refresh.dataset.ordersBound="1";refresh.addEventListener("click",function(){renderOrders(true);});}
+    var search=document.getElementById("ordersPageSearch");
+    if(search&&!search.dataset.ordersBound){search.dataset.ordersBound="1";search.addEventListener("input",function(e){query=e.target.value.trim().toLowerCase();renderOrders(false);});}
   }
   function effectiveStatus(o){return o.archived_at?"Archived":(o.status||"Order Received");}
   function drawFilters(){

@@ -4,26 +4,32 @@ import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("core Workspace sections have render targets or explicit injected views", async () => {
+test("core Workspace sections have native render targets", async () => {
   const html = await read("index.html");
   const general = await read("js/general-update.js");
-  for (const id of ["view-my-works","view-projects","view-clients","view-payments","view-reports","view-calendar","view-pricelist","view-online-portal","view-settings"]) {
+  for (const id of [
+    "view-my-works","view-projects","view-orders","view-clients","view-payments","view-reports",
+    "view-tasks","view-deliverables","view-calendar","view-pricelist","view-online-portal","view-settings"
+  ]) {
     assert.ok(html.includes(`id="${id}"`), `missing ${id}`);
   }
   assert.match(general, /function ensureOrdersView\(\)/);
-  assert.ok(general.includes('s.id="view-orders"'));
+  assert.match(general, /ordersRefreshBtn/);
+  assert.match(general, /ordersPageSearch/);
   assert.match(general, /async function renderOrders\(reload\)/);
 });
 
-test("Operations Tasks and Deliverables are restored as reachable nonblank views", async () => {
+test("Operations Tasks and Deliverables render from the base Workspace", async () => {
+  const html = await read("index.html");
   const js = await read("js/v1-2-ux.js");
   const css = await read("css/v1-2-ux.css");
-  assert.match(js, /id='view-tasks'/);
-  assert.match(js, /id='view-deliverables'/);
-  assert.match(js, /id="tasksList"/);
-  assert.match(js, /id="allDeliverablesByProject"/);
-  assert.match(js, /if\(view==='tasks'\)window\.app\.renderTasks/);
-  assert.match(js, /if\(view==='deliverables'\)window\.app\.renderDeliverablesView/);
+  assert.match(html, /id="view-tasks"/);
+  assert.match(html, /id="tasksList"/);
+  assert.match(html, /id="view-deliverables"/);
+  assert.match(html, /id="allDeliverablesByProject"/);
+  assert.match(html, /state\.activeView === "tasks"\) renderTasks\(\)/);
+  assert.match(html, /state\.activeView === "deliverables"\) renderDeliverablesView\(\)/);
+  assert.doesNotMatch(js, /function ensureOperationalViews/);
   assert.match(css, /#view-tasks\.active,#view-deliverables\.active\{display:block!important\}/);
 });
 
@@ -61,16 +67,23 @@ test("Workspace API retries once after refreshing an expired session", async () 
   assert.match(js, /Your Workspace session expired\. Please sign in again\./);
 });
 
-test("Reports show three financial KPIs, Recent Payments, then full-width Payment Status", async () => {
+test("Reports render three KPIs, Recent Payments, then full-width Payment Status at source", async () => {
   const html = await read("index.html");
   const js = await read("js/v1-2-ux.js");
   const css = await read("css/v1-2-ux.css");
-  assert.match(html, /<span>Total Receivables<\/span>/);
-  assert.match(html, /<span>Collected<\/span>/);
-  assert.match(html, /<span>Outstanding<\/span>/);
-  assert.match(js, /q\('\.report-chart-card-v2',root\)\?\.remove\(\)/);
-  assert.match(js, /root\.append\(recent\)/);
-  assert.match(js, /status\.classList\.add\('report-status-full'\)/);
+  const renderStart=html.indexOf("function renderReportsView");
+  const renderEnd=html.indexOf("function setReportsRange",renderStart);
+  const render=html.slice(renderStart,renderEnd);
+  const outstanding=render.indexOf("<span>Outstanding</span>");
+  const receivables=render.indexOf("<span>Total Receivables</span>");
+  const collected=render.indexOf("<span>Collected</span>");
+  const recent=render.indexOf('class="card report-recent-v2"');
+  const status=render.indexOf('class="card report-status-card-v2 report-status-full"');
+  assert.ok(outstanding>=0 && outstanding<receivables && receivables<collected);
+  assert.ok(recent>=0 && status>recent);
+  assert.doesNotMatch(render, /class="card report-chart-card-v2"/);
+  assert.doesNotMatch(js, /function simplifyReports/);
+  assert.doesNotMatch(js, /MutationObserver\(.*simplifyReports/);
   assert.match(css, /report-recent-v2 \.table-responsive\{max-height:360px;overflow-y:auto/);
 });
 
