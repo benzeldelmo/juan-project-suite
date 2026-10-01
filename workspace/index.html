@@ -6313,9 +6313,21 @@ ${description}`))actionCallback();return;}
 
       function archiveProjectById(projId){state.activeProjectId=projId;archiveCurrentProject();}
 
+      async function restoreArchivedProject(projId){
+        const proj=state.projects.find(p=>p.id===projId);if(!proj||!proj.archived_at)return;
+        if(!supabaseClient||!state.isConnected){showToast('Supabase connection required before restoring a project.');return;}
+        try{
+          const updatedAt=new Date().toISOString();
+          const result=await supabaseClient.from('projects').update({archived_at:null,updated_at:updatedAt}).eq('id',proj.id).select('id').single();
+          if(result.error)throw result.error;
+          proj.archived_at=null;proj.updated_at=updatedAt;persistProjectsState();renderProjects();renderOverviewDashboard();showToast(`Project "${proj.title}" restored.`);
+        }catch(error){showToast(`Project restore failed: ${error?.message||error}`);}
+      }
+
       // Compatibility aliases: older controls now archive instead of destroying history.
       function deleteCurrentProject(){archiveCurrentProject();}
       function deleteProjectById(projId){archiveProjectById(projId);}
+      function undoDeleteProject(projId){return restoreArchivedProject(projId);}
 
       /* ==========================================================================
          NEW ORDER & CART PERSISTENCE WORKFLOW
@@ -9591,6 +9603,9 @@ ${description}`))actionCallback();return;}
         confirmResetDataPin,
         requestDestructivePin,
         confirmDestructivePin,
+        archiveCurrentProject,
+        archiveProjectById,
+        restoreArchivedProject,
         deleteCurrentProject,
         deleteProjectById,
         undoDeleteProject,
