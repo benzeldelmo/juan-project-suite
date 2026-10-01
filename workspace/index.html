@@ -1658,21 +1658,13 @@ table.jp-packages-table col:nth-child(6){width:7%}
                 <div class="overview-section-heading"><div><h2>Upcoming Deadlines</h2><p>What needs attention next</p></div><div class="overview-heading-actions"><button class="icon-action-button" onclick="app.openOverviewListModal('deadlines')" title="Expand upcoming deadlines" aria-label="Expand upcoming deadlines"><svg class="icon-svg sm" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><line x1="14" y1="10" x2="21" y2="3"/><polyline points="9 21 3 21 3 15"/><line x1="10" y1="14" x2="3" y2="21"/></svg></button></div></div>
                 <div id="overviewUpcomingDeadlines" class="attention-list"></div>
               </div>
-              <div class="card">
-                <div class="overview-section-heading">
-                  <div><h2 id="overviewCalendarTitle">Calendar</h2><p>Project deadline overview</p></div>
-                  <button class="icon-action-button" onclick="app.navigateTo('calendar')" title="Open full calendar" aria-label="Open full calendar"><svg class="icon-svg sm" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><line x1="14" y1="10" x2="21" y2="3"/><polyline points="9 21 3 21 3 15"/><line x1="10" y1="14" x2="3" y2="21"/></svg></button>
-                </div>
-                <div class="overview-calendar-shell"><div id="overviewMiniCalendar" class="overview-calendar"></div></div>
-                <div id="overviewUpcomingEvents" class="overview-upcoming-events"></div>
-              </div>
             </div>
           </div>
 
           <div class="card overview-task-card">
             <div class="card-header">
-              <h2 class="card-title">Current Deliverables</h2>
-              <button class="btn btn-secondary btn-sm" onclick="app.navigateTo('deliverables')">View all</button>
+              <div><h2 class="card-title">Upcoming Deliverables</h2><div class="text-sm text-muted">Open the related project to manage its work.</div></div>
+              <button class="btn btn-secondary btn-sm" onclick="app.navigateTo('projects')">View Projects</button>
             </div>
             <div id="overviewTaskTracker"></div>
           </div>
@@ -1689,58 +1681,13 @@ table.jp-packages-table col:nth-child(6){width:7%}
         </div>
       </section>
 
-      <!-- NEW VIEW: FINANCIAL ANALYTICS -->
-      <section id="view-analytics" class="view">
-        <header class="page-header">
-          <div>
-            <div class="greeting-subtitle">Financial Performance</div>
-            <h1 class="page-title">Financial Analytics</h1>
-          </div>
-        </header>
-
-        <div class="analytics-grid">
-          <div class="metric-card">
-            <div class="metric-label">Total Revenue</div>
-            <div class="metric-value" id="analyticsTotalRevenue">₱ 0.00</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Total Payments Received</div>
-            <div class="metric-value" id="analyticsTotalPaid" style="color:var(--primary-mint-dark);">₱ 0.00</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Outstanding Balance</div>
-            <div class="metric-value" id="analyticsOutstanding" style="color:var(--status-red);">₱ 0.00</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Current Month Income</div>
-            <div class="metric-value" id="analyticsMonthlyIncome">₱ 0.00</div>
-          </div>
-        </div>
-
-        <div class="card mb-6">
-          <h2 class="card-title mb-4">Revenue Breakdown by Month</h2>
-          <div class="table-responsive">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Month</th>
-                  <th>Orders Created</th>
-                  <th>Payments Received</th>
-                  <th class="text-right">Total Monthly Amount</th>
-                </tr>
-              </thead>
-              <tbody id="analyticsMonthlyTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
       <!-- VIEW 2: NEW ORDER -->
       <section id="view-new-order" class="view">
         <header class="page-header">
           <div>
             <div class="greeting-subtitle">Workflow</div>
-            <h1 class="page-title">New Order Entry</h1>
+            <h1 class="page-title">New Order</h1>
+            <div class="page-description">Choose the client, add services, set the schedule, then review before creating the project.</div>
           </div>
           <div class="order-header-actions">
             <button type="button" class="btn btn-secondary" id="openDraftsBtn">Drafts</button>
@@ -1752,7 +1699,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
           <div class="order-main-col">
             <div class="card mb-6">
               <div class="card-header">
-                <h2 class="card-title">Client Information</h2>
+                <div><span class="order-step-label">STEP 1</span><h2 class="card-title">Project & Client</h2></div>
                 <div class="segmented-control">
                   <button class="segment active" id="segExistingClientBtn" onclick="app.setClientMode('existing')">Existing</button>
                   <button class="segment" id="segNewClientBtn" onclick="app.setClientMode('new')">
@@ -1807,7 +1754,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
 
             <div class="card">
               <div class="card-header">
-                <h2 class="card-title">Service Catalog</h2>
+                <div><span class="order-step-label">STEP 2</span><h2 class="card-title">Services & Packages</h2></div>
                 <button class="btn btn-secondary btn-sm" onclick="app.openCustomProductModal()">
                   <svg class="icon-svg sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   Custom Service
@@ -1826,7 +1773,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
 
           <div class="order-side-col">
             <div class="card sticky-card">
-              <h2 class="card-title mb-4">Your Order</h2>
+              <span class="order-step-label">STEP 3</span><h2 class="card-title mb-4">Schedule & Review</h2>
               <div class="cart-items-list" id="cartItemsContainer"></div>
               <div class="divider"></div>
 
@@ -1953,7 +1900,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
               <button class="icon-more-button project-header-more vertical-more" title="Project options" aria-label="Project options" onclick="app.togglePopover('projectDetailMenu',event)">⋮</button>
               <div class="popover-panel project-detail-menu">
                 <button class="popover-action" onclick="app.openProjectData()">Edit Project</button>
-                <button class="popover-action text-danger" onclick="app.deleteCurrentProject()">Delete Project</button>
+                <button class="popover-action text-danger" onclick="app.archiveCurrentProject()">Archive Project</button>
               </div>
             </div>
           </div>
@@ -1974,11 +1921,11 @@ table.jp-packages-table col:nth-child(6){width:7%}
         </div>
 
         <div class="tabs-nav project-details-tabs" aria-label="Project sections">
-          <button class="tab-btn" data-project-tab="project-data" onclick="app.switchProjectTab('project-data', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/></svg><span>Project Data</span></button>
+          <button class="tab-btn" data-project-tab="project-data" onclick="app.switchProjectTab('project-data', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/></svg><span>Overview</span></button>
           <button class="tab-btn active" data-project-tab="deliverables" onclick="app.switchProjectTab('deliverables', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4z"/><path d="m4 7 8 4 8-4v10l-8 4-8-4z"/></svg><span>Deliverables</span></button>
-          <button class="tab-btn" data-project-tab="payment-tracker" onclick="app.switchProjectTab('payment-tracker', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7"/></svg><span>Payment Monitoring</span></button>
-          <button class="tab-btn" data-project-tab="invoice" onclick="app.switchProjectTab('invoice', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Invoice</span></button>
-          <button class="tab-btn" data-project-tab="notes" onclick="app.switchProjectTab('notes', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Notes</span></button>
+          <button class="tab-btn" data-project-tab="payment-tracker" onclick="app.switchProjectTab('payment-tracker', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7"/></svg><span>Finance</span></button>
+          <button class="tab-btn" data-project-tab="files" onclick="app.switchProjectTab('files', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></svg><span>Files</span></button>
+          <button class="tab-btn" data-project-tab="notes" onclick="app.switchProjectTab('notes', event)"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Notes & Activity</span></button>
         </div>
 
         <div id="projTab-project-data" class="tab-content">
@@ -2031,7 +1978,12 @@ table.jp-packages-table col:nth-child(6){width:7%}
 
             </div>
             <div class="deliverables-list" id="projectDeliverablesList"></div>
-            <div id="projectFilesAccessCard" class="project-files-admin-card">
+          </div>
+        </div>
+
+        <div id="projTab-files" class="tab-content">
+          <div class="card">
+                        <div id="projectFilesAccessCard" class="project-files-admin-card">
               <div class="project-files-admin-head"><div><div class="section-kicker">CLIENT DELIVERY</div><h3 class="card-title jp-title-with-info">Project Files <button type="button" class="jp-info-button" aria-label="About project files" data-info="Controls the Google Drive link and availability shown to the client in JUAN PROJECT Online.">i</button></h3></div><span id="projectFilesAccessState" class="portal-drive-state locked">Locked</span></div>
               <div class="project-files-admin-grid">
                 <div class="form-group project-files-url"><label class="form-label">Google Drive URL</label><input id="projectFilesDriveUrl" class="form-control" placeholder="https://drive.google.com/…"></div>
@@ -2040,6 +1992,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
               </div>
               <div class="project-files-admin-actions"><a id="projectFilesOpenDrive" class="btn btn-secondary hidden" target="_blank" rel="noopener">Open Drive</a><span class="project-data-autosave-status">Autosave On</span></div>
             </div>
+
           </div>
         </div>
 
@@ -2059,9 +2012,8 @@ table.jp-packages-table col:nth-child(6){width:7%}
             <div class="card-header"><h3 class="card-title">Payment History</h3></div>
             <div id="paymentHistoryList"></div>
           </div>
-        </div>
-
-        <div id="projTab-invoice" class="tab-content">
+          <section class="card project-finance-invoice mt-6">
+            <div class="card-header"><div><div class="section-kicker">INVOICE</div><h3 class="card-title">Project Invoice</h3><div class="text-sm text-muted">Invoice actions stay with this project’s financial records.</div></div></div>
           <div class="invoice-actions-bar mb-4">
             <button class="btn btn-secondary btn-sm" onclick="app.saveInvoicePDF()">
               <svg class="icon-svg sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -2082,6 +2034,8 @@ table.jp-packages-table col:nth-child(6){width:7%}
             </button>
           </div>
           <div class="invoice-paper" id="invoicePaperPrintable"></div>
+          </section>
+
         </div>
 
         <div id="projTab-notes" class="tab-content">
@@ -2089,6 +2043,10 @@ table.jp-packages-table col:nth-child(6){width:7%}
             <h3 class="card-title mb-3">Project Notes</h3>
             <textarea class="form-control" id="projectNotesTextarea" rows="6" placeholder="Add specific client requests, asset URLs, or technical constraints..."></textarea>
             <div class="mt-3 text-right"><span class="project-data-autosave-status">Autosave On</span></div>
+          </div>
+          <div class="card mt-6">
+            <div class="card-header"><div><div class="section-kicker">HISTORY</div><h3 class="card-title">Project Activity</h3></div></div>
+            <div id="projectActivityList" class="project-activity-list"></div>
           </div>
         </div>
           </div>
@@ -5374,7 +5332,6 @@ ${description}`))actionCallback();return;}
         loadTaskStateOnce();
         if (state.activeView === "my-works") { renderMyWorks(); renderOverviewDashboard(); }
         if (state.activeView === "new-order") renderNewOrderView();
-        if (state.activeView === "analytics") renderAnalytics();
         if (state.activeView === "projects") renderProjects();
         if (state.activeView === "payments") renderPaymentsView();
         if (state.activeView === "reports") renderReportsView();
@@ -5516,16 +5473,13 @@ ${description}`))actionCallback();return;}
         const kpi = document.getElementById("overviewKpis");
         if (kpi) {
           kpi.innerHTML = `
-            <div class="kpi-card urgency-card"><div class="overview-kpi-head"><div class="kpi-label">Active Projects</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span></div><div class="kpi-value">${active.length}</div><div class="kpi-sub">Currently in production</div></div>
-            <div class="kpi-card urgency-card"><div class="overview-kpi-head"><div class="kpi-label">Not Done</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><div class="kpi-value">${unfinished}</div><div class="kpi-sub">Unfinished deliverables</div></div>
-            <div class="kpi-card ${dueSoon?'attention-kpi':''}"><div class="overview-kpi-head"><div class="kpi-label">Due in 7 Days</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span></div><div class="kpi-value">${dueSoon}</div><div class="kpi-sub">Needs attention soon</div></div>
-            <div class="kpi-card ${overdue?'danger-kpi':''}"><div class="overview-kpi-head"><div class="kpi-label">Overdue</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0z"/></svg></span></div><div class="kpi-value">${overdue}</div><div class="kpi-sub">Past project deadline</div></div>`;
+            <div class="kpi-card ${overdue?'danger-kpi':''}"><div class="kpi-label">Overdue Projects</div><div class="kpi-value">${overdue}</div><div class="kpi-sub">Needs attention now</div></div>
+            <div class="kpi-card ${dueSoon?'attention-kpi':''}"><div class="kpi-label">Due in 7 Days</div><div class="kpi-value">${dueSoon}</div><div class="kpi-sub">Upcoming project deadlines</div></div>
+            <div class="kpi-card ${unfinished?'attention-kpi':''}"><div class="kpi-label">Open Deliverables</div><div class="kpi-value">${unfinished}</div><div class="kpi-sub">Work remaining inside active projects</div></div>`;
         }
         animateNumbersIn(kpi);
         renderOverviewCurrentProjects();
         renderOverviewUpcomingDeadlines();
-        renderOverviewMiniCalendar();
-        renderOverviewUpcomingEvents();
         renderOverviewTaskTracker();
       }
 
@@ -5812,7 +5766,7 @@ ${description}`))actionCallback();return;}
         const sortEl=document.getElementById('projectsSort');if(sortEl)sortEl.value=state.listSorts?.projects||'default';
         body.innerHTML=rows.map(p=>{
           const bal=getProjectBalance(p),prog=getProjectProgress(p),active=projectIsActiveByPayment(p),status=active?'ACTIVE':'COMPLETED',menuId=`projectRowMenu_${String(p.id).replace(/[^a-zA-Z0-9_-]/g,'')}`;
-          return `<tr class="clickable-row" onclick="app.openProjectDetails('${p.id}','deliverables')"><td><strong class="project-id-cell">${escapeHtml(formatProjectId(p))}</strong></td><td><strong>${escapeHtml(p.title||'Untitled Project')}</strong></td><td class="project-client-cell" title="${escapeHtml(p.client_email||p.client_name||'')}">${escapeHtml(p.client_name||p.client_email||'—')}</td><td class="${bal?'text-danger':''}">${formatCurrency(bal)}</td><td><div class="table-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${prog}%"></div></div><span>${prog}%</span></div></td><td>${escapeHtml(formatProjectDate(p.deadline_date))}</td><td><span class="badge ${active?'badge-orange':'badge-green'}">${escapeHtml(status)}</span></td><td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel project-row-menu"><button class="popover-action" onclick="app.openProjectData('${p.id}')">Edit Project</button><button class="popover-action text-danger" onclick="app.deleteProjectById('${p.id}')">Delete Project</button></div></div></td></tr>`;
+          return `<tr class="clickable-row" onclick="app.openProjectDetails('${p.id}','project-data')"><td><strong class="project-id-cell">${escapeHtml(formatProjectId(p))}</strong></td><td><strong>${escapeHtml(p.title||'Untitled Project')}</strong></td><td class="project-client-cell" title="${escapeHtml(p.client_email||p.client_name||'')}">${escapeHtml(p.client_name||p.client_email||'—')}</td><td class="${bal?'text-danger':''}">${formatCurrency(bal)}</td><td><div class="table-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${prog}%"></div></div><span>${prog}%</span></div></td><td>${escapeHtml(formatProjectDate(p.deadline_date))}</td><td><span class="badge ${active?'badge-orange':'badge-green'}">${escapeHtml(status)}</span></td><td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel project-row-menu"><button class="popover-action" onclick="app.openProjectData('${p.id}')">Edit Project</button><button class="popover-action text-danger" onclick="app.archiveProjectById('${p.id}')">Archive Project</button></div></div></td></tr>`;
         }).join('')||`<tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>`;
       }
 
@@ -7643,9 +7597,9 @@ ${description}`))actionCallback();return;}
         document.querySelectorAll('#view-project-details .tab-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.projectTab===tab));
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
         if(tab==='project-data')populateProjectData(proj);
-        if(tab==='payment-tracker')renderPaymentTracker(proj);
-        if(tab==='invoice')renderInvoicePaper(proj);
-        if(tab==='notes')document.getElementById('projectNotesTextarea').value=proj.notes||'';
+        if(tab==='payment-tracker'){renderPaymentTracker(proj);renderInvoicePaper(proj);}
+        if(tab==='files')renderProjectFilesAccess(proj);
+        if(tab==='notes'){document.getElementById('projectNotesTextarea').value=proj.notes||'';renderProjectActivity(proj);}
       }
 
       async function blobToDataUrl(blob) {
@@ -7903,7 +7857,7 @@ ${description}`))actionCallback();return;}
         }
         closeModal("editProjectModal"); openProjectDetails(proj.id); renderOverviewDashboard(); renderProjects(); showToast(cloudSaved?"Project record updated.":"Project updated offline.");
       }
-      function openProjectDetails(projId,initialTab='deliverables'){
+      function openProjectDetails(projId,initialTab='project-data'){
         state.activeProjectId=projId;const proj=state.projects.find(p=>p.id===projId);if(!proj)return;
         if(Array.isArray(proj.project_items)&&proj.project_items.some(i=>String(i.type||'').toUpperCase()==='HISTORY')&&Array.isArray(proj.deliverables)&&proj.deliverables.length===1&&String(proj.deliverables[0].item_name||proj.deliverables[0].name||'')===String(proj.project_type||'')){proj.deliverables=[];persistProjectsState();}
         const hasOldAutoDeliverables=Array.isArray(proj.deliverables)&&proj.deliverables.some(d=>d.order_item_id&&String(d.source_type||'').toUpperCase()!=='ORDER_ITEM');
@@ -8964,7 +8918,7 @@ ${description}`))actionCallback();return;}
         grid.innerHTML=`<div class="card table-card"><div class="table-responsive"><table class="data-table unified-table clients-table"><thead><tr><th>Client ID</th><th>Client</th><th>Email</th><th>Phone</th><th>Projects</th><th>Payments</th><th class="table-actions-col" aria-label="Row actions"></th></tr></thead><tbody>${clients.map(c=>{
           const ps=projectsFor(c),paid=ps.reduce((x,p)=>x+getProjectPaid(p),0),menuId=`clientMenu_${String(c.id).replace(/[^a-zA-Z0-9_-]/g,'')}`;
           const initials=String(c.name||c.email||'CL').replace(/[^a-zA-Z0-9 ]/g,' ').trim().split(/\s+/).filter(Boolean).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'CL';
-          return `<tr class="clickable-row" onclick="app.openClientProfile('${c.id}')"><td><strong>${escapeHtml(c.client_code||'—')}</strong></td><td><div class="jp-client-list-cell"><span class="jp-client-list-avatar">${escapeHtml(initials)}</span><span class="jp-client-list-copy"><strong>${escapeHtml(c.name||'Client')}</strong><small>Client since ${escapeHtml(formatProjectDate(c.created_at)||'—')}</small></span></div></td><td>${escapeHtml(c.email||'—')}</td><td>${escapeHtml(formatPhilippinePhone(c.phone||'—'))}</td><td>${ps.length}</td><td><strong>${formatCurrency(paid)}</strong></td><td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)" aria-label="Client actions">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditClientModal('${c.id}')">Edit Client</button><button class="popover-action text-danger" onclick="app.removeClient('${c.id}')">Delete Client</button></div></div></td></tr>`;
+          return `<tr class="clickable-row" onclick="app.openClientProfile('${c.id}')"><td><strong>${escapeHtml(c.client_code||'—')}</strong></td><td><div class="jp-client-list-cell"><span class="jp-client-list-avatar">${escapeHtml(initials)}</span><span class="jp-client-list-copy"><strong>${escapeHtml(c.name||'Client')}</strong><small>Client since ${escapeHtml(formatProjectDate(c.created_at)||'—')}</small></span></div></td><td>${escapeHtml(c.email||'—')}</td><td>${escapeHtml(formatPhilippinePhone(c.phone||'—'))}</td><td>${ps.length}</td><td><strong>${formatCurrency(paid)}</strong></td><td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)" aria-label="Client actions">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditClientModal('${c.id}')">Edit Client</button><button class="popover-action text-danger" onclick="app.removeClient('${c.id}')">Archive Client</button></div></div></td></tr>`;
         }).join('')}</tbody></table></div></div>`;
       }
       function setClientFilter(filter){state.clientFilter=filter;renderClients();}
@@ -8982,7 +8936,7 @@ ${description}`))actionCallback();return;}
           : `Delete "${client.name}" from the active Client Directory? The client will be archived so the record can still be recovered if needed.`;
 
         requestDestructivePin(
-          'Delete Client',
+          'Archive Client',
           message,
           async()=>{
             try{
@@ -9008,7 +8962,7 @@ ${description}`))actionCallback();return;}
               }
 
               renderClients();
-              showToast('Client deleted from the active directory.');
+              showToast('Client archived.');
             }catch(error){
               console.error('Delete client failed:',error);
               showToast(`Delete client failed: ${error.message||error}`);
