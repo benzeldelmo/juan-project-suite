@@ -1,0 +1,320 @@
+/* JUAN PROJECT Workspace — Modern SaaS refresh, 2026-10-02 */
+:root{
+  --jp-saas-canvas:#f7f7f8;
+  --jp-saas-surface:#ffffff;
+  --jp-saas-border:#e7e7ea;
+  --jp-saas-border-strong:#dadce0;
+  --jp-saas-text:#171719;
+  --jp-saas-muted:#71717a;
+  --jp-saas-soft:#f2f2f4;
+  --jp-saas-primary:#161618;
+  --jp-saas-radius:14px;
+}
+body:not(.dark-mode){
+  --bg-app:var(--jp-saas-canvas)!important;
+  --bg-card:var(--jp-saas-surface)!important;
+  --bg-sidebar:#fafafa!important;
+  --bg-subtle:#f5f5f6!important;
+  --text-primary:var(--jp-saas-text)!important;
+  --text-secondary:#66666f!important;
+  --text-tertiary:#8b8b94!important;
+  --border-subtle:var(--jp-saas-border)!important;
+  --border-medium:var(--jp-saas-border-strong)!important;
+  --shadow-subtle:none!important;
+  --shadow-card:none!important;
+}
+body{background:var(--bg-app)!important}
+.sidebar{
+  width:238px!important;
+  padding:24px 16px 16px!important;
+  border-right:1px solid var(--border-subtle)!important;
+  box-shadow:none!important;
+}
+.brand{padding:0 8px 22px!important}
+.nav-menu{gap:2px!important}
+.nav-section-label{
+  margin:22px 10px 8px!important;
+  padding:0!important;
+  font-size:10px!important;
+  line-height:1.2!important;
+  font-weight:700!important;
+  letter-spacing:.11em!important;
+  color:var(--text-tertiary)!important;
+}
+.nav-section-label:first-child{margin-top:0!important}
+.nav-divider{display:none!important}
+.nav-item{
+  min-height:40px!important;
+  padding:9px 10px!important;
+  gap:11px!important;
+  border-radius:9px!important;
+  color:var(--text-secondary)!important;
+  font-size:13px!important;
+  font-weight:520!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.nav-item:hover{background:var(--bg-subtle)!important;color:var(--text-primary)!important}
+.nav-item.active{
+  background:#ededf0!important;
+  color:var(--text-primary)!important;
+  font-weight:650!important;
+  box-shadow:none!important;
+}
+.nav-item .icon{width:18px!important;height:18px!important;display:grid!important;place-items:center!important}
+.icon-svg,.nav-item svg,.jp-saas-icon{
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8!important;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.icon-svg.sm{width:16px!important;height:16px!important}
+.icon-svg.lg{width:22px!important;height:22px!important}
+.user-profile{border-top:1px solid var(--border-subtle)!important;margin-top:16px!important;padding:16px 8px 2px!important}
+
+.main-content{background:var(--bg-app)!important}
+.main-content>.view{padding:34px 38px 56px!important}
+.page-header{margin-bottom:26px!important;align-items:flex-start!important}
+.page-title{
+  color:var(--text-primary)!important;
+  font-size:30px!important;
+  line-height:1.12!important;
+  letter-spacing:-.035em!important;
+  font-weight:730!important;
+}
+.greeting-subtitle,.section-kicker{
+  color:var(--text-tertiary)!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  letter-spacing:.09em!important;
+  text-transform:uppercase!important;
+}
+.card{
+  background:var(--bg-card)!important;
+  border:1px solid var(--border-subtle)!important;
+  border-radius:var(--jp-saas-radius)!important;
+  box-shadow:none!important;
+}
+.btn{
+  min-height:38px!important;
+  border-radius:9px!important;
+  font-weight:650!important;
+  box-shadow:none!important;
+}
+.btn-primary{
+  background:var(--jp-saas-primary)!important;
+  border-color:var(--jp-saas-primary)!important;
+  color:#fff!important;
+}
+.btn-primary:hover{background:#000!important;border-color:#000!important}
+.btn-secondary{
+  background:var(--bg-card)!important;
+  border:1px solid var(--border-medium)!important;
+  color:var(--text-primary)!important;
+}
+.btn-danger{box-shadow:none!important}
+.form-control,.compact-sort,select,input,textarea{
+  border-color:var(--border-medium);
+  box-shadow:none;
+}
+.form-control:focus,.compact-sort:focus,select:focus,input:focus,textarea:focus{
+  outline:none!important;
+  border-color:#a1a1aa!important;
+  box-shadow:0 0 0 3px rgba(24,24,27,.06)!important;
+}
+
+.data-table,.unified-table{
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:var(--bg-card)!important;
+}
+.data-table thead th,.unified-table thead th{
+  background:#f8f8f9!important;
+  color:var(--text-tertiary)!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  letter-spacing:.06em!important;
+  text-transform:uppercase!important;
+  border-bottom:1px solid var(--border-subtle)!important;
+}
+.data-table tbody td,.unified-table tbody td{border-bottom:1px solid var(--border-subtle)!important}
+.data-table tbody tr:last-child td,.unified-table tbody tr:last-child td{border-bottom:0!important}
+.data-table tbody tr:hover,.unified-table tbody tr:hover{background:#fafafa!important}
+.table-responsive{border-radius:12px!important}
+
+/* Underline tab language */
+.project-details-tabs,.portal-tabs,.jp-online-tabs{
+  display:flex!important;
+  align-items:center!important;
+  gap:26px!important;
+  padding:0!important;
+  margin:0 0 24px!important;
+  border:0!important;
+  border-bottom:1px solid var(--border-subtle)!important;
+  background:transparent!important;
+  border-radius:0!important;
+  overflow-x:auto;
+}
+.project-details-tabs .tab-btn,.portal-tabs button,.jp-online-tabs button{
+  appearance:none!important;
+  border:0!important;
+  border-bottom:2px solid transparent!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:var(--text-secondary)!important;
+  padding:11px 1px 10px!important;
+  margin:0!important;
+  font-size:13px!important;
+  line-height:1.2!important;
+  font-weight:600!important;
+  white-space:nowrap!important;
+  box-shadow:none!important;
+}
+.project-details-tabs .tab-btn.active,.portal-tabs button.active,.jp-online-tabs button.active{
+  color:var(--text-primary)!important;
+  border-bottom-color:var(--text-primary)!important;
+  background:transparent!important;
+}
+.jp-online-tabs{margin-top:-8px!important;margin-bottom:24px!important}
+.jp-online-tabs button{cursor:pointer}
+.jp-online-shell-header{margin-bottom:0!important}
+#view-online-portal>.online-portal-intro{margin-top:0!important}
+
+/* Reports */
+#view-reports .report-range-control{display:none!important}
+.jp-report-kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:18px;
+}
+.jp-report-kpi{
+  padding:20px 22px!important;
+  min-height:128px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.jp-report-kpi span{
+  color:var(--text-secondary);
+  font-size:12px;
+  font-weight:600;
+}
+.jp-report-kpi strong{
+  display:block;
+  margin-top:11px;
+  font-size:27px;
+  line-height:1;
+  letter-spacing:-.035em;
+  color:var(--text-primary);
+}
+.jp-report-kpi small{display:block;margin-top:9px;color:var(--text-tertiary);font-size:11px;line-height:1.35}
+.jp-payment-activity{
+  padding:0!important;
+  overflow:hidden!important;
+}
+.jp-payment-activity-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  padding:20px 22px 16px;
+}
+.jp-payment-activity-head h2{font-size:17px;letter-spacing:-.02em;margin:0;color:var(--text-primary)}
+.jp-payment-activity-head p{margin:4px 0 0;color:var(--text-tertiary);font-size:11px}
+.jp-payment-count{
+  flex:0 0 auto;
+  padding:5px 9px;
+  border-radius:999px;
+  background:var(--bg-subtle);
+  color:var(--text-secondary);
+  font-size:11px;
+  font-weight:650;
+}
+.jp-payment-toolbar{
+  display:grid;
+  grid-template-columns:minmax(220px,1.4fr) repeat(3,minmax(140px,.6fr));
+  gap:10px;
+  padding:0 22px 16px;
+}
+.jp-payment-toolbar input,.jp-payment-toolbar select{
+  width:100%;
+  min-height:38px;
+  border:1px solid var(--border-medium);
+  border-radius:9px;
+  background:var(--bg-card);
+  color:var(--text-primary);
+  padding:0 11px;
+  font:inherit;
+  font-size:12px;
+}
+#reportsContent .jp-payment-activity-scroll{
+  max-height:540px!important;
+  overflow:auto!important;
+  border-top:1px solid var(--border-subtle)!important;
+  border-radius:0!important;
+  background:var(--bg-card)!important;
+}
+#reportsContent .jp-payment-activity-scroll .jp-payment-activity-table{
+  min-width:1080px!important;
+  width:100%!important;
+  table-layout:auto!important;
+}
+#reportsContent .jp-payment-activity-scroll thead th{
+  position:sticky!important;
+  top:0!important;
+  z-index:4!important;
+  background:#f8f8f9!important;
+}
+.jp-payment-activity-table td{font-size:12px!important;vertical-align:middle!important}
+.jp-payment-activity-table .jp-activity-ref{font-weight:680;color:var(--text-primary)}
+.jp-payment-activity-table .jp-activity-project strong{display:block;color:var(--text-primary);font-size:12px}
+.jp-payment-activity-table .jp-activity-project small{display:block;color:var(--text-tertiary);font-size:10px;margin-top:2px}
+.jp-payment-status{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#f1f2f3;
+  color:#57575f;
+  font-size:10px;
+  font-weight:700;
+}
+.jp-payment-activity-empty{padding:40px 20px!important;text-align:center!important;color:var(--text-tertiary)!important}
+.jp-open-record{
+  width:30px;height:30px;border:0;border-radius:8px;background:transparent;color:var(--text-secondary);cursor:pointer;
+}
+.jp-open-record:hover{background:var(--bg-subtle);color:var(--text-primary)}
+
+/* Invoice snapshots are the only retained finance-history panel. */
+.jp-invoice-snapshots-card{margin-top:18px!important}
+.jp-invoice-snapshots-card .card-header{padding-bottom:12px!important}
+.jp-invoice-snapshots-body{padding:0 0 4px!important}
+.jp-issued-invoices{margin-top:0!important}
+.jp-issued-invoices>h4{display:none!important}
+.jp-invoice-snapshot-row{padding:13px 18px!important;border-top:1px solid var(--border-subtle)!important}
+.jp-history-empty{color:var(--text-tertiary)!important;padding:18px!important}
+
+/* Existing information stays visible; background sync should not block the workspace. */
+#workspaceLoadingSkeleton{display:none!important}
+.portal-loading.jp-redundant-loading{display:none!important}
+
+@media(max-width:1100px){
+  .jp-payment-toolbar{grid-template-columns:1fr 1fr}
+}
+@media(max-width:900px){
+  .sidebar{width:220px!important}
+  .main-content>.view{padding:28px 24px 48px!important}
+  .jp-report-kpi-grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .main-content>.view{padding:22px 16px 42px!important}
+  .jp-payment-toolbar{grid-template-columns:1fr}
+  .jp-payment-activity-head{padding:18px 16px 14px}
+  .jp-payment-toolbar{padding:0 16px 14px}
+  .project-details-tabs,.portal-tabs,.jp-online-tabs{gap:20px!important}
+}
