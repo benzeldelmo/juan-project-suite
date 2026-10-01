@@ -2,7 +2,6 @@
 (function(){
   "use strict";
   var API=function(body){return window.JuanSuiteRuntime.request("/api/suite",body);};
-  filter="new";
   var esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
   var peso=function(v){return new Intl.NumberFormat("en-PH",{style:"currency",currency:"PHP"}).format(Number(v||0));};
   var dateText=function(v){
@@ -13,7 +12,7 @@
   };
   var dateTime=function(v){if(!v)return "—";var d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString("en-PH",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});};
   var toast=function(m){if(window.showToast)window.showToast(m);};
-  var orders=[],filter="active",query="",overlay=null;
+  var orders=[],filter="new",query="",overlay=null;
 
   function ready(fn,n){n=n||0;if(window.app&&window.JuanSuiteRuntime)return fn();if(n<60)setTimeout(function(){ready(fn,n+1);},100);}
   function closeOverlay(){if(overlay)overlay.remove();overlay=null;document.body.classList.remove("jp-general-modal-open");}
