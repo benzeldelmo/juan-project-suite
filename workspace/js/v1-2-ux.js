@@ -21,10 +21,10 @@
     'new-order':'Create a project with the client, services, timeline, and pricing in one flow.',
     payments:'Review project totals, recorded payments, outstanding balances, and invoice status.',
     reports:'Understand revenue, collections, outstanding balances, and current workload.',
-    calendar:'Review project deadlines and operational dates in a single schedule.',
-    pricelist:'Manage the shared JUAN PROJECT catalog used by Workspace and Online.',
-    'online-portal':'Manage client accounts, payment reviews, project Drive access, and payment setup.',
-    'in-house-ads':'Create, schedule, publish, pause, archive, and remove In-House Ads.',
+    calendar:'Review project deadlines in a supporting schedule.',
+    pricelist:'Manage JUAN services, packages, categories, and pricing.',
+    'online-portal':'Manage client accounts, payment reviews, project Drive access, and portal settings.',
+    'in-house-ads':'Publish Web flyers, collect surveys, and manage Online promotions from one campaign center.',
     settings:'Manage Workspace profile, preferences, and system settings.'
   };
   const labels={work:'WORK',finance:'FINANCE',operations:'OPERATIONS',system:'SYSTEM'};
@@ -50,19 +50,35 @@
     group.append(button,body);return group;
   }
 
+  function setNavLabel(el,label){
+    if(!el)return;
+    const icon=q('.icon',el);
+    const iconHtml=icon?icon.outerHTML:'';
+    el.innerHTML=iconHtml+label;
+    el.setAttribute('aria-label',label);
+  }
+
   function restructureSidebar(){
-    const menu=q('.nav-menu');if(!menu||menu.dataset.stabilized==='1')return;menu.dataset.stabilized='1';
+    const menu=q('.nav-menu');if(!menu||menu.dataset.stabilized==='2')return;menu.dataset.stabilized='2';
     const items={};qa('.nav-item',menu).forEach(el=>{const key=el.dataset.view||el.id;if(key)items[key]=el});
-    if(!items.tasks)items.tasks=makeNavItem('tasks','Tasks','<path d="M5 4h14v16H5z"/><path d="m8 9 2 2 4-4M8 15h8"/>');
-    if(!items.deliverables)items.deliverables=makeNavItem('deliverables','Deliverables','<path d="M4 6h16v14H4z"/><path d="M8 3v6M16 3v6M8 14l2 2 5-5"/>');
     menu.innerHTML='';
-    if(items['new-order'])items['new-order'].classList.remove('workspace-primary-action');
+
+    setNavLabel(items['my-works'],'Dashboard');
+    setNavLabel(items.projects,'Projects');
+    setNavLabel(items.orders,'Orders');
+    setNavLabel(items.clients,'Clients');
+    setNavLabel(items.payments,'Payments');
+    setNavLabel(items.reports,'Reports');
+    setNavLabel(items.pricelist,'Services');
+    setNavLabel(items['in-house-ads'],'Flyers & Campaigns');
+    setNavLabel(items['online-portal'],'Online Portal');
+    setNavLabel(items.settings,'Settings');
 
     menu.append(
-      makeGroup('WORKSPACE',[items['my-works'],items.projects,items.clients,items.orders,items['new-order']],true),
+      makeGroup('WORK',[items['my-works'],items.projects,items.orders,items.clients],true),
       makeGroup('FINANCE',[items.payments,items.reports],true),
-      makeGroup('OPERATIONS',[items.tasks,items.deliverables,items.calendar],false),
-      makeGroup('SHOP & ONLINE',[items.pricelist,items['online-portal'],items['in-house-ads']],false),
+      makeGroup('BUSINESS',[items.pricelist,items['in-house-ads']],false),
+      makeGroup('PORTAL',[items['online-portal']],false),
       makeGroup('SYSTEM',[items.settings],false)
     );
 
