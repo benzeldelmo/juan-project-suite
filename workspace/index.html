@@ -5767,18 +5767,19 @@ ${description}`))actionCallback();return;}
         const body=document.getElementById("projectsTableBody"),filters=document.getElementById("projectFilters");if(!body||!filters)return;
         const q=(document.getElementById("projectsSearch")?.value||"").trim().toLowerCase();
         const baseRows=state.projects.filter(p=>!p.deleted&&(`${formatProjectId(p)} ${p.title||''} ${p.client_name||''} ${p.client_email||''}`).toLowerCase().includes(q));
-        const hasActive=baseRows.some(projectIsActiveByPayment);
+        const hasActive=baseRows.some(p=>!p.archived_at&&projectIsActiveByPayment(p));
         if((state.projectFilter||"Active")==="Active"&&!hasActive)state.projectFilter="All";
-        const names=["All","Active","Completed"],current=state.projectFilter||"All";
+        const names=["All","Active","Completed","Archived"],current=state.projectFilter||"All";
         filters.innerHTML=names.map(n=>`<button class="filter-pill ${current===n?'active':''}" onclick="app.setProjectFilter('${n}')">${n}</button>`).join("");
         let rows=baseRows;
-        if(current==='Active')rows=rows.filter(projectIsActiveByPayment);
-        else if(current==='Completed')rows=rows.filter(p=>!projectIsActiveByPayment(p));
+        if(current==='Active')rows=rows.filter(p=>!p.archived_at&&projectIsActiveByPayment(p));
+        else if(current==='Completed')rows=rows.filter(p=>!p.archived_at&&!projectIsActiveByPayment(p));
+        else if(current==='Archived')rows=rows.filter(p=>!!p.archived_at);
         rows=sortProjectsFor('projects',rows,current);
         const sortEl=document.getElementById('projectsSort');if(sortEl)sortEl.value=state.listSorts?.projects||'default';
         body.innerHTML=rows.map(p=>{
-          const bal=getProjectBalance(p),prog=getProjectProgress(p),active=projectIsActiveByPayment(p),status=active?'ACTIVE':'COMPLETED',menuId=`projectRowMenu_${String(p.id).replace(/[^a-zA-Z0-9_-]/g,'')}`;
-          return `<tr class="clickable-row" onclick="app.openProjectDetails('${p.id}','project-data')"><td><strong class="project-id-cell">${escapeHtml(formatProjectId(p))}</strong></td><td><strong>${escapeHtml(p.title||'Untitled Project')}</strong></td><td class="project-client-cell" title="${escapeHtml(p.client_email||p.client_name||'')}">${escapeHtml(p.client_name||p.client_email||'—')}</td><td class="${bal?'text-danger':''}">${formatCurrency(bal)}</td><td><div class="table-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${prog}%"></div></div><span>${prog}%</span></div></td><td>${escapeHtml(formatProjectDate(p.deadline_date))}</td><td><span class="badge ${active?'badge-orange':'badge-green'}">${escapeHtml(status)}</span></td><td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel project-row-menu"><button class="popover-action" onclick="app.openProjectData('${p.id}')">Edit Project</button><button class="popover-action text-danger" onclick="app.archiveProjectById('${p.id}')">Archive Project</button></div></div></td></tr>`;
+          const bal=getProjectBalance(p),prog=getProjectProgress(p),active=!p.archived_at&&projectIsActiveByPayment(p),archived=!!p.archived_at,status=archived?'ARCHIVED':active?'ACTIVE':'COMPLETED',menuId=`projectRowMenu_${String(p.id).replace(/[^a-zA-Z0-9_-]/g,'')}`;
+          return `<tr class="clickable-row" onclick="app.openProjectDetails('${p.id}','project-data')"><td><strong class="project-id-cell">${escapeHtml(formatProjectId(p))}</strong></td><td><strong>${escapeHtml(p.title||'Untitled Project')}</strong></td><td class="project-client-cell" title="${escapeHtml(p.client_email||p.client_name||'')}">${escapeHtml(p.client_name||p.client_email||'—')}</td><td class="${bal?'text-danger':''}">${formatCurrency(bal)}</td><td><div class="table-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${prog}%"></div></div><span>${prog}%</span></div></td><td>${escapeHtml(formatProjectDate(p.deadline_date))}</td><td><span class="badge ${archived?'badge-neutral':active?'badge-orange':'badge-green'}">${escapeHtml(status)}</span></td><td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel project-row-menu"><button class="popover-action" onclick="app.openProjectData('${p.id}')">Open Overview</button>${archived?'':`<button class="popover-action" onclick="app.archiveProjectById('${p.id}')">Archive Project</button>`}</div></div></td></tr>`;
         }).join('')||`<tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>`;
       }
 
