@@ -30,5 +30,20 @@ jobs:
           for file in workspace/js/*.js; do
             node --check "$file"
           done
+      - name: Extract and syntax-check Workspace inline scripts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("workspace/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>(.*?)</script>', html, flags=re.S|re.I)
+          if not scripts:
+              raise SystemExit("No Workspace inline scripts found")
+          out = Path("/tmp/juan-workspace-inline")
+          out.mkdir(exist_ok=True)
+          for i, script in enumerate(scripts):
+              (out / f"inline-{i}.js").write_text(script, encoding="utf-8")
+          PY
+          for file in /tmp/juan-workspace-inline/*.js; do node --check "$file"; done
       - name: Run Workspace stabilization tests
         run: node --test workspace/tests/workspace-stabilization.test.mjs
