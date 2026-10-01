@@ -75,8 +75,14 @@ body{background:var(--bg-app)!important}
 .icon-svg.lg{width:22px!important;height:22px!important}
 .user-profile{border-top:1px solid var(--border-subtle)!important;margin-top:16px!important;padding:16px 8px 2px!important}
 
-.main-content{background:var(--bg-app)!important}
-.main-content>.view{padding:34px 38px 56px!important}
+.main-content{
+  margin-left:238px!important;
+  width:calc(100% - 238px)!important;
+  max-width:none!important;
+  padding:34px 38px 56px!important;
+  background:var(--bg-app)!important;
+}
+.main-content>.view{padding:0!important}
 .page-header{margin-bottom:26px!important;align-items:flex-start!important}
 .page-title{
   color:var(--text-primary)!important;
@@ -306,15 +312,36 @@ body{background:var(--bg-app)!important}
 @media(max-width:1100px){
   .jp-payment-toolbar{grid-template-columns:1fr 1fr}
 }
-@media(max-width:900px){
-  .sidebar{width:220px!important}
-  .main-content>.view{padding:28px 24px 48px!important}
+@media(max-width:1023px){
+  .sidebar{
+    width:100%!important;height:60px!important;position:fixed!important;
+    top:auto!important;bottom:0!important;left:0!important;right:0!important;
+    flex-direction:row!important;padding:0 10px!important;border-right:0!important;
+    border-top:1px solid var(--border-subtle)!important;align-items:center!important;
+  }
+  .brand,.user-profile,.nav-section-label,#connectionStatusIndicator{display:none!important}
+  .nav-menu{
+    flex-direction:row!important;margin:0!important;width:100%!important;
+    justify-content:flex-start!important;gap:2px!important;overflow-x:auto!important;overflow-y:hidden!important;
+    scrollbar-width:none!important;
+  }
+  .nav-menu::-webkit-scrollbar{display:none!important}
+  .nav-item{
+    flex:0 0 68px!important;min-height:52px!important;flex-direction:column!important;
+    justify-content:center!important;gap:3px!important;padding:5px 6px!important;
+    font-size:9px!important;text-align:center!important;
+  }
+  .main-content{margin-left:0!important;width:100%!important;padding:22px 18px 82px!important}
   .jp-report-kpi-grid{grid-template-columns:1fr}
 }
 @media(max-width:720px){
-  .main-content>.view{padding:22px 16px 42px!important}
+  .main-content{padding:20px 14px 80px!important}
   .jp-payment-toolbar{grid-template-columns:1fr}
   .jp-payment-activity-head{padding:18px 16px 14px}
   .jp-payment-toolbar{padding:0 16px 14px}
   .project-details-tabs,.portal-tabs,.jp-online-tabs{gap:20px!important}
 }
+body.dark-mode .nav-item.active{background:#2a2a2d!important}
+body.dark-mode .data-table thead th,
+body.dark-mode .unified-table thead th,
+body.dark-mode #reportsContent .jp-payment-activity-scroll thead th{background:#242426!important}
