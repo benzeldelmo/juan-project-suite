@@ -2094,6 +2094,36 @@ table.jp-packages-table col:nth-child(6){width:7%}
         </div>
       </section>
 
+
+      <!-- VIEW: TASKS -->
+      <section id="view-tasks" class="view">
+        <header class="page-header">
+          <div>
+            <div class="greeting-subtitle">Operations</div>
+            <h1 class="page-title">Tasks</h1>
+            <div class="page-description">Track operational work connected to projects and deliverables.</div>
+          </div>
+          <button class="btn btn-primary" type="button" onclick="app.openTaskModal()">+ New Task</button>
+        </header>
+        <div class="view-toolbar unified-toolbar">
+          <input id="tasksSearch" class="form-control" placeholder="Search tasks, projects, or deliverables..." oninput="app.renderTasks()">
+          <div id="taskFilters" class="filter-pills"></div>
+        </div>
+        <div class="card"><div id="tasksList"></div></div>
+      </section>
+
+      <!-- VIEW: DELIVERABLES -->
+      <section id="view-deliverables" class="view">
+        <header class="page-header">
+          <div>
+            <div class="greeting-subtitle">Operations</div>
+            <h1 class="page-title">Deliverables</h1>
+            <div class="page-description">See active project deliverables without opening projects one by one.</div>
+          </div>
+        </header>
+        <div id="allDeliverablesByProject"></div>
+      </section>
+
       <!-- VIEW 4: CALENDAR -->
       <section id="view-calendar" class="view">
         <header class="page-header">
@@ -2123,6 +2153,31 @@ table.jp-packages-table col:nth-child(6){width:7%}
         </div>
       </section>
 
+
+
+      <!-- VIEW: ORDERS -->
+      <section id="view-orders" class="view">
+        <header class="page-header">
+          <div>
+            <div class="greeting-subtitle">Online Intake</div>
+            <h1 class="page-title">Orders</h1>
+            <div class="page-description">Review Order Requests before turning them into projects.</div>
+          </div>
+          <button class="btn btn-secondary" id="ordersRefreshBtn" type="button">Refresh</button>
+        </header>
+        <div class="view-toolbar unified-toolbar jp-orders-toolbar">
+          <input class="form-control" id="ordersPageSearch" placeholder="Search Order ID, client, email, or request...">
+          <div class="toolbar-actions"><div class="filter-pills" id="ordersPageFilters"></div></div>
+        </div>
+        <div class="card table-card">
+          <div class="table-responsive">
+            <table class="data-table unified-table jp-orders-page-table" data-keyboard-table="orders">
+              <thead><tr><th>Order ID</th><th>Client</th><th>Request</th><th>Amount</th><th>Submitted</th><th>Status</th><th class="table-actions-col"></th></tr></thead>
+              <tbody id="ordersPageRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       <!-- VIEW 6: CLIENTS -->
       <section id="view-clients" class="view">
@@ -6006,21 +6061,14 @@ ${description}`))actionCallback();return;}
                 <div class="report-kpi-card-v2"><div><span>Collected</span><strong>${formatCurrency(collected)}</strong><small class="report-positive">${collectionRate}% of total receivables collected</small></div></div>
               </div>
 
-              <div class="report-main-grid-v2">
-                <section class="card report-chart-card-v2">
-                  <div class="report-card-head-v2"><div><h2>Revenue Trend</h2><p>${escapeHtml(rangeSubtitle)}</p></div><div class="report-legend-chip"><span></span> Revenue <b>${escapeHtml(rangeTitle)}</b></div></div>
-                  <div class="report-line-chart-wrap">
-                    <svg class="report-line-chart" viewBox="0 0 ${chartW} ${chartH}" role="img" aria-label="Revenue trend for ${escapeHtml(rangeTitle)}">
-                      <defs><linearGradient id="revenueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#14b86e" stop-opacity=".24"/><stop offset="100%" stop-color="#14b86e" stop-opacity="0"/></linearGradient></defs>
-                      ${gridLines}
-                      ${areaPath?`<path d="${areaPath}" class="report-area-path"/>`:''}
-                      ${linePath?`<path d="${linePath}" class="report-line-path"/>`:''}
-                      ${chartLabels}
-                    </svg>
-                  </div>
-                </section>
+              <section class="card report-recent-v2">
+                <div class="report-card-head-v2"><div><h2>Recent Payments</h2><p>Latest recorded payments</p></div><button class="btn btn-secondary btn-sm" onclick="app.navigateTo('payments')">View all payments →</button></div>
+                <div class="table-responsive"><table class="data-table unified-table report-recent-table"><thead><tr><th>Reference</th><th>Payment Method</th><th>Amount</th><th>Date</th><th class="table-actions-col" aria-label="Actions"></th></tr></thead><tbody>
+                  ${recentPayments.map(pay=>{const pr=projectMap.get(String(pay.project_id));return `<tr><td><strong>${escapeHtml(pr?formatProjectId(pr):(pay.reference_no||pay.reference_number||'—'))}</strong></td><td>${escapeHtml(pay.payment_method||pay.method||'Payment')}${pay.reference_no||pay.reference_number?` · ${escapeHtml(pay.reference_no||pay.reference_number)}`:''}</td><td><strong>${formatCurrency(Math.max(0,safeNumber(pay.amount_paid??pay.amount)))}</strong></td><td class="jp-date-cell">${escapeHtml(formatProjectDate(pay.payment_date||pay.created_at))}</td><td class="table-row-actions">${pr?`<div class="popover-wrap" id="reportPaymentMenu_${String(pay.id||pay.reference_no||pay.reference_number||Math.random()).replace(/[^a-zA-Z0-9_-]/g,'')}"><button type="button" class="icon-more-button vertical-more table-action-button" aria-label="Payment actions" onclick="app.togglePopover(this.parentElement.id,event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="event.stopPropagation();app.openProjectDetails('${pr.id}','payment-tracker')">Open Project</button></div></div>`:'—'}</td></tr>`}).join('')||`<tr><td colspan="5" class="text-center text-muted py-4">No payments recorded yet.</td></tr>`}
+                </tbody></table></div>
+              </section>
 
-                <section class="card report-status-card-v2">
+                <section class="card report-status-card-v2 report-status-full">
                   <div class="report-card-head-v2"><div><h2>Payment Status</h2><p>Overview of all project payments</p></div></div>
                   <div class="report-status-body-v2">
                     <div class="report-donut-v2" style="background:conic-gradient(#20bf78 0 ${paidEnd}deg,#f4b122 ${paidEnd}deg ${partialEnd}deg,#f47b20 ${partialEnd}deg ${unpaidEnd}deg,#ef4b55 ${unpaidEnd}deg 360deg)">
@@ -6035,14 +6083,6 @@ ${description}`))actionCallback();return;}
                   </div>
                   <div class="report-status-footer-v2"><span><b>${projects.filter(p=>projectBalance(p)<=0.005).length}</b> settled projects</span><span><b>${collectionRate}%</b> collected</span><span><b>${projects.filter(p=>projectIsActiveByPayment(p)).length}</b> active</span></div>
                 </section>
-              </div>
-
-              <section class="card report-recent-v2">
-                <div class="report-card-head-v2"><div><h2>Recent Payments</h2><p>Latest recorded payments</p></div><button class="btn btn-secondary btn-sm" onclick="app.navigateTo('payments')">View all payments →</button></div>
-                <div class="table-responsive"><table class="data-table unified-table report-recent-table"><thead><tr><th>Reference</th><th>Payment Method</th><th>Amount</th><th>Date</th><th class="table-actions-col" aria-label="Actions"></th></tr></thead><tbody>
-                  ${recentPayments.map(pay=>{const pr=projectMap.get(String(pay.project_id));return `<tr><td><strong>${escapeHtml(pr?formatProjectId(pr):(pay.reference_no||pay.reference_number||'—'))}</strong></td><td>${escapeHtml(pay.payment_method||pay.method||'Payment')}${pay.reference_no||pay.reference_number?` · ${escapeHtml(pay.reference_no||pay.reference_number)}`:''}</td><td><strong>${formatCurrency(Math.max(0,safeNumber(pay.amount_paid??pay.amount)))}</strong></td><td class="jp-date-cell">${escapeHtml(formatProjectDate(pay.payment_date||pay.created_at))}</td><td class="table-row-actions">${pr?`<div class="popover-wrap" id="reportPaymentMenu_${String(pay.id||pay.reference_no||pay.reference_number||Math.random()).replace(/[^a-zA-Z0-9_-]/g,'')}"><button type="button" class="icon-more-button vertical-more table-action-button" aria-label="Payment actions" onclick="app.togglePopover(this.parentElement.id,event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="event.stopPropagation();app.openProjectDetails('${pr.id}','payment-tracker')">Open Project</button></div></div>`:'—'}</td></tr>`}).join('')||`<tr><td colspan="5" class="text-center text-muted py-4">No payments recorded yet.</td></tr>`}
-                </tbody></table></div>
-              </section>
             </div>`;
         }catch(error){
           console.error('Reports render error:',error);
