@@ -503,6 +503,7 @@
   }
 
   function install(){
+    window.JPSettingsBuild=buildSettings;
     cleanRootText();applyInterfacePrefs();buildSettings();if(!$("#view-settings .jp-settings-layout")){settingsBuilt=false;buildSettings();}bindProjectDrafts();fixClientProfileGuard();portalPolish();removeProjectSaveButtons();overviewPolish();installBrowserNotifications();
     const originalNav=window.app.navigateTo.bind(window.app);
     window.app.navigateTo=function(view){
