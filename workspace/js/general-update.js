@@ -228,7 +228,8 @@
   function adAudienceLabel(v){return ({all:"Everyone",guest:"Guests",client:"Clients"})[v]||"Everyone";}
   function adDestinationLabel(a){var type=String(a.destination_type||"no_action"),value=String(a.destination_value||"").trim(),label=({no_action:"No action",shop:"Shop",package:"Package",service:"Service",referral:"Referral",loyalty:"Loyalty",page:"Online page",external_url:"External URL"})[type]||type;return label+(value?" · "+value:"");}
   async function renderAds(){
-    var host=ensureAdsPage();if(!host)return;host.innerHTML='<div class="jp-ad-loading"><span class="portal-loading-spinner"></span><div><strong>Loading Ad Management</strong><small>Syncing campaigns…</small></div></div>';
+    var host=ensureAdsPage();if(!host)return;
+    if(!host.querySelector('.jp-ads-page'))host.innerHTML='<div class="jp-ad-loading"><span class="portal-loading-spinner"></span><div><strong>Loading Ad Management</strong><small>Syncing campaigns…</small></div></div>';
     try{
       var d=await API({action:"ad-dashboard"}),ads=d.ads||[],settings=d.settings||{enabled:true,rotation_seconds:8,max_active_popups:1,auto_archive_expired:true};
       host.innerHTML='<div class="jp-ads-page"><div class="jp-ads-heading"><div><span class="section-kicker">ONLINE PORTAL</span><h1>Ad Management</h1><p>Control banners and popups shown in JUAN PROJECT Online.</p></div><div class="jp-ads-heading-actions"><label class="jp-ad-master-toggle"><span>In-house Ads</span><span class="toggle-switch"><input id="jpAdsMaster" type="checkbox" '+(settings.enabled!==false?'checked':'')+'><span class="toggle-slider"></span></span></label><button class="btn btn-secondary" id="jpBannerSettings">Ad Settings</button><button class="btn btn-primary" id="jpCreateAd">+ New Ad</button></div></div>'+
