@@ -157,7 +157,7 @@ button,.btn,.icon-button,.nav button,.shop-row,.project-button,.settings-row{tou
   .client-mode.route-home .home-activity-card.expanded .activity-row{display:grid}
 }
 
-/* 2026-09-24 Online SF Pro Rounded system */
+/* 2026-09-24 Online SF Pro system */
 html,body,#root,button,input,select,textarea{
   font-family:"SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
 }
