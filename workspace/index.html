@@ -4180,9 +4180,6 @@ table.jp-packages-table col:nth-child(6){width:7%}
           const packages = packagesRes.data || [];
           const packageItems = itemsRes.data || [];
           state.sharedCatalogReady=true;
-          const hasRemoteCatalog = services.length > 0 || packages.length > 0;
-          if (!hasRemoteCatalog) return true;
-
           const categoryById = new Map(categories.map(c => [String(c.id), c]));
           state.catalogCategories = categories.filter(c => c.active !== false).map(c => c.name).filter(Boolean);
           state.soloServices = services.map((row, index) => ({
@@ -9373,8 +9370,15 @@ ${description}`))actionCallback();return;}
         if(!state.catalogCategories.some(x=>String(x).toLowerCase()===category.toLowerCase())){showToast('Choose an existing category.');return;}
         if(state.soloServices.some(s=>String(s.product_code)!==code&&String(s.name||'').trim().toLowerCase()===name.toLowerCase())){showToast('A service with that name already exists.');return;}
         await commitCatalogMutation(()=>{
-          if(code){const item=state.soloServices.find(s=>s.product_code===code);if(!item)throw new Error('Service no longer exists.');Object.assign(item,{name,category,description:desc,price,active,type:'SOLO'});}
-          else{const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name,category,description:desc,price,active,type:'SOLO'});}
+          if(code){
+            const item=state.soloServices.find(s=>s.product_code===code);if(!item)throw new Error('Service no longer exists.');
+            const oldName=String(item.name||'');
+            Object.assign(item,{name,category,description:desc,price,active,type:'SOLO'});
+            if(oldName&&oldName!==name)state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).map(x=>x===oldName?name:x);});
+          }else{
+            const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;
+            state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name,category,description:desc,price,active,type:'SOLO'});
+          }
         },code?'Service updated.':'Service added.',{modalId:'catalogServiceModal'});
       }
       function renderPackageServiceChoices(query=''){
@@ -9413,12 +9417,13 @@ ${description}`))actionCallback();return;}
       function deleteCatalogService(){
         const code=document.getElementById('catalogServiceCode')?.value;if(!code)return;const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;
         const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));
+        const wouldEmpty=bundles.filter(p=>(p.includedServiceNames||[]).length<=1);
+        if(wouldEmpty.length){showToast('Edit or delete '+wouldEmpty[0].name+' first; this is its only included service.');return;}
         requestDestructivePin('Delete Service',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} package${bundles.length===1?'':'s'}.`:''}`,async()=>{
           await commitCatalogMutation(()=>{
             state.soloServices=state.soloServices.filter(s=>s.product_code!==code);
             state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});
-            state.packagesList=state.packagesList.filter(p=>(p.includedServiceNames||[]).length>0);
-          },'Service deleted.',{modalId:'catalogServiceModal'});
+                      },'Service deleted.',{modalId:'catalogServiceModal'});
         });
       }
       function deleteCatalogPackage(){
