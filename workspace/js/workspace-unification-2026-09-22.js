@@ -369,14 +369,12 @@ function standardizePageNames(){
     if(sub)sub.textContent=entry[1][0];if(title)title.textContent=entry[1][1];
   });
 }
-function syncCatalogPanel(panel='services'){
+function syncCatalogPanel(panel='all'){
   const view=document.getElementById('view-pricelist');if(!view)return;
-  const tabs=view.querySelector('.jp-catalog-tabs'),services=document.getElementById('catalogServicesCard'),packages=document.getElementById('catalogPackagesCard');
+  const tabs=view.querySelector('.jp-catalog-tabs');
   tabs?.querySelectorAll('button').forEach(x=>{const active=x.dataset.catalogPanel===panel;x.classList.toggle('active',active);x.setAttribute('aria-selected',active?'true':'false');});
-  if(services)services.classList.toggle('hidden',panel!=='services');
-  if(packages)packages.classList.toggle('hidden',panel!=='packages');
-  const primary=document.getElementById('jpCatalogPrimaryAction');
-  if(primary){primary.textContent=panel==='packages'?'+ New Package':'+ New Service';primary.onclick=()=>panel==='packages'?window.app?.openCatalogPackageModal?.():window.app?.openCatalogServiceModal?.();}
+  const map={all:'All',services:'Services',packages:'Packages'};
+  window.app?.setCatalogManagerFilter?.(map[panel]||'All');
 }
 function enhanceServicesPricing(){
   const view=document.querySelector('#view-pricelist.active');if(!view)return;
@@ -384,28 +382,16 @@ function enhanceServicesPricing(){
   const title=header.querySelector('.page-title'),sub=header.querySelector('.greeting-subtitle');
   if(title)title.textContent='Services & Pricing';if(sub)sub.textContent='Catalog';
   let desc=header.querySelector('.jp-services-description');
-  if(!desc){desc=document.createElement('p');desc.className='jp-services-description';desc.textContent='Manage packages, solo services, pricing, and the client-facing catalog.';header.querySelector('div')?.append(desc);}
-  const pricingUrl='https://juan-project-online-juan-codes.vercel.app/pricing';
-  let actions=header.querySelector('.action-buttons-group');
-  if(actions&&actions.dataset.jpPricingActions!=='1'){
-    actions.dataset.jpPricingActions='1';
-    actions.innerHTML='<button type="button" class="btn btn-secondary" id="jpPreviewPricing">Preview Pricing</button>'+
-      '<button type="button" class="btn btn-secondary jp-share-pricing" id="jpSharePricing">Share</button>'+
-      '<button type="button" class="btn btn-primary" id="jpCatalogPrimaryAction">+ New Service</button>'+
-      '<div class="popover-wrap" id="jpCatalogMore"><button type="button" class="icon-more-button vertical-more" aria-label="More catalog actions">⋮</button><div class="popover-panel client-row-menu"><button type="button" class="popover-action" id="jpCatalogCategories">Manage Categories</button></div></div>';
-    actions.querySelector('#jpPreviewPricing').onclick=()=>window.open(pricingUrl,'_blank','noopener,noreferrer');
-    actions.querySelector('#jpSharePricing').onclick=async()=>{try{await navigator.clipboard.writeText(pricingUrl);window.showToast?.('Pricing link copied.')}catch{window.open(pricingUrl,'_blank','noopener,noreferrer')}};
-    actions.querySelector('#jpCatalogMore .icon-more-button').onclick=e=>window.app?.togglePopover?.('jpCatalogMore',e);
-    actions.querySelector('#jpCatalogCategories').onclick=()=>window.app?.openCatalogCategoryModal?.();
-  }
+  if(!desc){desc=document.createElement('p');desc.className='jp-services-description';header.querySelector('div')?.append(desc);}
+  desc.textContent='Manage services, packages, and pricing shared with JUAN PROJECT Online.';
   let tabs=view.querySelector('.jp-catalog-tabs');
   if(!tabs){
     tabs=document.createElement('div');tabs.className='jp-catalog-tabs';tabs.setAttribute('role','tablist');
-    tabs.innerHTML='<button type="button" role="tab" data-catalog-panel="services" class="active">Solo Services</button><button type="button" role="tab" data-catalog-panel="packages">Packages</button>';
+    tabs.innerHTML='<button type="button" role="tab" data-catalog-panel="all" class="active">All</button><button type="button" role="tab" data-catalog-panel="services">Services</button><button type="button" role="tab" data-catalog-panel="packages">Packages</button>';
     const toolbar=view.querySelector('.catalog-toolbar');if(toolbar)toolbar.before(tabs);else header.after(tabs);
     tabs.querySelectorAll('button').forEach(btn=>btn.onclick=()=>syncCatalogPanel(btn.dataset.catalogPanel));
   }
-  const active=tabs.querySelector('button.active')?.dataset.catalogPanel||'services';
+  const active=tabs.querySelector('button.active')?.dataset.catalogPanel||'all';
   syncCatalogPanel(active);
 }
 function makeOnlineTabs(active){
