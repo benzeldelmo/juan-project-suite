@@ -2138,33 +2138,29 @@ table.jp-packages-table col:nth-child(6){width:7%}
       <!-- VIEW 7: PRICELIST -->
       <section id="view-pricelist" class="view">
         <header class="page-header">
-          <div><div class="greeting-subtitle">Seller</div><h1 class="page-title">Shop</h1></div>
-          <div class="action-buttons-group"><button class="btn btn-secondary" onclick="app.openCatalogCategoryModal()">Categories</button><button class="btn btn-primary" onclick="app.openCatalogServiceModal()">+ New Service</button></div>
+          <div><div class="greeting-subtitle">Catalog</div><h1 class="page-title">Services & Pricing</h1><p class="jp-services-description">Manage services, packages, and pricing shared with JUAN PROJECT Online.</p></div>
+          <div class="action-buttons-group"><button class="btn btn-secondary" type="button" onclick="window.open('https://juan-project-online-juan-codes.vercel.app/pricing','_blank','noopener,noreferrer')">Preview Pricing</button><button class="btn btn-secondary" type="button" id="jpSharePricingBase">Share</button><div class="popover-wrap" id="jpCatalogCreateMenu"><button class="btn btn-primary" type="button" onclick="app.togglePopover('jpCatalogCreateMenu',event)">+ New ▾</button><div class="popover-panel client-row-menu"><button class="popover-action" type="button" onclick="app.openCatalogCategoryModal()">Category</button><button class="popover-action" type="button" onclick="app.openCatalogServiceModal()">Service</button><button class="popover-action" type="button" onclick="app.openCatalogPackageModal()">Package</button></div></div></div>
         </header>
         <div class="view-toolbar unified-toolbar catalog-toolbar">
-          <input type="text" class="form-control" id="catalogManagerSearch" placeholder="Search services, packages, descriptions, or inclusions..." oninput="app.queueViewRender('catalog')">
+          <input type="text" class="form-control" id="catalogManagerSearch" placeholder="Search services, packages, or inclusions..." oninput="app.queueViewRender('catalog')">
           <div class="toolbar-actions">
             <div id="catalogManagerFilters" class="hidden"></div>
             <select id="catalogCategorySelect" class="compact-sort" onchange="app.selectCatalogCategory(this.value)"></select>
-            <select id="catalogSort" class="compact-sort" onchange="app.setListSort('catalog',this.value)"><option value="default">Default (by ID)</option><option value="price-desc">Price: Highest to Lowest</option><option value="price-asc">Price: Lowest to Highest</option></select>
+            <select id="catalogSort" class="compact-sort" onchange="app.setListSort('catalog',this.value)"><option value="default">Default</option><option value="name">Name: A–Z</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option></select>
           </div>
         </div>
         <div class="catalog-manager-main catalog-manager-simple">
-          <div class="card table-card" id="catalogServicesCard"><div class="catalog-panel-heading catalog-table-heading"><div><h2 class="card-title" id="catalogSelectedCategoryTitle">Services</h2></div><button class="btn btn-primary btn-sm" onclick="app.openCatalogServiceModal()">+ New Service</button></div><div class="table-responsive"><table class="data-table unified-table catalog-services-table"><thead><tr><th>Service ID</th><th>Service Name</th><th>Category</th><th>Description</th><th>Price</th><th class="table-actions-col" aria-label="Actions"></th></tr></thead><tbody id="catalogServicesBody"></tbody></table></div></div>
-          <div class="card table-card" id="catalogPackagesCard"><div class="catalog-panel-heading catalog-table-heading"><div><h2 class="card-title">Packages</h2></div><button class="btn btn-secondary btn-sm" onclick="app.openCatalogPackageModal()">+ New Package</button></div><div class="table-responsive"><table class="data-table unified-table catalog-packages-table"><thead><tr><th>Service ID</th><th>Package Name</th><th>Package Inclusions</th><th>Original Price</th><th>New Price</th><th class="table-actions-col" aria-label="Actions"></th></tr></thead><tbody id="catalogPackagesBody"></tbody></table></div></div>
+          <div class="card table-card" id="catalogServicesCard"><div class="catalog-panel-heading catalog-table-heading"><div><h2 class="card-title" id="catalogSelectedCategoryTitle">Services</h2></div></div><div class="table-responsive"><table class="data-table unified-table catalog-services-table"><thead><tr><th>Service ID</th><th>Service Name</th><th>Category</th><th>Details / Format</th><th>Price</th><th class="table-actions-col" aria-label="Actions"></th></tr></thead><tbody id="catalogServicesBody"></tbody></table></div></div>
+          <div class="card table-card" id="catalogPackagesCard"><div class="catalog-panel-heading catalog-table-heading"><div><h2 class="card-title">Packages</h2></div></div><div class="table-responsive"><table class="data-table unified-table catalog-packages-table"><thead><tr><th>Package ID</th><th>Package Name</th><th>Inclusions</th><th>Regular Total</th><th>Package Price</th><th class="table-actions-col" aria-label="Actions"></th></tr></thead><tbody id="catalogPackagesBody"></tbody></table></div></div>
         </div>
       </section>
 
       <!-- VIEW: ONLINE PORTAL — integrated V1.1 admin control layer -->
       <section id="view-online-portal" class="view">
         <header class="page-header">
-          <div><div class="greeting-subtitle">Client Experience</div><h1 class="page-title">Online Portal</h1></div>
+          <div><div class="greeting-subtitle">Online</div><h1 class="page-title">Online</h1><p class="online-page-description">Manage client access, portal activity, payments, and configuration.</p></div>
           <button class="btn btn-secondary" id="onlinePortalRefreshBtn">Refresh</button>
         </header>
-        <div class="online-portal-intro card">
-          <div><strong>JUAN PROJECT Online</strong><p>Manage client access, client-facing activity, payment reviews, and portal configuration. Project delivery links now live inside each Project → Deliverables tab.</p></div>
-          <span class="status-badge status-green">V1.3.3.2</span>
-        </div>
         <div class="portal-tabs" id="onlinePortalTabs">
           <button type="button" data-portal-tab="accounts" class="active">Client Access</button>
           <button type="button" data-portal-tab="activity">Portal Activity</button>
@@ -2694,8 +2690,8 @@ table.jp-packages-table col:nth-child(6){width:7%}
 
   <!-- CATALOG MANAGER MODALS -->
   <div class="modal-backdrop" id="catalogCategoryModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATALOG</div><h3 class="modal-title" id="catalogCategoryModalTitle">Add Category</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogCategoryModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogCategoryOldName"><div class="form-group"><label class="form-label">Category Name</label><input class="form-control" id="catalogCategoryName" placeholder="Category name"></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogCategoryDeleteBtn" onclick="app.deleteCatalogCategory()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogCategoryModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogCategory()">Save Category</button></div></div></div>
-  <div class="modal-backdrop" id="catalogServiceModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATALOG</div><h3 class="modal-title" id="catalogServiceModalTitle">Add Service</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogServiceModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogServiceCode"><div class="form-group"><label class="form-label">Service Name</label><input class="form-control" id="catalogServiceName" placeholder="Service name"></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="catalogServiceCategory"></select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control" id="catalogServiceDescription" rows="3" placeholder="What is included or produced"></textarea></div><div class="form-grid"><div class="form-group"><label class="form-label">Price (₱)</label><input class="form-control" id="catalogServicePrice" type="number" min="0" step="0.01"></div><div class="form-group"><label class="form-label">Status</label><select class="form-control" id="catalogServiceActive"><option value="true">Active</option><option value="false">Inactive</option></select></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogServiceDeleteBtn" onclick="app.deleteCatalogService()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogServiceModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogService()">Save Service</button></div></div></div>
-  <div class="modal-backdrop" id="catalogPackageModal"><div class="modal-card modal-wide"><div class="modal-header"><div><div class="section-kicker">PACKAGE BUILDER</div><h3 class="modal-title" id="catalogPackageModalTitle">Create Package</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogPackageModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogPackageCode"><div class="form-grid"><div class="form-group"><label class="form-label">Package Name</label><input class="form-control" id="catalogPackageName" placeholder="Package name"></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="catalogPackageCategory" onchange="app.renderPackageServiceChoices(document.getElementById('catalogPackageServiceSearch').value)"></select></div></div><div class="form-group"><label class="form-label">Find Services</label><input class="form-control" id="catalogPackageServiceSearch" placeholder="Type to search available services..." oninput="app.renderPackageServiceChoices(this.value)"></div><div class="package-service-picker" id="catalogPackageServiceChoices"></div><div class="package-builder-summary"><div><span>Original service total</span><strong id="catalogPackageOriginalTotal">₱0.00</strong></div><div class="form-group" style="margin:0"><label class="form-label">Offer / Discounted Price (₱)</label><input class="form-control" id="catalogPackageSellingPrice" type="number" min="0" step="0.01"></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogPackageDeleteBtn" onclick="app.deleteCatalogPackage()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogPackageModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogPackage()">Save Package</button></div></div></div>
+  <div class="modal-backdrop" id="catalogServiceModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATALOG</div><h3 class="modal-title" id="catalogServiceModalTitle">Add Service</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogServiceModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogServiceCode"><div class="form-group"><label class="form-label">Service Name</label><input class="form-control" id="catalogServiceName" placeholder="Service name"></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="catalogServiceCategory"></select></div><div class="form-group"><label class="form-label">Details / Format</label><textarea class="form-control" id="catalogServiceDescription" rows="2" placeholder="e.g. MP4, Blender, AE"></textarea></div><div class="form-grid"><div class="form-group"><label class="form-label">Price (₱)</label><input class="form-control" id="catalogServicePrice" type="number" min="0" step="0.01"></div><div class="form-group" id="catalogServiceStatusGroup"><label class="form-label">Status</label><select class="form-control" id="catalogServiceActive"><option value="true">Active</option><option value="false">Inactive</option></select></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogServiceDeleteBtn" onclick="app.deleteCatalogService()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogServiceModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogService()">Save Service</button></div></div></div>
+  <div class="modal-backdrop" id="catalogPackageModal"><div class="modal-card modal-wide"><div class="modal-header"><div><div class="section-kicker">PACKAGE BUILDER</div><h3 class="modal-title" id="catalogPackageModalTitle">Create Package</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogPackageModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogPackageCode"><div class="form-grid"><div class="form-group"><label class="form-label">Package Name</label><input class="form-control" id="catalogPackageName" placeholder="Package name"></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="catalogPackageCategory" onchange="app.renderPackageServiceChoices(document.getElementById('catalogPackageServiceSearch').value)"></select></div></div><div class="form-group"><label class="form-label">Find Services</label><input class="form-control" id="catalogPackageServiceSearch" placeholder="Type to search available services..." oninput="app.renderPackageServiceChoices(this.value)"></div><div class="package-service-picker" id="catalogPackageServiceChoices"></div><div class="package-builder-summary"><div><span>Regular total</span><strong id="catalogPackageOriginalTotal">₱0.00</strong><small id="catalogPackageSavings">Savings: ₱0.00</small></div><div class="form-group" style="margin:0"><label class="form-label">Package Price (₱)</label><input class="form-control" id="catalogPackageSellingPrice" type="number" min="0" step="0.01"></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogPackageDeleteBtn" onclick="app.deleteCatalogPackage()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogPackageModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogPackage()">Save Package</button></div></div></div>
 
   <!-- QUICK ACTIONS: global Workspace action launcher -->
   <button class="quick-actions-fab" id="quickActionsFab" onclick="window.jpToggleQuickActions?.()" aria-label="Open Quick Actions" aria-expanded="false">
@@ -4101,7 +4097,25 @@ table.jp-packages-table col:nth-child(6){width:7%}
         localStorage.setItem("JUAN_PACKAGES", JSON.stringify(state.packagesList));
         localStorage.setItem("JUAN_CATALOG_CATEGORIES", JSON.stringify(state.catalogCategories || []));
       }
+      function packageDescriptionInclusions(description){
+        const raw=String(description||'').replace(/\r/g,'').trim();
+        if(!raw)return[];
+        return raw.split('\n')
+          .map(line=>line.replace(/^\s*includes\s*:?\s*/i,'').replace(/^\s*[•*✓-]\s*/,'').trim())
+          .filter(line=>line&&!/^includes\s*:?$/i.test(line));
+      }
+      function repairCatalogPackageInclusions(){
+        const services=state.soloServices||[];
+        const byName=new Map(services.map(service=>[String(service.name||'').trim().toLowerCase(),service.name]));
+        (state.packagesList||[]).forEach(pkg=>{
+          let included=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames.filter(Boolean):[];
+          if(!included.length)included=packageDescriptionInclusions(pkg.description);
+          pkg.includedServiceNames=[...new Set(included.map(name=>byName.get(String(name||'').trim().toLowerCase())).filter(Boolean))];
+          pkg.description='';
+        });
+      }
       function validateCatalogState(){
+        repairCatalogPackageInclusions();
         const categories=(state.catalogCategories||[]).map(x=>normalizeHumanText(x,80)).filter(Boolean);
         const categorySet=new Set(categories.map(x=>x.toLowerCase()));
         if(categorySet.size!==categories.length)return 'Category names must be unique.';
@@ -4193,17 +4207,18 @@ table.jp-packages-table col:nth-child(6){width:7%}
             type: "SOLO"
           }));
           state.packagesList = normalizeBroadcastPackageNames(packages.map((row, index) => {
-            const inclusions = packageItems
+            let inclusions = packageItems
               .filter(item => String(item.package_id) === String(row.id))
               .sort((a,b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
               .map(item => item.item_name)
               .filter(Boolean);
+            if(!inclusions.length)inclusions=packageDescriptionInclusions(row.description);
             return {
               db_id: row.id,
               product_code: row.product_code || `PKG-${String(index + 1).padStart(3, "0")}`,
               name: String(row.name || "").toUpperCase(),
               category: categoryById.get(String(row.category_id))?.name || "Other",
-              description: row.description || "",
+              description: "",
               type: "PACKAGE",
               sellingPrice: Number(row.new_price || 0),
               originalPrice: Number(row.original_price || 0),
@@ -4260,7 +4275,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
             product_code: String(pkg.product_code || "").trim(),
             category_id: categoryByName.get(String(pkg.category || "").toLowerCase())?.id || null,
             name: String(pkg.name || "").trim(),
-            description: String(pkg.description || ""),
+            description: "",
             original_price: Number(pkg.originalPrice || 0),
             new_price: Number(pkg.sellingPrice || 0),
             active: pkg.active !== false
@@ -8244,11 +8259,12 @@ ${description}`))actionCallback();return;}
           const menuId=`deliverableMenu_${String(d.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,children=d.is_group?ds.filter(c=>String(c.parent_id||'')===String(d.id)):[];
           return `<div class="deliverable-checklist-row ${child?'deliverable-child-row':''} ${d.is_group?'deliverable-package-row':''} ${d.completed?'is-complete':''}">
             <button type="button" class="deliverable-check ${d.completed?'checked':''}" aria-pressed="${d.completed?'true':'false'}" aria-label="${d.completed?'Mark incomplete':'Mark complete'}" onclick="app.toggleDeliverable('${proj.id}','${String(d.id).replace(/'/g,"\\'")}')"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></button>
-            <div class="deliverable-checklist-copy"><strong>${escapeHtml(d.item_name)}</strong>${d.is_group?`<span>${children.filter(c=>c.completed).length}/${children.length} included items · Package</span>`:child?`<span>${escapeHtml(d.package_name||'Package inclusion')}</span>`:''}</div>
+            <div class="deliverable-checklist-copy"><strong>${escapeHtml(d.item_name)}</strong>${d.is_group?`<span>${children.filter(c=>c.completed).length}/${children.length} completed · Package</span>`:''}</div>
+            ${d.is_group?`<button type="button" class="deliverable-group-toggle" aria-label="Expand or collapse package" onclick="event.stopPropagation();this.closest('.deliverable-group-block').classList.toggle('collapsed')">⌄</button>`:''}
             <div class="popover-wrap" id="${menuId}"><button class="icon-more-button" onclick="event.stopPropagation();app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action text-danger" onclick="event.stopPropagation();app.deleteProjectDeliverable('${String(d.id).replace(/'/g,"\\'")}')">Remove Deliverable</button></div></div>
           </div>`;
         };
-        container.innerHTML=`<div class="deliverable-checklist">${roots.map(root=>`<div class="deliverable-group-block ${root.is_group?'package-group':''}">${row(root,false)}${ds.filter(c=>String(c.parent_id||'')===String(root.id)).sort((a,b)=>Number(a.child_index??999)-Number(b.child_index??999)).map(c=>row(c,true)).join('')}</div>`).join('')}</div>`;
+        container.innerHTML=`<div class="deliverable-checklist">${roots.map(root=>{const children=ds.filter(c=>String(c.parent_id||'')===String(root.id)).sort((a,b)=>Number(a.child_index??999)-Number(b.child_index??999));const collapsed=root.is_group&&children.length&&children.every(c=>c.completed);return `<div class="deliverable-group-block ${root.is_group?'package-group':''} ${collapsed?'collapsed':''}">${row(root,false)}<div class="deliverable-package-children">${children.map(c=>row(c,true)).join('')}</div></div>`}).join('')}</div>`;
         renderProjectFilesAccess(proj);
       }
       function toLocalDateTimeInput(value){if(!value)return'';const d=new Date(value);if(Number.isNaN(d.getTime()))return'';const local=new Date(d.getTime()-d.getTimezoneOffset()*60000);return local.toISOString().slice(0,16);}
@@ -9343,13 +9359,15 @@ ${description}`))actionCallback();return;}
         if(!state.catalogCategories.some(x=>x.toLowerCase()==='tv broadcast graphics')&&(state.soloServices||[]).some(s=>String(s.category||'').toLowerCase()==='tv broadcast graphics'))state.catalogCategories.unshift('TV Broadcast Graphics');
         if(migrated)persistCatalogState();
       }
+      document.getElementById('jpSharePricingBase')?.addEventListener('click',async()=>{const url='https://juan-project-online-juan-codes.vercel.app/pricing';try{await navigator.clipboard.writeText(url);showToast('Pricing link copied.')}catch{window.open(url,'_blank','noopener,noreferrer')}});
+
       function renderPricelist(){
         ensureCatalogCategories();const servicesBody=document.getElementById('catalogServicesBody'),packagesBody=document.getElementById('catalogPackagesBody'),filters=document.getElementById('catalogManagerFilters'),categorySelect=document.getElementById('catalogCategorySelect');if(!servicesBody||!packagesBody||!filters||!categorySelect)return;
-        const q=(document.getElementById('catalogManagerSearch')?.value||'').trim().toLowerCase(),filter='All',pref=state.listSorts?.catalog||'default';filters.innerHTML='';const sortEl=document.getElementById('catalogSort');if(sortEl)sortEl.value=pref;
+        const q=(document.getElementById('catalogManagerSearch')?.value||'').trim().toLowerCase(),filter=state.catalogManagerFilter||'All',pref=state.listSorts?.catalog||'default';filters.innerHTML='';const sortEl=document.getElementById('catalogSort');if(sortEl)sortEl.value=pref;
         const categories=['ALL',...state.catalogCategories].sort((a,b)=>a==='ALL'?-1:b==='ALL'?1:String(a).localeCompare(String(b)));categorySelect.innerHTML=categories.map(cat=>`<option value="${escapeHtml(cat)}">${escapeHtml(cat==='ALL'?'All Categories':displayCategory(cat))}</option>`).join('');categorySelect.value=state.catalogManagerCategory||'ALL';
         const selected=state.catalogManagerCategory||'ALL',title=document.getElementById('catalogSelectedCategoryTitle');if(title)title.textContent=selected==='ALL'?'Services':`${displayCategory(selected)} Services`;
-        let services=state.soloServices.filter(item=>(selected==='ALL'||String(item.category||'')===selected)&&(`${item.name||''} ${item.category||''} ${item.description||''}`).toLowerCase().includes(q)),packages=state.packagesList.filter(pkg=>(selected==='ALL'||String(pkg.category||'')===selected)&&`${pkg.name||''} ${pkg.category||''} ${pkg.description||''} ${(pkg.includedServiceNames||[]).join(' ')}`.toLowerCase().includes(q));
-        const codeNo=x=>Number(String(x.product_code||'').match(/(\d+)$/)?.[1]||999999),price=x=>Number(x.type==='PACKAGE'?x.sellingPrice:x.price||0);const cmp=pref==='price-desc'?(a,b)=>price(b)-price(a)||codeNo(a)-codeNo(b):pref==='price-asc'?(a,b)=>price(a)-price(b)||codeNo(a)-codeNo(b):(a,b)=>codeNo(a)-codeNo(b);services.sort(cmp);packages.sort(cmp);
+        let services=state.soloServices.filter(item=>(selected==='ALL'||String(item.category||'')===selected)&&(`${item.name||''} ${item.category||''} ${item.description||''}`).toLowerCase().includes(q)),packages=state.packagesList.filter(pkg=>(selected==='ALL'||String(pkg.category||'')===selected)&&`${pkg.name||''} ${pkg.category||''} ${(pkg.includedServiceNames||[]).join(' ')}`.toLowerCase().includes(q));
+        const codeNo=x=>Number(String(x.product_code||'').match(/(\d+)$/)?.[1]||999999),price=x=>Number(x.type==='PACKAGE'?x.sellingPrice:x.price||0);const cmp=pref==='name'?(a,b)=>String(a.name||'').localeCompare(String(b.name||'')):pref==='price-desc'?(a,b)=>price(b)-price(a)||codeNo(a)-codeNo(b):pref==='price-asc'?(a,b)=>price(a)-price(b)||codeNo(a)-codeNo(b):(a,b)=>codeNo(a)-codeNo(b);services.sort(cmp);packages.sort(cmp);
         const packageCard=document.getElementById('catalogPackagesCard'),serviceCard=document.getElementById('catalogServicesCard');serviceCard.style.display=filter==='Packages'?'none':'';packageCard.style.display=filter==='Services'?'none':'';
         servicesBody.innerHTML=services.map(item=>`<tr><td><strong class="catalog-service-id">${escapeHtml(item.product_code||'—')}</strong></td><td><strong>${escapeHtml(item.name)}</strong></td><td>${escapeHtml(displayCategory(item.category||'—'))}</td><td class="text-sm text-secondary catalog-desc-cell">${escapeHtml(item.description||'')}</td><td><strong>${formatCurrency(item.price||0)}</strong></td><td class="text-right"><button class="icon-more-button" aria-label="Service actions" onclick="app.openEditServiceModal('${item.product_code}')">•••</button></td></tr>`).join('')||`<tr><td colspan="6" class="text-center text-muted py-4">No matching services.</td></tr>`;
         packagesBody.innerHTML=packages.map(pkg=>{const inc=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:[],displayInc=inc.map(displayPackageServiceName);return `<tr><td><strong class="catalog-service-id">${escapeHtml(pkg.product_code||'—')}</strong></td><td><strong>${escapeHtml(normalizeBroadcastPackageName(pkg.name))}</strong></td><td><span class="catalog-inclusion-count">${displayInc.length} item${displayInc.length===1?'':'s'}</span><div class="text-sm text-muted catalog-inclusion-preview">${escapeHtml(displayInc.join(' • '))}</div></td><td>${formatCurrency(pkg.originalPrice||0)}</td><td><strong>${formatCurrency(pkg.sellingPrice||0)}</strong></td><td class="text-right"><button class="icon-more-button" aria-label="Package actions" onclick="app.openEditPackageModal('${pkg.product_code}')">•••</button></td></tr>`}).join('')||`<tr><td colspan="6" class="text-center text-muted py-4">No matching packages.</td></tr>`;
@@ -9376,14 +9394,14 @@ ${description}`))actionCallback();return;}
         },old?'Category updated.':'Category added.',{modalId:'catalogCategoryModal'});
       }
       function openCatalogServiceModal(code=''){
-        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a category first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select a category first, then add a service.');return}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Service':'Add Service';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceActive').value=String(item?.active!==false);document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
+        ensureCatalogCategories();if(!state.catalogCategories.length){openCatalogCategoryModal();showToast('Create a category first, then add services under it.');return}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Service':'Add Service';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceActive').value=String(item?.active!==false);document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);document.getElementById('catalogServiceStatusGroup')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
       }
       async function saveCatalogService(){
         const code=String(document.getElementById('catalogServiceCode').value||'').trim();
         const name=normalizeHumanText(document.getElementById('catalogServiceName').value,120).toUpperCase();
         const category=String(document.getElementById('catalogServiceCategory').value||'').trim();
         const desc=String(document.getElementById('catalogServiceDescription').value||'').trim().slice(0,1000);
-        const price=Number(document.getElementById('catalogServicePrice').value),active=document.getElementById('catalogServiceActive').value==='true';
+        const price=Number(document.getElementById('catalogServicePrice').value),active=code?document.getElementById('catalogServiceActive').value==='true':true;
         if(!name||!category||!validReasonableMoney(price)){showToast('Enter a valid service name, category, and non-negative price.');return;}
         if(!state.catalogCategories.some(x=>String(x).toLowerCase()===category.toLowerCase())){showToast('Choose an existing category.');return;}
         if(state.soloServices.some(s=>String(s.product_code)!==code&&String(s.name||'').trim().toLowerCase()===name.toLowerCase())){showToast('A service with that name already exists.');return;}
@@ -9403,7 +9421,7 @@ ${description}`))actionCallback();return;}
         const box=document.getElementById('catalogPackageServiceChoices');if(!box)return;const q=String(query||'').toLowerCase(),category=document.getElementById('catalogPackageCategory')?.value||'',selected=new Set(state.packageBuilderSelectedNames||[]),items=state.soloServices.filter(s=>s.active!==false&&(!category||String(s.category||'')===category)&&(`${s.name||''} ${s.category||''}`).toLowerCase().includes(q));box.innerHTML=items.map(s=>`<label class="package-service-choice"><input type="checkbox" value="${escapeHtml(s.name)}" data-price="${Number(s.price||0)}" ${selected.has(s.name)?'checked':''} onchange="app.togglePackageBuilderService(this.value,this.checked)"><span><strong>${escapeHtml(displayPackageServiceName(s.name))}</strong><small>${formatCurrency(s.price||0)}</small></span></label>`).join('')||`<div class="typeahead-empty">No matching services in this category</div>`;updatePackagePriceSummary()
       }
       function togglePackageBuilderService(name,checked){const set=new Set(state.packageBuilderSelectedNames||[]);if(checked)set.add(name);else set.delete(name);state.packageBuilderSelectedNames=[...set];updatePackagePriceSummary()}
-      function updatePackagePriceSummary(){const selected=new Set(state.packageBuilderSelectedNames||[]),total=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0),el=document.getElementById('catalogPackageOriginalTotal');if(el)el.textContent=formatCurrency(total)}
+      function updatePackagePriceSummary(){const selected=new Set(state.packageBuilderSelectedNames||[]),total=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0),el=document.getElementById('catalogPackageOriginalTotal'),selling=Number(document.getElementById('catalogPackageSellingPrice')?.value||0),save=document.getElementById('catalogPackageSavings');if(el)el.textContent=formatCurrency(total);if(save)save.textContent='Savings: '+formatCurrency(Math.max(0,total-selling))}
       function openCatalogPackageModal(code=''){
         ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a category and services first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select the category where this bundle belongs.');return}const pkg=code?state.packagesList.find(p=>p.product_code===code):null;state.packageBuilderSelectedNames=[...(pkg?.includedServiceNames||[])];document.getElementById('catalogPackageModalTitle').textContent=pkg?'Edit Package':'Create Package';document.getElementById('catalogPackageCode').value=pkg?.product_code||'';document.getElementById('catalogPackageName').value=pkg?normalizeBroadcastPackageName(pkg.name):'';document.getElementById('catalogPackageSellingPrice').value=pkg?.sellingPrice??'';document.getElementById('catalogPackageDeleteBtn')?.classList.toggle('hidden',!pkg);const categorySel=document.getElementById('catalogPackageCategory');categorySel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(displayCategory(c))}</option>`).join('');categorySel.value=pkg?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);document.getElementById('catalogPackageServiceSearch').value='';renderPackageServiceChoices('');openModal('catalogPackageModal')
       }
@@ -9418,7 +9436,7 @@ ${description}`))actionCallback();return;}
         if(!state.catalogCategories.some(x=>String(x).toLowerCase()===category.toLowerCase())){showToast('Choose an existing category.');return;}
         if(included.some(x=>!state.soloServices.some(s=>s.active!==false&&s.name===x))){showToast('One or more selected services are no longer available.');return;}
         if(state.packagesList.some(p=>String(p.product_code)!==code&&String(p.name||'').trim().toLowerCase()===name.toLowerCase())){showToast('A package with that name already exists.');return;}
-        const payload={name,category,description:'Includes:\n'+included.map(x=>'• '+x).join('\n'),type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:true};
+        const payload={name,category,description:'',type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:true};
         await commitCatalogMutation(()=>{
           if(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(!pkg)throw new Error('Package no longer exists.');Object.assign(pkg,payload);}
           else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload});}
@@ -10023,6 +10041,7 @@ ${description}`))actionCallback();return;}
     });
   </script>
   <script src="/js/v1-2-ux.js?v=20260923-ads-nav-fix-1"></script>
+  <link rel="stylesheet" href="/css/master-cleanup-2026-10-02.css?v=20261002-master-1">
 
 <style>
 @media (max-width: 720px) {

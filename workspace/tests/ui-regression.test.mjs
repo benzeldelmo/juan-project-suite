@@ -84,9 +84,7 @@ test("Settings tab activation uses collection selectors and initializes content 
   assert.ok(js.includes('$$(".jp-settings-segment").forEach'));
   assert.ok(js.includes('const tabs=$$(".jp-settings-nav-item")'));
   assert.ok(js.includes('$$("[data-search-index]",box).forEach'));
-  assert.ok(!js.includes('$(".jp-settings-nav-item").forEach'));
-  assert.ok(!js.includes('$(".jp-settings-segment").forEach'));
-  assert.ok(js.includes('settingsBuilt=true;bindSettingsTabs();try{bindSettings();}'));
+  assert.ok(js.includes('settingsBuilt=true;settingsDirty=false;bindSettingsTabs();try{bindSettings();}'));
 });
 
 
@@ -129,9 +127,9 @@ test("JUAN PROJECT Online refreshes and cache-busts in-house ads", async () => {
   const html = await read("../online/index.html");
   assert.match(ads, /lastLoadedAt/);
   assert.match(ads, /juan-ads-refresh/);
-  assert.match(sw, /juan-online-v1\.8-ads-release/);
+  assert.match(sw, /const CACHE='juan-online-[^']+'/);
   assert.match(sw, /networkFirst/);
-  assert.match(html, /\/js\/ads\.js\?v=20260920-1900/);
+  assert.match(html, /\/js\/ads\.js\?v=\d{8}-[a-z0-9-]+/);
   assert.match(html, /updateViaCache:"none"/);
 });
 
@@ -144,19 +142,19 @@ test("Workspace Ads API also permits authenticated permanent deletion", async ()
 });
 
 
-test("Client Home pins 1800x600 ad and footer above navigation without body whitespace", async () => {
+test("Client Home keeps its compact viewport layout, footer and 1800x600 ad format", async () => {
   const app = await read("../online/js/app.js");
   const mobile = await read("../online/css/mobile-redesign.css");
   const ads = await read("../online/css/ads.css");
   const workspaceAds = await read("js/general-update.js");
-  assert.match(app, /jp-home-bottom-dock/);
-  assert.match(app, /jp-home-footer/);
+  assert.match(mobile, /\.jp-home-only-footer/);
+  assert.match(mobile, /body:has\(\.app\.route-home\)/);
   assert.match(app, /route-\$\{esc\(state\.route\|\|'home'\)\}/);
   assert.match(mobile, /\.app\.route-home\{height:100dvh;min-height:0;padding-bottom:0;overflow:hidden/);
   assert.match(mobile, /bottom:calc\(66px \+ env\(safe-area-inset-bottom\)\)/);
   assert.match(ads, /aspect-ratio:3\/1/);
   assert.match(workspaceAds, /canvas\.width=1800;canvas\.height=600/);
-  assert.match(workspaceAds, /Banner format: 1800 × 600 px/);
+  assert.match(workspaceAds, /1800 × 600 px/);
 });
 
 

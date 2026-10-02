@@ -1,0 +1,195 @@
+/* JUAN PROJECT Workspace — master cleanup 2026-10-02
+   Final neutral/8px-system overrides for the approved 12-item cleanup. */
+
+/* Neutral navigation: reserve semantic color for status/urgency. */
+.nav-menu .nav-item.active{
+  background:#f1f1f3!important;
+  color:var(--text-primary)!important;
+}
+.nav-menu .nav-item.active .icon-svg{color:var(--text-primary)!important}
+
+/* HOME — consistent rhythm and natural empty-state height */
+#view-my-works.active{height:auto!important;min-height:100%!important;overflow:visible!important}
+#overviewDashboard{height:auto!important;overflow:visible!important;gap:24px!important}
+#overviewDashboard>.kpi-grid{gap:16px!important;margin-bottom:0!important}
+#overviewDashboard>.overview-priority-grid{
+  height:auto!important;min-height:0!important;align-items:start!important;
+  grid-template-columns:minmax(0,1.7fr) minmax(320px,.7fr)!important;gap:16px!important;
+}
+#overviewDashboard .overview-priority-grid>.card{height:auto!important;min-height:400px!important}
+#overviewDashboard .overview-priority-grid>div:last-child{
+  height:auto!important;display:grid!important;grid-template-rows:auto auto!important;gap:16px!important;
+}
+#overviewDashboard .overview-priority-grid>div:last-child>.card{height:auto!important;min-height:0!important}
+#overviewCurrentProjects,#overviewUpcomingDeadlines{
+  min-height:0!important;max-height:none!important;overflow:visible!important;
+  -webkit-mask-image:none!important;mask-image:none!important;padding:0!important;
+}
+#overviewCurrentProjects .empty-compact-state{min-height:280px!important}
+#overviewUpcomingDeadlines .empty-compact-state{min-height:140px!important}
+
+/* Semantic urgency outlines: only activate when the JS adds attention/danger classes. */
+#overviewKpis .kpi-card{border-color:var(--border-subtle)!important;background:var(--bg-card)!important}
+#overviewKpis .attention-kpi{border-color:rgba(224,148,0,.55)!important;box-shadow:inset 0 0 0 1px rgba(224,148,0,.08)!important}
+#overviewKpis .danger-kpi{border-color:rgba(220,55,48,.55)!important;box-shadow:inset 0 0 0 1px rgba(220,55,48,.08)!important}
+#overviewKpis .attention-kpi .overview-kpi-icon{color:#a86f00!important}
+#overviewKpis .danger-kpi .overview-kpi-icon,#overviewKpis .danger-kpi .kpi-value{color:#c7352f!important}
+
+/* PROJECT DETAILS — one clean horizontal segmented nav, no green fill/separators. */
+#view-project-details .project-details-workspace{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px!important;
+}
+#view-project-details .project-details-tabs{
+  position:static!important;top:auto!important;width:100%!important;max-width:none!important;
+  display:flex!important;flex-direction:row!important;align-items:stretch!important;
+  gap:0!important;padding:0!important;margin:0!important;min-height:52px!important;
+  border:1px solid var(--border-subtle)!important;border-radius:16px!important;
+  background:var(--bg-card)!important;overflow-x:auto!important;
+}
+#view-project-details .project-details-tabs .tab-btn{
+  flex:1 0 132px!important;width:auto!important;height:52px!important;min-height:52px!important;
+  justify-content:center!important;text-align:center!important;gap:0!important;
+  padding:0 14px!important;border:0!important;border-radius:0!important;
+  background:transparent!important;color:var(--text-secondary)!important;box-shadow:none!important;
+  position:relative!important;
+}
+#view-project-details .project-details-tabs .tab-btn .icon-svg{display:none!important}
+#view-project-details .project-details-tabs .tab-btn::before{display:none!important}
+#view-project-details .project-details-tabs .tab-btn::after{
+  content:""!important;display:block!important;position:absolute!important;
+  left:20%!important;right:20%!important;bottom:0!important;height:2px!important;
+  border-radius:999px!important;background:transparent!important;
+}
+#view-project-details .project-details-tabs .tab-btn:hover{
+  background:#f7f7f8!important;color:var(--text-primary)!important;
+}
+#view-project-details .project-details-tabs .tab-btn.active{
+  background:transparent!important;color:var(--text-primary)!important;
+}
+#view-project-details .project-details-tabs .tab-btn.active::after{background:var(--text-primary)!important}
+
+/* DELIVERABLE PACKAGE GROUPS */
+#view-project-details .deliverables-main-card{overflow:hidden!important}
+#view-project-details .deliverable-group-block.package-group{
+  border:1px solid var(--border-subtle)!important;border-radius:14px!important;
+  margin:8px 0!important;overflow:hidden!important;background:var(--bg-card)!important;
+}
+#view-project-details .deliverable-group-block.package-group>.deliverable-checklist-row{
+  min-height:64px!important;padding:10px 16px!important;
+  grid-template-columns:28px minmax(0,1fr) 32px 32px!important;
+}
+#view-project-details .deliverable-group-toggle{
+  width:30px;height:30px;border:0;background:transparent;border-radius:8px;
+  color:var(--text-secondary);font:inherit;font-size:18px;cursor:pointer;
+  display:grid;place-items:center;transition:transform .16s ease,background .16s ease;
+}
+#view-project-details .deliverable-group-toggle:hover{background:var(--bg-subtle)}
+#view-project-details .deliverable-group-block.collapsed .deliverable-group-toggle{transform:rotate(-90deg)}
+#view-project-details .deliverable-group-block.collapsed .deliverable-package-children{display:none!important}
+#view-project-details .deliverable-package-children .deliverable-child-row{
+  min-height:48px!important;padding-top:7px!important;padding-bottom:7px!important;
+}
+#view-project-details .deliverable-child-row .deliverable-checklist-copy span{display:none!important}
+
+/* CATALOG — compact hierarchy and neutral metadata */
+#view-pricelist .jp-services-description,
+#view-online-portal .online-page-description{
+  margin:6px 0 0!important;color:var(--text-tertiary)!important;font-size:12px!important;line-height:1.45!important;
+}
+#view-pricelist .jp-catalog-tabs{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:0!important;margin:16px 0!important;border:1px solid var(--border-subtle)!important;
+  border-radius:14px!important;padding:4px!important;background:var(--bg-card)!important;
+}
+#view-pricelist .jp-catalog-tabs button{
+  min-height:38px!important;border:0!important;border-radius:10px!important;
+  background:transparent!important;color:var(--text-secondary)!important;font:inherit!important;
+  font-size:12px!important;font-weight:650!important;cursor:pointer!important;
+}
+#view-pricelist .jp-catalog-tabs button:hover{background:#f7f7f8!important;color:var(--text-primary)!important}
+#view-pricelist .jp-catalog-tabs button.active{
+  background:#f1f1f3!important;color:var(--text-primary)!important;box-shadow:none!important;
+}
+#view-pricelist .catalog-service-id{color:var(--text-tertiary)!important;font-weight:650!important}
+#view-pricelist .catalog-toolbar{margin-bottom:16px!important}
+#view-pricelist .catalog-manager-main{gap:16px!important}
+#view-pricelist .catalog-table-heading{padding:16px 18px!important}
+#view-pricelist .catalog-table-heading:has(.card-title:only-child){min-height:56px!important}
+#view-pricelist .popover-wrap#jpCatalogCreateMenu>.popover-panel{min-width:170px!important}
+
+/* CATALOG MODALS — content-sized, consistent, creation-safe. */
+#catalogCategoryModal .modal-card{max-width:520px!important}
+#catalogServiceModal .modal-card{max-width:620px!important}
+#catalogPackageModal .modal-card{max-width:760px!important}
+#catalogCategoryModal .modal-card,
+#catalogServiceModal .modal-card,
+#catalogPackageModal .modal-card{
+  padding:24px!important;border-radius:22px!important;
+}
+#catalogCategoryModal .modal-header,
+#catalogServiceModal .modal-header,
+#catalogPackageModal .modal-header{margin-bottom:20px!important}
+#catalogCategoryModal .modal-body,
+#catalogServiceModal .modal-body,
+#catalogPackageModal .modal-body{display:grid!important;gap:16px!important}
+#catalogCategoryModal .form-group,
+#catalogServiceModal .form-group,
+#catalogPackageModal .form-group{margin-bottom:0!important}
+#catalogCategoryModal .form-control,
+#catalogServiceModal .form-control,
+#catalogPackageModal .form-control{min-height:44px!important;border-radius:12px!important}
+#catalogServiceModal textarea.form-control{min-height:84px!important}
+#catalogServiceModal input[type=number]::-webkit-inner-spin-button,
+#catalogPackageModal input[type=number]::-webkit-inner-spin-button{appearance:none!important;margin:0!important}
+.jp-currency-field{position:relative}
+.jp-currency-field>span{position:absolute;left:13px;top:50%;transform:translateY(-50%);z-index:2;color:var(--text-secondary);font-weight:650}
+.jp-currency-field>.form-control{padding-left:30px!important}
+#catalogPackageSavings{display:block;margin-top:4px;color:var(--text-tertiary);font-size:11px}
+.catalog-modal-footer{margin-top:20px!important}
+.catalog-modal-footer .btn{min-height:42px!important}
+.catalog-modal-footer .btn-text.hidden{display:none!important}
+
+/* ONLINE — remove redundant card gap and neutral tab selection. */
+#view-online-portal .jp-online-tabs{margin-top:16px!important}
+#view-online-portal .portal-tabs{margin-top:16px!important}
+#view-online-portal .portal-tabs button.active,
+#view-online-portal .jp-online-tabs button.active{
+  background:#f1f1f3!important;border-color:var(--border-subtle)!important;color:var(--text-primary)!important;
+}
+#view-online-portal .filter-pill.active{
+  background:#f1f1f3!important;border-color:var(--border-subtle)!important;color:var(--text-primary)!important;
+}
+
+/* REPORTS — keep rounded card geometry, normal action buttons, no clipped strip. */
+#view-reports .jp-payment-activity{
+  border-radius:18px!important;overflow:hidden!important;padding:0!important;
+}
+#view-reports .jp-payment-activity-head{padding:18px 20px!important}
+#view-reports .jp-payment-activity-scroll{
+  width:100%!important;overflow-x:auto!important;overflow-y:visible!important;border-radius:0 0 18px 18px!important;
+}
+#view-reports .jp-payment-activity-table{width:100%!important;min-width:980px!important;border-collapse:separate!important;border-spacing:0!important}
+#view-reports .jp-payment-activity-table tbody tr:last-child td:first-child{border-bottom-left-radius:18px!important}
+#view-reports .jp-payment-activity-table tbody tr:last-child td:last-child{border-bottom-right-radius:18px!important}
+#view-reports .jp-payment-status{display:inline-flex!important;white-space:nowrap!important;word-break:normal!important}
+#view-reports .jp-open-record{
+  width:32px!important;height:32px!important;border:0!important;border-radius:9px!important;
+  background:transparent!important;color:var(--text-secondary)!important;font-size:20px!important;
+  display:grid!important;place-items:center!important;cursor:pointer!important;
+}
+#view-reports .jp-open-record:hover{background:var(--bg-subtle)!important;color:var(--text-primary)!important}
+
+/* FLOATING ACTION BUTTON — consistent page clearance */
+.quick-actions-fab{right:24px!important;bottom:24px!important}
+@media(max-width:720px){.quick-actions-fab{right:16px!important;bottom:80px!important}}
+
+/* Tables should retain their parent radius rather than painting a square edge. */
+.table-card{border-radius:16px!important}
+.table-card>.table-responsive{border-radius:inherit!important}
+.unified-table tbody tr:last-child td{border-bottom:0!important}
+
+@media(max-width:1023px){
+  #overviewDashboard>.overview-priority-grid{grid-template-columns:1fr!important}
+  #overviewDashboard .overview-priority-grid>.card{min-height:320px!important}
+  #view-project-details .project-details-tabs .tab-btn{flex:1 0 112px!important}
+}
