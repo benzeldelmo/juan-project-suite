@@ -1911,7 +1911,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
         <header class="page-header"><div><div class="greeting-subtitle">Finance</div><h1 class="page-title">Invoices & Payments</h1></div></header>
         <div class="view-toolbar unified-toolbar payments-toolbar">
           <input id="paymentsSearch" class="form-control" placeholder="Search Project ID, project name, or client..." oninput="app.queueViewRender('payments')">
-          <div class="toolbar-actions"><div class="filter-pills" id="paymentFilters"></div></div>
+          <div class="toolbar-actions"><select id="paymentsSort" class="compact-sort" onchange="app.setListSort('payments',this.value)"><option value="default">Default (by ID)</option><option value="date">Due Date</option><option value="payment">Amount Paid</option><option value="balance">Balance</option></select><div class="filter-pills" id="paymentFilters"></div></div>
         </div>
         <div id="mobilePaymentApprovals" class="mobile-payment-approvals" aria-live="polite"></div>
         <div class="card table-card"><div class="table-responsive"><table class="data-table unified-table"><thead><tr><th>Project ID</th><th>Project Name</th><th>Client</th><th>Total</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th><th class="table-actions-col" aria-label="Actions"></th></tr></thead><tbody id="paymentsTableBody"></tbody></table></div></div>
@@ -5896,7 +5896,12 @@ ${description}`))actionCallback();return;}
         let projects=baseProjects;
         if(current==='Completed')projects=projects.filter(p=>getProjectPaymentStatus(p)==='Completed');
         else if(current==='Pending')projects=projects.filter(p=>getProjectPaymentStatus(p)!=='Completed');
-        projects=projects.slice().sort(current==='Pending'?(a,b)=>{const ad=parseDateSafe(a.payment_due_date||a.deadline_date)?.getTime()??Infinity,bd=parseDateSafe(b.payment_due_date||b.deadline_date)?.getTime()??Infinity;return ad-bd||Number(projectIsPriority(b))-Number(projectIsPriority(a))||projectNumber(a)-projectNumber(b)}:(a,b)=>projectNumber(a)-projectNumber(b));
+        const pref=state.listSorts?.payments||'default';
+        if(pref==='date')projects=projects.slice().sort((a,b)=>{const ad=parseDateSafe(a.payment_due_date||a.deadline_date)?.getTime()??Infinity,bd=parseDateSafe(b.payment_due_date||b.deadline_date)?.getTime()??Infinity;return ad-bd||projectNumber(a)-projectNumber(b);});
+        else if(pref==='payment')projects=projects.slice().sort((a,b)=>getProjectPaid(b)-getProjectPaid(a)||projectNumber(a)-projectNumber(b));
+        else if(pref==='balance')projects=projects.slice().sort((a,b)=>getProjectBalance(b)-getProjectBalance(a)||projectNumber(a)-projectNumber(b));
+        else projects=projects.slice().sort(current==='Pending'?(a,b)=>{const ad=parseDateSafe(a.payment_due_date||a.deadline_date)?.getTime()??Infinity,bd=parseDateSafe(b.payment_due_date||b.deadline_date)?.getTime()??Infinity;return ad-bd||Number(projectIsPriority(b))-Number(projectIsPriority(a))||projectNumber(a)-projectNumber(b)}:(a,b)=>projectNumber(a)-projectNumber(b));
+        const sortEl=document.getElementById('paymentsSort');if(sortEl)sortEl.value=pref;
         body.innerHTML=projects.map(p=>{
           const paid=getProjectPaid(p),bal=getProjectBalance(p);
           const displayStatus=getProjectPaymentStatus(p);
