@@ -12,7 +12,7 @@ export default async function handler(req,res){
       svc.from('catalog_package_items').select('id,package_id,service_id,item_name,quantity,sort_order').order('sort_order')
     ]);
     for(const result of [categories,services,packages,packageItems])if(result.error)throw result.error;
-    res.setHeader('Cache-Control','public, max-age=60, s-maxage=300, stale-while-revalidate=3600');
+    res.setHeader('Cache-Control','public, max-age=0, s-maxage=30, stale-while-revalidate=60');
     return res.status(200).json({
       categories:categories.data||[],
       services:(services.data||[]).map(x=>({...x,price:Number(x.price||0)})),
