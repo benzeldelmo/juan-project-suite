@@ -555,7 +555,7 @@ function packageInclusions(x){
 }
 function priceListPackageCard(x){
   const price=Number(x.new_price||0),old=Number(x.original_price||0),items=packageInclusions(x),saved=Math.max(0,old-price);
-  return '<article class="jp-pricelist-package-card"><div class="jp-package-card-copy"><h3>'+esc(x.name)+'</h3>'+(x.description?'<p>'+esc(x.description)+'</p>':'')+'</div><div class="jp-pricelist-package-price"><strong>'+peso(price)+'</strong>'+(old>price?'<s>'+peso(old)+'</s><span>Save '+peso(saved)+'</span>':'')+'</div><div class="jp-package-inclusions"><span>Includes</span><ul>'+(items.length?items.map(item=>'<li><span class="jp-package-check">✓</span><span>'+esc(item.name)+(item.qty>1?' ×'+item.qty:'')+'</span></li>').join(''):'<li><span class="jp-package-check">✓</span><span>Package inclusions available in the current catalog.</span></li>')+'</ul></div></article>';
+  return '<article class="jp-pricelist-package-card"><div class="jp-package-card-copy"><h3>'+esc(x.name)+'</h3></div><div class="jp-pricelist-package-price"><strong>'+peso(price)+'</strong>'+(old>price?'<s>'+peso(old)+'</s><span>Save '+peso(saved)+'</span>':'')+'</div><div class="jp-package-inclusions"><span>Includes</span><ul>'+(items.length?items.map(item=>'<li><span class="jp-package-check">✓</span><span>'+esc(item.name)+(item.qty>1?' ×'+item.qty:'')+'</span></li>').join(''):'<li class="jp-package-inclusions-missing">Package inclusions are being updated.</li>')+'</ul></div></article>';
 }
 function priceListServiceRow(x){
   const price=Number(x.price||0),label=categoryName(x.category_id);
@@ -604,7 +604,7 @@ function pricing(){
         '<div class="jp-pricelist">'+
           '<div class="jp-pricelist-section-head"><h2>Packages</h2><span>'+packages.length+' package'+(packages.length===1?'':'s')+'</span></div>'+
           '<div class="jp-pricelist-packages">'+(packages.map(priceListPackageCard).join('')||'<div class="jp-pricing-empty">No matching packages.</div>')+'</div>'+
-          '<div class="jp-pricelist-section-head jp-solo-services-head"><h2>Solo Services</h2><span>'+services.length+' service'+(services.length===1?'':'s')+'</span></div>'+
+          '<div class="jp-pricelist-section-head jp-solo-services-head"><h2>Services</h2><span>'+services.length+' service'+(services.length===1?'':'s')+'</span></div>'+
           '<div class="jp-pricelist-table"><div class="jp-pricelist-table-head"><span>Service</span><span>Category</span><span>Price</span></div>'+(services.map(priceListServiceRow).join('')||'<div class="jp-pricing-empty">No matching solo services.</div>')+'</div>'+
         '</div>')+
     '</main>'+
