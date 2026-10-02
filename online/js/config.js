@@ -1,1 +1,0 @@
-let _config;export async function getConfig(){if(_config)return _config;const r=await fetch('/api/supabase-config',{cache:'no-store'});const j=await r.json();if(!r.ok)throw Error(j.error||'Configuration unavailable');_config=j;return j}
