@@ -112,9 +112,91 @@ async function enhanceFinancialHistory(){
     const body=card.querySelector('.jp-invoice-snapshots-body');if(body)body.innerHTML='<div class="jp-history-empty">Invoice snapshots could not be loaded.</div>';
   }
 }
+
+function enhanceDeliverablesUX(){
+  const tab=document.getElementById('projTab-deliverables');if(!tab)return;
+  const count=document.getElementById('projDetailProgressCount');
+  if(count)count.textContent=String(count.textContent||'').replace(/(\d+)\s*\/\s*(\d+)\s*completed/i,'$1 of $2 completed');
+  document.getElementById('projDetailProgressPercent')?.classList.add('jp-visually-redundant');
+  tab.querySelectorAll('.deliverable-group-block.package-group').forEach(group=>{
+    if(group.dataset.jpCollapsible==='1')return;group.dataset.jpCollapsible='1';
+    const parent=group.querySelector(':scope > .deliverable-package-row');if(!parent)return;
+    const children=[...group.querySelectorAll(':scope > .deliverable-child-row')];if(!children.length)return;
+    const copy=parent.querySelector('.deliverable-checklist-copy');
+    const toggle=document.createElement('button');toggle.type='button';toggle.className='jp-deliverable-group-toggle';toggle.setAttribute('aria-expanded','true');toggle.setAttribute('aria-label','Collapse package inclusions');toggle.innerHTML='<span>'+children.length+' items</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    toggle.onclick=e=>{e.stopPropagation();const collapsed=group.classList.toggle('jp-collapsed');toggle.setAttribute('aria-expanded',collapsed?'false':'true');toggle.setAttribute('aria-label',collapsed?'Expand package inclusions':'Collapse package inclusions');};
+    if(copy)copy.after(toggle);else parent.append(toggle);
+  });
+}
+function driveConfig(){return window.JUAN_GOOGLE_DRIVE_CONFIG||{}}
+function driveFolderId(url){const m=String(url||'').match(/\/folders\/([^/?#]+)/i);return m?m[1]:''}
+function loadExternalScript(src,id){
+  return new Promise((resolve,reject)=>{if(document.getElementById(id)){resolve();return;}const s=document.createElement('script');s.id=id;s.src=src;s.async=true;s.defer=true;s.onload=resolve;s.onerror=()=>reject(new Error('Could not load Google Drive tools.'));document.head.append(s);});
+}
+let jpDriveToken=null,jpDriveTokenClient=null,jpPickerReady=false;
+async function ensureDriveLibraries(){
+  const cfg=driveConfig();
+  if(!cfg.clientId||!cfg.apiKey||!cfg.appId)throw new Error('Google Drive connection is not configured yet.');
+  await Promise.all([loadExternalScript('https://apis.google.com/js/api.js','jpGoogleApi'),loadExternalScript('https://accounts.google.com/gsi/client','jpGoogleIdentity')]);
+  await new Promise((resolve,reject)=>{if(jpPickerReady){resolve();return;}if(!window.gapi){reject(new Error('Google Drive tools are unavailable.'));return;}gapi.load('picker',()=>{jpPickerReady=true;resolve();});});
+  if(!jpDriveTokenClient)jpDriveTokenClient=google.accounts.oauth2.initTokenClient({client_id:cfg.clientId,scope:'https://www.googleapis.com/auth/drive.file',callback:()=>{}});
+  return cfg;
+}
+async function driveAccessToken(){
+  const cfg=await ensureDriveLibraries();if(jpDriveToken)return {cfg,token:jpDriveToken};
+  return await new Promise((resolve,reject)=>{
+    jpDriveTokenClient.callback=response=>{if(response?.error){reject(new Error(response.error));return;}jpDriveToken=response.access_token;resolve({cfg,token:jpDriveToken});};
+    jpDriveTokenClient.requestAccessToken({prompt:'consent'});
+  });
+}
+function renderPickedDriveFiles(docs=[]){
+  const rows=document.getElementById('jpDriveFileRows');if(!rows)return;
+  if(!docs.length){rows.innerHTML='<div class="jp-files-empty"><strong>No Drive files selected yet</strong><span>Use Add from Drive to choose files for this project.</span></div>';return;}
+  rows.innerHTML=docs.map(doc=>'<a class="jp-file-row" href="'+esc(doc.url||'#')+'" target="_blank" rel="noopener noreferrer"><span class="jp-file-icon">'+navIcon('reports')+'</span><span class="jp-file-name"><strong>'+esc(doc.name||'Google Drive file')+'</strong><small>Google Drive</small></span><span class="jp-file-type">'+esc(doc.mimeType||'File')+'</span><span class="jp-file-open">Open</span></a>').join('');
+}
+window.jpOpenGoogleDrivePicker=async function(){
+  try{
+    const {cfg,token}=await driveAccessToken();
+    const view=new google.picker.DocsView(google.picker.ViewId.DOCS);view.setMode(google.picker.DocsViewMode.LIST);
+    const picker=new google.picker.PickerBuilder().enableFeature(google.picker.Feature.MULTISELECT_ENABLED).setOAuthToken(token).setDeveloperKey(cfg.apiKey).setAppId(String(cfg.appId)).addView(view).addView(new google.picker.DocsUploadView()).setCallback(data=>{
+      if(data[google.picker.Response.ACTION]!==google.picker.Action.PICKED)return;
+      const docs=(data[google.picker.Response.DOCUMENTS]||[]).map(d=>({id:d[google.picker.Document.ID],name:d[google.picker.Document.NAME],url:d[google.picker.Document.URL],mimeType:d[google.picker.Document.MIME_TYPE]}));
+      renderPickedDriveFiles(docs);window.showToast?.(docs.length+' Drive item'+(docs.length===1?'':'s')+' selected.');
+    }).build();picker.setVisible(true);
+  }catch(e){window.showToast?.(e?.message||'Google Drive could not be opened.');}
+};
+window.jpCreateDriveFolder=async function(){
+  try{await driveAccessToken();window.showToast?.('Create the project folder in Google Drive, then save its link in Drive Location.');window.open('https://drive.google.com/drive/my-drive','_blank','noopener,noreferrer');}
+  catch(e){window.showToast?.(e?.message||'Google Drive could not be opened.');}
+};
+function enhanceProjectFilesTab(p){
+  const view=document.querySelector('#view-project-details.active');if(!view||!p)return;
+  const tabs=view.querySelector('.project-details-tabs'),notesBtn=tabs?.querySelector('[data-project-tab="notes"]');
+  if(tabs&&!tabs.querySelector('[data-project-tab="files"]')){
+    const btn=document.createElement('button');btn.className='tab-btn';btn.dataset.projectTab='files';btn.innerHTML='<span>Files</span>';btn.onclick=e=>window.app?.switchProjectTab?.('files',e);tabs.insertBefore(btn,notesBtn||null);
+  }
+  const notes=document.getElementById('projTab-notes'),content=notes?.parentElement;if(!content)return;
+  let panel=document.getElementById('projTab-files');
+  if(!panel){
+    panel=document.createElement('div');panel.id='projTab-files';panel.className='tab-content';
+    panel.innerHTML='<div class="jp-files-workspace"><section class="card jp-files-browser"><div class="jp-files-head"><div><div class="section-kicker">PROJECT FILES</div><h3 class="card-title">Files</h3><p>Google Drive-backed files for this project.</p></div><div class="jp-files-actions"><button type="button" class="btn btn-secondary btn-sm" id="jpDriveNewFolder">New Folder</button><button type="button" class="btn btn-primary btn-sm" id="jpDriveAdd">Add from Drive</button></div></div><div class="jp-files-toolbar"><label class="jp-files-search">'+navIcon('reports')+'<input type="search" id="jpDriveSearch" placeholder="Search project files" aria-label="Search project files"></label></div><div class="jp-file-table-head"><span>Name</span><span>Type</span><span></span></div><div id="jpDriveFileRows"></div></section><aside class="jp-files-context"><section class="card"><div class="section-kicker">GOOGLE DRIVE</div><h3 class="jp-files-side-title">Drive Location</h3><div id="jpDriveLocation" class="jp-drive-location"></div></section><section class="card"><div class="section-kicker">STORAGE</div><strong class="jp-drive-context-value">Google Drive</strong><p class="jp-drive-context-copy">Files stay in Drive. Workspace stores project information and links.</p></section><section class="card"><div class="section-kicker">RECENT ACTIVITY</div><div class="jp-drive-context-copy">Drive activity appears after the Google connection is enabled.</div></section><div id="jpProjectDriveAdminSlot"></div></aside></div>';
+    content.insertBefore(panel,notes);
+    panel.querySelector('#jpDriveAdd').onclick=()=>window.jpOpenGoogleDrivePicker?.();
+    panel.querySelector('#jpDriveNewFolder').onclick=()=>window.jpCreateDriveFolder?.();
+    panel.querySelector('#jpDriveSearch').oninput=e=>{const q=String(e.target.value||'').trim().toLowerCase();panel.querySelectorAll('.jp-file-row').forEach(row=>row.hidden=q&&!row.textContent.toLowerCase().includes(q));};
+  }
+  const admin=document.getElementById('projectFilesAccessCard'),slot=panel.querySelector('#jpProjectDriveAdminSlot');if(admin&&slot&&!slot.contains(admin))slot.append(admin);
+  const loc=panel.querySelector('#jpDriveLocation'),folder=driveFolderId(p.drive_url);
+  if(loc)loc.innerHTML=p.drive_url?'<a href="'+esc(p.drive_url)+'" target="_blank" rel="noopener noreferrer"><strong>Project Drive Folder</strong><span>Open in Google Drive</span></a>':'<div class="jp-files-empty compact"><strong>No Drive folder linked</strong><span>Save a Google Drive folder below.</span></div>';
+  const rows=panel.querySelector('#jpDriveFileRows');
+  if(rows&&!rows.children.length)rows.innerHTML=p.drive_url?'<a class="jp-file-row" href="'+esc(p.drive_url)+'" target="_blank" rel="noopener noreferrer"><span class="jp-file-icon">'+navIcon('projects')+'</span><span class="jp-file-name"><strong>Project Drive Folder</strong><small>'+(folder?'Linked folder':'Google Drive')+'</small></span><span class="jp-file-type">Folder</span><span class="jp-file-open">Open</span></a>':'<div class="jp-files-empty"><strong>No project files yet</strong><span>Link a Drive folder or use Add from Drive.</span></div>';
+}
+
 function enhanceProjectPage(){
   const view=document.querySelector('#view-project-details.active');if(!view)return;
   const p=activeProject();if(!p)return;
+  enhanceProjectFilesTab(p);
+  enhanceDeliverablesUX();
   const progress=document.getElementById('projectOverallProgress'),tabs=view.querySelector('.project-details-tabs');
   const percent=document.getElementById('projectOverallProgressPercent')?.textContent||'0%';
   const bal=balance(p),fee=Number(p.late_fee_total||0),status=p.financial_status||p.payment_status||(bal<=0?'PAID':'UNPAID');
@@ -127,7 +209,7 @@ function enhanceProjectPage(){
   if(progress)progress.classList.add('jp-progress-collapsed');
   document.getElementById('jpProjectFinanceSummary')?.remove();
   if(tabs){
-    const labels={'project-data':'Overview','deliverables':'Deliverables','payment-tracker':'Payments','invoice':'Invoice','notes':'Notes'};
+    const labels={'project-data':'Overview','deliverables':'Deliverables','payment-tracker':'Payments','invoice':'Invoice','files':'Files','notes':'Notes'};
     tabs.querySelectorAll('[data-project-tab]').forEach(btn=>{const span=btn.querySelector('span');if(span)span.textContent=labels[btn.dataset.projectTab]||span.textContent;});
   }
   enhanceInvoiceActions(p);
@@ -206,7 +288,7 @@ function enhanceSettingsPage(){
 function ensureSaaSStyles(){
   if(document.getElementById('jpSaaSRefreshStyles'))return;
   const link=document.createElement('link');
-  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261002-ultra-ux4';
+  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261002-ultra-approved-1';
   document.head.append(link);
 }
 function navIcon(name){

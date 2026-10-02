@@ -2719,9 +2719,9 @@ table.jp-packages-table col:nth-child(6){width:7%}
         <span class="quick-action-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path d="M9 9h2v2H9zM13 9h2v2h-2zM9 13h2v2H9zM13 13h2v2h-2z"/></svg></span>
         <span><strong>Scan QR</strong><small>Open a client or order request.</small></span>
       </button>
-      <button type="button" class="quick-action-card" onclick="window.jpQuickDrafts?.()">
-        <span class="quick-action-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h6M8 16h4"/></svg></span>
-        <span><strong>Drafts</strong><small>Continue unfinished manual orders.</small></span>
+      <button type="button" class="quick-action-card" onclick="window.jpQuickGoogleDrive?.()">
+        <span class="quick-action-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/><path d="M8 12h8M12 9v6"/></svg></span>
+        <span><strong>Google Drive</strong><small>Open project files and Drive.</small></span>
       </button>
     </div>
   </aside>
@@ -8799,18 +8799,23 @@ ${description}`))actionCallback();return;}
         const statusClass=status==='PAID'?'paid':status==='OVERDUE'?'overdue':status==='GRACE PERIOD'?'partial':status==='PAYMENT UNDER REVIEW'?'partial':status==='PARTIALLY PAID'?'partial':'unpaid';
         const due=proj.payment_due_date?parseDateSafe(proj.payment_due_date):null;
         if(overviewEl)overviewEl.innerHTML=`
-          <div class="payment-status-card ${statusClass}"><div><span>Payment Status</span><strong>${escapeHtml(status)}</strong><small>${due?'Due '+due.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'Due date follows the Project End / Deadline Date'}</small></div><div class="payment-status-balance"><span>Balance Due</span><strong>${formatCurrency(remaining)}</strong></div></div>
-          <div class="payment-modular-grid">
-            <div class="payment-metric-card"><span>Items Subtotal</span><strong>${formatCurrency(itemsSubtotal)}</strong></div>
-            <div class="payment-metric-card"><span>Rush Fee</span><strong>${formatCurrency(rushFee)}</strong></div>
-            <div class="payment-metric-card"><span>Other Charges</span><strong>${formatCurrency(workloadSurcharge+maintenance+otherFees)}</strong></div>
-            <div class="payment-metric-card"><span>Discounts</span><strong>${formatCurrency(discounts)}</strong></div>
-            <div class="payment-metric-card"><span>Base Total</span><strong>${formatCurrency(baseTotal)}</strong></div>
-            <div class="payment-metric-card ${lateFees>0?'due':''}"><span class="jp-label-with-info">Overdue Fees <button type="button" class="jp-info-button" aria-label="About overdue fee calculation" data-info="1-day grace period. ₱500 applies on Day 3, then +₱250 only after each completed 7-day period. No daily fee.">i</button></span><strong>${overdueFeesEnabled?formatCurrency(lateFees):'Disabled'}</strong></div>
-            <div class="payment-metric-card"><span>Current Total</span><strong>${formatCurrency(total)}</strong></div>
-            <div class="payment-metric-card paid"><span>Amount Paid</span><strong>${formatCurrency(totalPaid)}</strong></div>
-            <div class="payment-metric-card ${remaining>0?'due':'paid'}"><span>Balance Due</span><strong>${formatCurrency(remaining)}</strong></div>
-          </div>`;
+          <div class="jp-payment-summary-grid">
+            <div class="jp-payment-summary-item"><span>Total</span><strong>${formatCurrency(total)}</strong></div>
+            <div class="jp-payment-summary-item paid"><span>Paid</span><strong>${formatCurrency(totalPaid)}</strong></div>
+            <div class="jp-payment-summary-item ${remaining>0?'due':'paid'}"><span>Balance</span><strong>${formatCurrency(remaining)}</strong></div>
+            <div class="jp-payment-summary-item status"><span>Status</span><strong class="jp-payment-summary-status ${statusClass}">${escapeHtml(status)}</strong><small>${due?'Due '+due.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'Due date follows the project deadline'}</small></div>
+          </div>
+          <details class="jp-payment-breakdown">
+            <summary><span>Calculation Breakdown</span><span>View details</span></summary>
+            <div class="jp-payment-breakdown-grid">
+              <div><span>Items Subtotal</span><strong>${formatCurrency(itemsSubtotal)}</strong></div>
+              <div><span>Rush Fee</span><strong>${formatCurrency(rushFee)}</strong></div>
+              <div><span>Other Charges</span><strong>${formatCurrency(workloadSurcharge+maintenance+otherFees)}</strong></div>
+              <div><span>Discounts</span><strong>${formatCurrency(discounts)}</strong></div>
+              <div><span>Base Total</span><strong>${formatCurrency(baseTotal)}</strong></div>
+              <div><span>Overdue Fees</span><strong>${overdueFeesEnabled?formatCurrency(lateFees):'Disabled'}</strong></div>
+            </div>
+          </details>`;
         if(listEl){
           if(!payments.length){listEl.innerHTML='<div class="payment-history-empty"><strong>No payments recorded</strong><span>Recorded payments will appear here.</span></div>';return;}
           payments.sort((a,b)=>new Date(b.payment_date||b.created_at||0)-new Date(a.payment_date||a.created_at||0));
@@ -9143,10 +9148,9 @@ ${description}`))actionCallback();return;}
         else clients.sort((a,b)=>codeNo(a)-codeNo(b));
         const sortEl=document.getElementById('clientsSort');if(sortEl)sortEl.value=pref;
         if(!clients.length){grid.innerHTML=`<div class="card text-center text-muted py-4">${q?'No matching clients.':'No clients in this filter.'}</div>`;return;}
-        grid.innerHTML=`<div class="card table-card"><div class="table-responsive"><table class="data-table unified-table clients-table"><thead><tr><th>Client ID</th><th>Client</th><th>Email</th><th>Phone</th><th>Projects</th><th>Payments</th><th class="table-actions-col" aria-label="Row actions"></th></tr></thead><tbody>${clients.map(c=>{
-          const ps=projectsFor(c),paid=ps.reduce((x,p)=>x+getProjectPaid(p),0),menuId=`clientMenu_${String(c.id).replace(/[^a-zA-Z0-9_-]/g,'')}`;
-          const initials=String(c.name||c.email||'CL').replace(/[^a-zA-Z0-9 ]/g,' ').trim().split(/\s+/).filter(Boolean).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'CL';
-          return `<tr class="clickable-row" onclick="app.openClientProfile('${c.id}')"><td><strong>${escapeHtml(c.client_code||'—')}</strong></td><td><div class="jp-client-list-cell"><span class="jp-client-list-avatar">${escapeHtml(initials)}</span><span class="jp-client-list-copy"><strong>${escapeHtml(c.name||'Client')}</strong><small>Client since ${escapeHtml(formatProjectDate(c.created_at)||'—')}</small></span></div></td><td>${escapeHtml(c.email||'—')}</td><td>${escapeHtml(formatPhilippinePhone(c.phone||'—'))}</td><td>${ps.length}</td><td><strong>${formatCurrency(paid)}</strong></td><td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)" aria-label="Client actions">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditClientModal('${c.id}')">Edit Client</button><button class="popover-action text-danger" onclick="app.removeClient('${c.id}')">Delete Client</button></div></div></td></tr>`;
+        grid.innerHTML=`<div class="card table-card"><div class="table-responsive"><table class="data-table unified-table clients-table"><thead><tr><th>Client ID</th><th>Client</th><th>Email</th><th>Phone</th><th>Projects</th><th class="table-actions-col" aria-label="Row actions"></th></tr></thead><tbody>${clients.map(c=>{
+          const ps=projectsFor(c),menuId=`clientMenu_${String(c.id).replace(/[^a-zA-Z0-9_-]/g,'')}`;
+          return `<tr class="clickable-row" onclick="app.openClientProfile('${c.id}')"><td><strong>${escapeHtml(c.client_code||'—')}</strong></td><td><strong class="jp-client-name">${escapeHtml(c.name||c.email||'Client')}</strong></td><td>${escapeHtml(c.email||'—')}</td><td>${escapeHtml(formatPhilippinePhone(c.phone||'—'))}</td><td>${ps.length}</td><td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)" aria-label="Client actions">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditClientModal('${c.id}')">Edit Client</button><button class="popover-action text-danger" onclick="app.removeClient('${c.id}')">Delete Client</button></div></div></td></tr>`;
         }).join('')}</tbody></table></div></div>`;
       }
       function setClientFilter(filter){state.clientFilter=filter;renderClients();}
@@ -9983,10 +9987,14 @@ ${description}`))actionCallback();return;}
     window.jpOpenOrders = () => { window.jpToggleQuickActions(false); window.jpRunSuiteTool("orderRequests"); };
     window.jpOpenQrScanner = () => { window.jpToggleQuickActions(false); window.jpRunSuiteTool("scanner"); };
     window.jpQuickNewOrder = () => { window.jpToggleQuickActions(false); app.navigateTo("new-order"); };
-    window.jpQuickDrafts = () => {
+    window.jpQuickGoogleDrive = () => {
       window.jpToggleQuickActions(false);
-      app.navigateTo("new-order");
-      setTimeout(()=>document.getElementById("openDraftsBtn")?.click(),80);
+      const openFiles=proj=>{app.openProjectDetails(proj.id,'deliverables');setTimeout(()=>app.switchProjectTab('files'),120);};
+      const proj=state.projects.find(p=>p.id===state.activeProjectId);
+      if(proj){openFiles(proj);return;}
+      const linked=state.projects.find(p=>!p.deleted&&p.drive_url);
+      if(linked){openFiles(linked);return;}
+      window.open('https://drive.google.com/drive/my-drive','_blank','noopener,noreferrer');
     };
     document.addEventListener("click",e=>{
       const panel=document.getElementById("quickActionsPanel"),fab=document.getElementById("quickActionsFab");
@@ -9996,7 +10004,7 @@ ${description}`))actionCallback();return;}
 
     document.addEventListener("DOMContentLoaded", () => {
       app.initWorkspace();
-      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20261002-ultra-2',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
+      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=20261002-ultra-approved-1',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Workspace offline cache unavailable:',err?.message||err)));}
       setTimeout(()=>{refreshSearchableSelects(document);app.bindEmailDomainSuggestions();if(location.hash==="#online-portal")app.navigateTo("online-portal");},60);
       
       document.addEventListener("click", (e) => {
@@ -10789,11 +10797,11 @@ ${description}`))actionCallback();return;}
 <script src="/js/jsQR.js"></script>
 <script type="module" src="/js/suite-prod.js"></script>
 <script type="module" src="/js/workspace-redesign.js"></script>
-<script type="module" src="/js/general-update.js?v=20261002-ultra-2"></script>
+<script type="module" src="/js/general-update.js?v=20261002-ultra-approved-1"></script>
 <script type="module" src="/js/keyboard-shortcuts.js?v=20260923-0105"></script>
 <script src="/js/workspace-icon-system-2026-09-22.js?v=20260923-0225"></script>
   <script src="/js/consistency-pass.js?v=20260925-deliverable-payment-rush-1"></script>
-  <script src="/js/workspace-unification-2026-09-22.js?v=20261002-ultra-2"></script>
+  <script src="/js/workspace-unification-2026-09-22.js?v=20261002-ultra-approved-1"></script>
 </body>
 </html>
 <style id="v111-maintenance-patch">
