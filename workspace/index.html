@@ -7347,14 +7347,17 @@ ${description}`))actionCallback();return;}
             }
 
             const payload = {
-              name: document.getElementById("newClientName")?.value?.trim() || "",
-              email: document.getElementById("newClientEmail")?.value?.trim() || "",
+              name: normalizeHumanText(document.getElementById("newClientName")?.value,120),
+              email: normalizeProjectClientEmail(document.getElementById("newClientEmail")?.value),
               phone: normalizedPhone || null,
-              address: document.getElementById("newClientAddress")?.value?.trim() || null
+              address: String(document.getElementById("newClientAddress")?.value||"").trim().slice(0,500) || null
             };
 
             if (!payload.name || !payload.email) {
               throw new Error("Client name and email are required.");
+            }
+            if (!validProjectClientEmail(payload.email)) {
+              throw new Error("Enter a valid client email address.");
             }
 
             const existingClient = await supabaseClient
@@ -7388,6 +7391,13 @@ ${description}`))actionCallback();return;}
           if (!Array.isArray(state.cart.items) || !state.cart.items.length) {
             throw new Error("Add at least one order item.");
           }
+          state.cart.items.forEach((item,index)=>{
+            if(!normalizeHumanText(item?.name,160))throw new Error(`Order item ${index+1} needs a name.`);
+            if(!validPositiveInteger(Number(item?.qty??1)))throw new Error(`Order item ${index+1} has an invalid quantity.`);
+            if(!validReasonableMoney(Number(item?.price??0)))throw new Error(`Order item ${index+1} has an invalid price.`);
+            const type=String(item?.type||'SOLO').toUpperCase();
+            if(!['SOLO','PACKAGE','CUSTOM'].includes(type))throw new Error(`Order item ${index+1} has an invalid type.`);
+          });
 
           const subtotal = state.cart.items.reduce(
             (sum, item) => sum + Number(item.price || 0) * Number(item.qty || 1),
@@ -7395,17 +7405,15 @@ ${description}`))actionCallback();return;}
           );
 
           const discountRaw = Number(state.cart.discountVal || 0);
-          const discountAmount = Math.min(
-            subtotal,
-            Math.max(
-              0,
-              state.cart.discountType === "percent"
-                ? subtotal * (discountRaw / 100)
-                : discountRaw
-            )
-          );
+          if(!Number.isFinite(discountRaw)||discountRaw<0)throw new Error("Discount must be a valid non-negative amount.");
+          if(state.cart.discountType==="percent"&&discountRaw>100)throw new Error("Percentage discount cannot be greater than 100%.");
+          if(state.cart.discountType!=="percent"&&discountRaw>subtotal)throw new Error("Fixed discount cannot be greater than the order subtotal.");
+          const discountAmount = state.cart.discountType === "percent"
+            ? subtotal * (discountRaw / 100)
+            : discountRaw;
 
           const rushFee = Number(state.cart.rushFee || 0);
+          if(!validReasonableMoney(rushFee))throw new Error("Rush fee must be a valid non-negative amount.");
           const maintenanceFee=automaticMaintenanceFee(state.cart.items,nextProjectNumber(),subtotal);
           const totalAmount = Math.max(0, subtotal - discountAmount + rushFee + maintenanceFee);
 
@@ -7416,13 +7424,14 @@ ${description}`))actionCallback();return;}
           const standardDays = 14;
           const start = parseDateSafe(state.cart.startDate);
           const due = parseDateSafe(state.cart.deadlineDate);
+          if(!validProjectDateRange(state.cart.startDate,state.cart.deadlineDate))throw new Error("Project deadline cannot be earlier than the start date.");
           const durationDays = start && due
-            ? Math.max(0, Math.round((due - start) / 86400000))
+            ? Math.round((due - start) / 86400000)
             : standardDays;
 
           const projectPayload = {
             client_id: client.id,
-            title: String(state.cart.projectName || "").trim(),
+            title: normalizeHumanText(state.cart.projectName,120),
             status: "In Progress",
             delivery_status: "Pending",
             priority: rushFee > 0 || durationDays < standardDays,
@@ -9213,11 +9222,11 @@ ${description}`))actionCallback();return;}
         const addressInput = document.getElementById("editClientAddress");
         const notesInput = document.getElementById("editClientNotes");
 
-        const name = nameInput.value.trim();
-        const email = emailInput.value.trim();
-        const phone = phoneInput.value.trim();
-        const address = addressInput.value.trim();
-        const notes = notesInput.value.trim();
+        const name = normalizeHumanText(nameInput.value,120);
+        const email = normalizeProjectClientEmail(emailInput.value);
+        const phone = phoneInput.value.trim().slice(0,30);
+        const address = addressInput.value.trim().slice(0,500);
+        const notes = notesInput.value.trim().slice(0,3000);
 
         const errName = document.getElementById("editClientNameError");
         const errEmail = document.getElementById("editClientEmailError");
@@ -9236,12 +9245,12 @@ ${description}`))actionCallback();return;}
           nameInput.classList.add("is-invalid");
           valid = false;
         }
-        if (!email || !email.includes("@")) {
+        if (!email || !validProjectClientEmail(email)) {
           errEmail.innerText = "Please enter a valid email address.";
           emailInput.classList.add("is-invalid");
           valid = false;
         }
-        if (phone && !/^[\+\d\s\-\(\)]+$/.test(phone)) {
+        if (phone && (phone.length>30 || !/^[\+\d\s\-\(\)]+$/.test(phone))) {
           errPhone.innerText = "Please enter a valid phone number or leave it blank.";
           phoneInput.classList.add("is-invalid");
           valid = false;
