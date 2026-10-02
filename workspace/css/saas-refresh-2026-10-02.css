@@ -477,3 +477,165 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(pointer:coarse){
   .filter-pill,.btn-sm{min-height:44px!important}
 }
+
+
+/* 2026-10-02 — Home viewport lock + unified filter/sort controls */
+
+/* Desktop Home: fit the full dashboard inside the viewport. */
+@media (min-width:1200px){
+  .main-content:has(#view-my-works.active){
+    height:100dvh!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    padding-top:28px!important;
+    padding-bottom:28px!important;
+  }
+  #view-my-works.active{
+    height:100%!important;
+    min-height:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+  #view-my-works.active>.page-header{
+    flex:0 0 auto!important;
+    margin-bottom:18px!important;
+  }
+  #view-my-works.active #overviewDashboard{
+    flex:1 1 auto!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #view-my-works.active #overviewDashboard .kpi-grid{
+    flex:0 0 auto!important;
+    margin-bottom:14px!important;
+  }
+  #view-my-works.active #overviewDashboard .overview-priority-grid{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    margin-bottom:0!important;
+  }
+  #view-my-works.active #overviewDashboard .overview-priority-grid>.card,
+  #view-my-works.active #overviewDashboard .overview-priority-grid>div:last-child,
+  #view-my-works.active #overviewDashboard .overview-priority-grid>div:last-child>.card{
+    min-height:0!important;
+  }
+  #view-my-works.active #overviewCurrentProjects,
+  #view-my-works.active #overviewUpcomingDeadlines{
+    min-height:0!important;
+    overflow-y:auto!important;
+  }
+  #view-my-works.active>.overview-task-card,
+  #view-my-works.active #overviewDashboard .overview-task-card,
+  #view-my-works.active>#paymentOverdueAlerts,
+  #view-my-works.active>#paymentDueSection{
+    display:none!important;
+  }
+}
+
+/* Canonical table toolbar language from the approved sort/filter reference. */
+.unified-toolbar{
+  min-height:44px!important;
+}
+.unified-toolbar .toolbar-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  min-width:0!important;
+}
+.compact-sort,
+.unified-toolbar select.compact-sort{
+  height:44px!important;
+  min-height:44px!important;
+  padding:0 34px 0 12px!important;
+  border:1px solid var(--border-medium)!important;
+  border-radius:9px!important;
+  background:var(--bg-card)!important;
+  color:var(--text-primary)!important;
+  font-size:12px!important;
+  font-weight:550!important;
+  box-shadow:none!important;
+}
+.filter-pills{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex-wrap:nowrap!important;
+}
+.filter-pill{
+  min-height:44px!important;
+  padding:0 14px!important;
+  border:1px solid var(--border-medium)!important;
+  border-radius:9px!important;
+  background:var(--bg-card)!important;
+  color:var(--text-secondary)!important;
+  font-size:12px!important;
+  line-height:1!important;
+  font-weight:600!important;
+  box-shadow:none!important;
+}
+.filter-pill:hover{
+  background:var(--bg-subtle)!important;
+  color:var(--text-primary)!important;
+}
+.filter-pill.active{
+  background:var(--mint-light-bg)!important;
+  color:var(--primary-mint-dark)!important;
+  border-color:var(--mint-subtle-border)!important;
+  box-shadow:inset 0 0 0 1px var(--mint-subtle-border)!important;
+}
+.unified-toolbar .form-control{
+  min-height:44px!important;
+  height:44px!important;
+}
+#view-pricelist .catalog-toolbar .toolbar-actions,
+#view-projects .toolbar-actions,
+#view-clients .toolbar-actions,
+#view-payments .toolbar-actions{
+  flex-wrap:nowrap!important;
+}
+
+/* Reports use the same control geometry while preserving report-specific filters. */
+.jp-payment-toolbar input,
+.jp-payment-toolbar select{
+  min-height:44px!important;
+  height:44px!important;
+  border-radius:9px!important;
+  border-color:var(--border-medium)!important;
+  background:var(--bg-card)!important;
+}
+#view-reports .jp-payment-toolbar{
+  gap:8px!important;
+}
+
+/* Smaller layouts may scroll instead of compressing the dashboard. */
+@media (max-width:1199px){
+  .main-content:has(#view-my-works.active){
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow:visible!important;
+  }
+  #view-my-works.active,
+  #view-my-works.active #overviewDashboard{
+    height:auto!important;
+    overflow:visible!important;
+  }
+  .unified-toolbar .toolbar-actions,
+  #view-pricelist .catalog-toolbar .toolbar-actions,
+  #view-projects .toolbar-actions,
+  #view-clients .toolbar-actions,
+  #view-payments .toolbar-actions{
+    flex-wrap:wrap!important;
+    justify-content:flex-start!important;
+  }
+  .filter-pills{
+    overflow-x:auto!important;
+    max-width:100%!important;
+    padding-bottom:2px!important;
+  }
+}
