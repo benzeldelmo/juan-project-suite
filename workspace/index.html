@@ -4101,6 +4101,59 @@ table.jp-packages-table col:nth-child(6){width:7%}
         localStorage.setItem("JUAN_PACKAGES", JSON.stringify(state.packagesList));
         localStorage.setItem("JUAN_CATALOG_CATEGORIES", JSON.stringify(state.catalogCategories || []));
       }
+      function validateCatalogState(){
+        const categories=(state.catalogCategories||[]).map(x=>normalizeHumanText(x,80)).filter(Boolean);
+        const categorySet=new Set(categories.map(x=>x.toLowerCase()));
+        if(categorySet.size!==categories.length)return 'Category names must be unique.';
+        const services=state.soloServices||[],packages=state.packagesList||[];
+        const serviceCodes=new Set(),serviceNames=new Set();
+        for(const s of services){
+          const code=String(s.product_code||'').trim(),name=normalizeHumanText(s.name,120),category=String(s.category||'').trim().toLowerCase();
+          if(!code||!name)return 'Every service needs an ID and name.';
+          if(serviceCodes.has(code))return 'Service IDs must be unique.';serviceCodes.add(code);
+          const key=name.toLowerCase();if(serviceNames.has(key))return 'Service names must be unique.';serviceNames.add(key);
+          if(!categorySet.has(category))return 'Every service must belong to an existing category.';
+          if(!validReasonableMoney(s.price))return 'Service prices must be valid non-negative amounts.';
+        }
+        const packageCodes=new Set(),packageNames=new Set();
+        for(const p of packages){
+          const code=String(p.product_code||'').trim(),name=normalizeHumanText(p.name,120),category=String(p.category||'').trim().toLowerCase();
+          if(!code||!name)return 'Every package needs an ID and name.';
+          if(packageCodes.has(code))return 'Package IDs must be unique.';packageCodes.add(code);
+          const key=name.toLowerCase();if(packageNames.has(key))return 'Package names must be unique.';packageNames.add(key);
+          if(!categorySet.has(category))return 'Every package must belong to an existing category.';
+          if(!validReasonableMoney(p.originalPrice)||!validReasonableMoney(p.sellingPrice))return 'Package prices must be valid non-negative amounts.';
+          const included=[...(p.includedServiceNames||[])];
+          if(!included.length)return 'Every package must include at least one service.';
+          for(const name of included)if(!services.some(s=>String(s.name||'').toLowerCase()===String(name||'').toLowerCase()))return 'A package contains a service that no longer exists.';
+        }
+        return '';
+      }
+      async function commitCatalogMutation(mutator,successMessage,{modalId=null}={}){
+        if(!cloudAvailable()||!(await ensureWorkspaceSyncSession())){showToast('Connect to Supabase before changing Services & Pricing.');return false;}
+        const snapshot={services:JSON.parse(JSON.stringify(state.soloServices||[])),packages:JSON.parse(JSON.stringify(state.packagesList||[])),categories:[...(state.catalogCategories||[])]};
+        const primary=modalId?document.querySelector('#'+modalId+' .btn-primary'):null,oldLabel=primary?.innerHTML;
+        try{
+          if(primary){primary.disabled=true;primary.textContent='Saving…';}
+          mutator();
+          const issue=validateCatalogState();if(issue)throw new Error(issue);
+          persistCatalogState();renderPricelist();renderServiceCatalog();
+          const synced=await syncSharedCatalogToDatabase({silent:true});if(!synced)throw new Error('Cloud synchronization failed.');
+          await loadSharedCatalogFromDatabase();
+          renderPricelist();renderServiceCatalog();
+          if(modalId)closeModal(modalId);
+          showToast(successMessage);
+          return true;
+        }catch(error){
+          state.soloServices=snapshot.services;state.packagesList=snapshot.packages;state.catalogCategories=snapshot.categories;
+          persistCatalogState();renderPricelist();renderServiceCatalog();
+          showToast('Change not saved: '+(error?.message||error));
+          return false;
+        }finally{
+          if(primary){primary.disabled=false;if(oldLabel!==undefined)primary.innerHTML=oldLabel;}
+        }
+      }
+
 
       function catalogSlug(value) {
         return String(value || "")
@@ -4126,8 +4179,9 @@ table.jp-packages-table col:nth-child(6){width:7%}
           const services = servicesRes.data || [];
           const packages = packagesRes.data || [];
           const packageItems = itemsRes.data || [];
+          state.sharedCatalogReady=true;
           const hasRemoteCatalog = services.length > 0 || packages.length > 0;
-          if (!hasRemoteCatalog) return false;
+          if (!hasRemoteCatalog) return true;
 
           const categoryById = new Map(categories.map(c => [String(c.id), c]));
           state.catalogCategories = categories.filter(c => c.active !== false).map(c => c.name).filter(Boolean);
@@ -4175,6 +4229,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
         if (!supabaseClient || !state.isConnected) return false;
         try {
           ensureCatalogCategories();
+          const validationIssue=validateCatalogState();if(validationIssue)throw new Error(validationIssue);
           const categoryRows = (state.catalogCategories || []).map((name, index) => ({
             name: String(name).trim(),
             slug: catalogSlug(name),
@@ -7942,37 +7997,62 @@ ${description}`))actionCallback();return;}
         document.getElementById("editProjectAmountReceived").value = paid;
         document.getElementById("editProjectPendingAmount").value = pending;
         document.getElementById("editProjectPaymentStatus").value = proj.payment_status || getInvoiceStatus(proj,pending);
+        ["editProjectAmount","editProjectAmountReceived","editProjectPendingAmount","editProjectPaymentStatus"].forEach(id=>{const el=document.getElementById(id);if(el){el.readOnly=true;el.setAttribute("aria-readonly","true");el.title="Managed from project items and payment records.";}})
         document.getElementById("editProjectCompletedToggle").checked = proj.status==="Completed" || proj.delivery_status==="Delivered";
         openModal("editProjectModal");
       }
       async function submitEditProject(){
-        const proj=state.projects.find(p=>p.id===state.activeProjectId); if(!proj)return;
-        const title=document.getElementById("editProjectTitle").value.trim(),clientName=document.getElementById("editProjectClientName").value.trim(),email=document.getElementById("editProjectClientEmail").value.trim();
-        if(!title||!clientName){showToast("Project and client name are required.");return;} if(email&&!email.includes('@')){showToast("Please enter a valid client email.");return;}
-        proj.title=title; proj.project_type=document.getElementById("editProjectType").value.trim(); proj.client_name=clientName; proj.client_email=email;
-        proj.total_amount=Math.max(0,Number(document.getElementById("editProjectAmount").value||0)); proj.legacy_reference=document.getElementById("editProjectLegacyRef").value.trim(); proj.record_date=document.getElementById("editProjectRecordDate").value; proj.start_date=document.getElementById("editProjectStartDate").value; proj.deadline_date=document.getElementById("editProjectDeadline").value; proj.payment_due_date=proj.deadline_date||null; proj.invoice_due_date=proj.payment_due_date||"";
+        const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
+        const title=normalizeHumanText(document.getElementById("editProjectTitle").value,120);
+        const clientName=normalizeHumanText(document.getElementById("editProjectClientName").value,120);
+        const email=normalizeProjectClientEmail(document.getElementById("editProjectClientEmail").value);
+        const startDate=document.getElementById("editProjectStartDate").value;
+        const deadlineDate=document.getElementById("editProjectDeadline").value;
+        if(!title||!clientName){showToast("Project and client name are required.");return;}
+        if(email&&!validProjectClientEmail(email)){showToast("Enter a valid client email address.");return;}
+        if(!validProjectDateRange(startDate,deadlineDate)){showToast("Project deadline cannot be earlier than the start date.");return;}
+        const previous={title:proj.title,project_type:proj.project_type,client_name:proj.client_name,client_email:proj.client_email,legacy_reference:proj.legacy_reference,record_date:proj.record_date,start_date:proj.start_date,deadline_date:proj.deadline_date,payment_due_date:proj.payment_due_date,invoice_due_date:proj.invoice_due_date,priority:proj.priority,status:proj.status,delivery_status:proj.delivery_status,archived_at:proj.archived_at,updated_at:proj.updated_at};
+        proj.title=title;
+        proj.project_type=normalizeHumanText(document.getElementById("editProjectType").value,100);
+        proj.client_name=clientName;
+        proj.client_email=email;
+        proj.legacy_reference=normalizeHumanText(document.getElementById("editProjectLegacyRef").value,120);
+        proj.record_date=document.getElementById("editProjectRecordDate").value;
+        proj.start_date=startDate;
+        proj.deadline_date=deadlineDate;
+        proj.payment_due_date=deadlineDate||null;
+        proj.invoice_due_date=proj.payment_due_date||"";
         proj.priority=document.getElementById('editProjectPriority').value==='YES';
-        const received=Math.max(0,Number(document.getElementById("editProjectAmountReceived").value||0)); const pendingInput=Math.max(0,Number(document.getElementById("editProjectPendingAmount").value||0)); proj.payment_status=document.getElementById("editProjectPaymentStatus").value.trim(); proj.pending_amount=pendingInput;
-        proj.payments=received>0?[{id:(proj.payments?.[0]?.id||('pay_hist_'+proj.id)),amount_paid:received,amount:received,payment_date:proj.record_date||proj.start_date||String(proj.created_at||'').slice(0,10),method:proj.payments?.[0]?.method||'Historical Record',reference_number:proj.payments?.[0]?.reference_number||'',notes:proj.payments?.[0]?.notes||'',created_at:proj.payments?.[0]?.created_at||proj.created_at||new Date().toISOString()}]:[];
-        const completed=document.getElementById("editProjectCompletedToggle").checked; proj.status=completed?"Completed":"In Progress"; proj.delivery_status=completed?"Delivered":"In Production"; if(completed) proj.archived_at=proj.archived_at||new Date().toISOString(); else proj.archived_at=null; proj.updated_at=new Date().toISOString();
-        const client=state.clients.find(c=>c.id===proj.client_id)||state.clients.find(c=>String(c.email||'').toLowerCase()===email.toLowerCase()); if(client){client.name=clientName;if(email)client.email=email;}
-        persistProjectsState(); persistClientsState();
+        // Financial totals and payment history are deliberately read-only here.
+        // They are authoritative from Project Items + Payments and must never be synthesized by Edit Project.
+        proj.pending_amount=getProjectBalance(proj);
+        proj.payment_status=getProjectPaymentStatus(proj);
+        const completed=document.getElementById("editProjectCompletedToggle").checked;
+        proj.status=completed?"Completed":"In Progress";
+        proj.delivery_status=completed?"Delivered":"In Production";
+        if(completed)proj.archived_at=proj.archived_at||new Date().toISOString();else proj.archived_at=null;
+        proj.updated_at=new Date().toISOString();
+        const client=state.clients.find(x=>String(x.id)===String(proj.client_id))||state.clients.find(x=>normalizeProjectClientEmail(x.email)===email);
+        if(client){client.name=clientName;if(email)client.email=email;}
+        persistProjectsState();persistClientsState();
         let cloudSaved=false;
         if(cloudAvailable()){
           try{
             await syncProjectToDatabase(proj,{quiet:true});
-            if(client) await syncClientToDatabase(client,{quiet:true});
+            if(client)await syncClientToDatabase(client,{quiet:true});
             cloudSaved=true;
           }catch(e){
+            Object.assign(proj,previous);
             console.error('Edit Project cloud save failed:',e);
-            showToast('Project edit was not saved to Supabase: '+(e?.message||e));
+            showToast('Project edit was not saved: '+(e?.message||e));
             try{await loadDatabaseData();}catch(_){}
             return;
           }
         }else{
           queueOfflineProject(proj,'Edit Project');
         }
-        closeModal("editProjectModal"); openProjectDetails(proj.id); renderOverviewDashboard(); renderProjects(); showToast(cloudSaved?"Project record updated.":"Project updated offline.");
+        closeModal("editProjectModal");openProjectDetails(proj.id);renderOverviewDashboard();renderProjects();
+        showToast(cloudSaved?"Project record updated.":"Project updated offline and queued for sync.");
       }
       function openProjectDetails(projId,initialTab='deliverables'){
         state.activeProjectId=projId;const proj=state.projects.find(p=>p.id===projId);if(!proj)return;
@@ -8001,6 +8081,21 @@ ${description}`))actionCallback();return;}
       }
 
       function validProjectClientEmail(value){const v=String(value||'').trim();return !v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
+      function validProjectDateRange(startValue,endValue){
+        if(!startValue||!endValue)return true;
+        const start=parseDateSafe(startValue),end=parseDateSafe(endValue);
+        return Boolean(start&&end&&end>=start);
+      }
+      function validReasonableMoney(value,{allowZero=true,max=100000000}={}){
+        const n=Number(value);
+        return Number.isFinite(n)&&(allowZero?n>=0:n>0)&&n<=max;
+      }
+      function validPositiveInteger(value,{max=9999}={}){
+        const n=Number(value);
+        return Number.isInteger(n)&&n>0&&n<=max;
+      }
+      function normalizeHumanText(value,max=160){return String(value||'').trim().replace(/\s+/g,' ').slice(0,max);}
+
       function nextLocalClientCode(){const max=(state.clients||[]).reduce((m,c)=>Math.max(m,Number(String(c.client_code||'').match(/(\d+)$/)?.[1]||0)),0);return `CL-${String(max+1).padStart(3,'0')}`;}
       function getProjectClientRecord(proj){
         return state.clients.find(c=>String(c.id)===String(proj?.client_id))||null;
@@ -8080,9 +8175,11 @@ ${description}`))actionCallback();return;}
       async function saveProjectData(options={}){
         const silent=options?.silent===true,proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj||projectDataAutosaveBusy)return;
         if(options?.authorized!==true){requestDestructivePin('Confirm Project Changes','Save changes to this project information?',()=>saveProjectData({...options,authorized:true}));return;}
-        const name=document.getElementById('projectDataProjectName')?.value.trim()||'',email=document.getElementById('projectDataClientEmail')?.value.trim()||'';
+        const name=normalizeHumanText(document.getElementById('projectDataProjectName')?.value,120),email=normalizeProjectClientEmail(document.getElementById('projectDataClientEmail')?.value),clientName=normalizeHumanText(document.getElementById('projectDataClientName')?.value,120),startValue=document.getElementById('projectDataStartDate')?.value||'',deadlineValue=document.getElementById('projectDataDeadline')?.value||'';
         if(!name){setProjectDataAutosaveStatus('Project name is required.','error');return}
-        if(!validProjectClientEmail(email)){setProjectDataAutosaveStatus('Enter a valid email address.','error');return}
+        if(!clientName){setProjectDataAutosaveStatus('Client name is required.','error');return}
+        if(email&&!validProjectClientEmail(email)){setProjectDataAutosaveStatus('Enter a valid email address.','error');return}
+        if(!validProjectDateRange(startValue,deadlineValue)){setProjectDataAutosaveStatus('Deadline cannot be earlier than the start date.','error');return}
         projectDataAutosaveBusy=true;setProjectDataAutosaveStatus('Saving…','saving');
         const previousClientId=proj.client_id,previousEmail=proj.client_email||'',previousStart=proj.start_date||'',previousDeadline=proj.deadline_date||'';
         try{
@@ -8305,20 +8402,25 @@ ${description}`))actionCallback();return;}
         setProjectOrderItemType(item.type||item.item_type||'SOLO');document.getElementById('projectOrderItemSuggestions')?.classList.remove('open');openModal('projectOrderItemModal');
       }
       function saveProjectOrderItem(authorized=false){
-        const proj=state.projects.find(p=>p.id===state.activeProjectId); if(!proj)return;
+        const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
         if(!authorized){requestDestructivePin('Confirm Order Item Changes','Save this order item change?',()=>saveProjectOrderItem(true));return;}
-        if(!Array.isArray(proj.project_items)) proj.project_items=[];
-        const name=document.getElementById('projectOrderItemName').value.trim();
-        const qty=Math.max(1,Math.round(Number(document.getElementById('projectOrderItemQty').value||1)));
-        const price=Math.max(0,Number(document.getElementById('projectOrderItemPrice').value||0));
-        const type=document.getElementById('projectOrderItemType').value||'SOLO';
+        if(!Array.isArray(proj.project_items))proj.project_items=[];
+        const name=normalizeHumanText(document.getElementById('projectOrderItemName').value,160);
+        const qtyRaw=Number(document.getElementById('projectOrderItemQty').value);
+        const priceRaw=Number(document.getElementById('projectOrderItemPrice').value);
+        const type=String(document.getElementById('projectOrderItemType').value||'SOLO').toUpperCase();
         if(!name){showToast('Item name is required.');return;}
+        if(!validPositiveInteger(qtyRaw)){showToast('Quantity must be a whole number greater than 0.');return;}
+        if(!validReasonableMoney(priceRaw)){showToast('Enter a valid non-negative item price.');return;}
+        if(!['SOLO','PACKAGE','CUSTOM'].includes(type)){showToast('Choose a valid item type.');return;}
+        const qty=qtyRaw,price=priceRaw;
         const selected=state.projectOrderItemSelected&&String(state.projectOrderItemSelected.name||'').toLowerCase()===name.toLowerCase()?state.projectOrderItemSelected:null;
-        const raw=document.getElementById('projectOrderItemIndex').value; const index=raw===''?null:Number(raw);
+        const raw=document.getElementById('projectOrderItemIndex').value,index=raw===''?null:Number(raw);
+        if(index!==null&&(!Number.isInteger(index)||index<0||index>=proj.project_items.length)){showToast('That order item is no longer available. Refresh and try again.');return;}
         const base={name,qty,quantity:qty,price,unit_price:price,type,item_type:type,product_code:selected?.code||null,category:selected?.category||'',id:index!==null&&proj.project_items[index]?.id?proj.project_items[index].id:`oi_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`};
-        if(index===null){ proj.project_items.push(base); }
-        else if(proj.project_items[index]){ proj.project_items[index]={...proj.project_items[index],...base}; }
-        recalculateProjectFromOrderItems(proj);syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();scheduleProjectStructureSync(proj,80);closeModal('projectOrderItemModal');renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderOverviewDashboard();showToast('Order item saved and synced to Deliverables.');
+        if(index===null)proj.project_items.push(base);else proj.project_items[index]={...proj.project_items[index],...base};
+        recalculateProjectFromOrderItems(proj);syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();scheduleProjectStructureSync(proj,80);
+        closeModal('projectOrderItemModal');renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderOverviewDashboard();showToast('Order item saved and synced to Deliverables.');
       }
       function requestDeleteProjectOrderItem(index,event){if(event)event.stopPropagation();const proj=state.projects.find(p=>p.id===state.activeProjectId),item=proj?.project_items?.[index];if(!item)return;requestDestructivePin('Remove Order Item',`Remove "${item.name||'this item'}"? Its linked deliverable will also be removed.`,()=>deleteProjectOrderItem(index,true));}
       function deleteProjectOrderItem(index,authorized=false){
@@ -8576,7 +8678,7 @@ ${description}`))actionCallback();return;}
         showConfirmationDialog(draft.editingId?'Confirm Payment Changes':'Confirm Payment',`${formatCurrency(draft.amount)} · ${formatProjectDate(draft.payment_date)} · ${draft.payment_method}`,'Confirm',()=>finalizePaymentRecord(proj,draft));
       }
       async function finalizePaymentRecord(proj,draft){
-        showActionStatus('Processing Payment','Saving payment details…',false);await new Promise(r=>setTimeout(r,180));
+        showActionStatus('Processing Payment','Saving payment details…',false);
         let newReceiptPath=draft.receiptDraft?.path||null,oldReceiptPath=draft.receiptDraft?.previousPath||null;
         try{
           if(draft.receiptDraft?.file)newReceiptPath=await uploadWorkspacePaymentReceipt(draft.receiptDraft.file);
@@ -9243,11 +9345,38 @@ ${description}`))actionCallback();return;}
       function switchPricelistTab(tab){state.catalogManagerFilter=tab==='PACKAGE'?'Packages':'Services';renderPricelist()}
       function filterPricelistTable(){renderPricelist()}
       function openCatalogCategoryModal(existing=''){ensureCatalogCategories();document.getElementById('catalogCategoryOldName').value=existing||'';document.getElementById('catalogCategoryName').value=existing||'';document.getElementById('catalogCategoryModalTitle').textContent=existing?'Edit Category':'Add Category';document.getElementById('catalogCategoryDeleteBtn')?.classList.toggle('hidden',!existing);openModal('catalogCategoryModal')}
-      function saveCatalogCategory(){const old=document.getElementById('catalogCategoryOldName').value.trim(),name=document.getElementById('catalogCategoryName').value.trim();if(!name){showToast('Category name is required.');return}ensureCatalogCategories();const dup=state.catalogCategories.some(c=>c.toLowerCase()===name.toLowerCase()&&c!==old);if(dup){showToast('That category already exists.');return}if(old){const idx=state.catalogCategories.indexOf(old);if(idx>-1)state.catalogCategories[idx]=name;state.soloServices.forEach(s=>{if(String(s.category||'')===old)s.category=name});state.packagesList.forEach(pkg=>{if(String(pkg.category||'')===old)pkg.category=name});if(state.catalogManagerCategory===old)state.catalogManagerCategory=name}else state.catalogCategories.push(name);persistCatalogState();queueCatalogCloudSync();closeModal('catalogCategoryModal');renderPricelist();renderServiceCatalog();showToast(old?'Category updated.':'Category added.')}
+      async function saveCatalogCategory(){
+        const old=normalizeHumanText(document.getElementById('catalogCategoryOldName').value,80),name=normalizeHumanText(document.getElementById('catalogCategoryName').value,80);
+        if(!name){showToast('Category name is required.');return;}
+        ensureCatalogCategories();
+        if(state.catalogCategories.some(x=>x.toLowerCase()===name.toLowerCase()&&x!==old)){showToast('That category already exists.');return;}
+        await commitCatalogMutation(()=>{
+          if(old){
+            const idx=state.catalogCategories.indexOf(old);if(idx<0)throw new Error('Category no longer exists.');
+            state.catalogCategories[idx]=name;
+            state.soloServices.forEach(s=>{if(String(s.category||'')===old)s.category=name});
+            state.packagesList.forEach(p=>{if(String(p.category||'')===old)p.category=name});
+            if(state.catalogManagerCategory===old)state.catalogManagerCategory=name;
+          }else state.catalogCategories.push(name);
+        },old?'Category updated.':'Category added.',{modalId:'catalogCategoryModal'});
+      }
       function openCatalogServiceModal(code=''){
         ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a category first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select a category first, then add a service.');return}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Service':'Add Service';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceActive').value=String(item?.active!==false);document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
       }
-      function saveCatalogService(){const code=document.getElementById('catalogServiceCode').value,name=document.getElementById('catalogServiceName').value.trim(),category=document.getElementById('catalogServiceCategory').value,desc=document.getElementById('catalogServiceDescription').value.trim(),price=Number(document.getElementById('catalogServicePrice').value),active=document.getElementById('catalogServiceActive').value==='true';if(!name||!category||!Number.isFinite(price)||price<0){showToast('Enter a valid service name, category, and price.');return}if(code){const item=state.soloServices.find(s=>s.product_code===code);if(item)Object.assign(item,{name:name.toUpperCase(),category,description:desc,price,active,type:'SOLO'})}else{const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name:name.toUpperCase(),category,description:desc,price,active,type:'SOLO'})}persistCatalogState();queueCatalogCloudSync();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast(code?'Service updated.':'Service added.')}
+      async function saveCatalogService(){
+        const code=String(document.getElementById('catalogServiceCode').value||'').trim();
+        const name=normalizeHumanText(document.getElementById('catalogServiceName').value,120).toUpperCase();
+        const category=String(document.getElementById('catalogServiceCategory').value||'').trim();
+        const desc=String(document.getElementById('catalogServiceDescription').value||'').trim().slice(0,1000);
+        const price=Number(document.getElementById('catalogServicePrice').value),active=document.getElementById('catalogServiceActive').value==='true';
+        if(!name||!category||!validReasonableMoney(price)){showToast('Enter a valid service name, category, and non-negative price.');return;}
+        if(!state.catalogCategories.some(x=>String(x).toLowerCase()===category.toLowerCase())){showToast('Choose an existing category.');return;}
+        if(state.soloServices.some(s=>String(s.product_code)!==code&&String(s.name||'').trim().toLowerCase()===name.toLowerCase())){showToast('A service with that name already exists.');return;}
+        await commitCatalogMutation(()=>{
+          if(code){const item=state.soloServices.find(s=>s.product_code===code);if(!item)throw new Error('Service no longer exists.');Object.assign(item,{name,category,description:desc,price,active,type:'SOLO'});}
+          else{const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name,category,description:desc,price,active,type:'SOLO'});}
+        },code?'Service updated.':'Service added.',{modalId:'catalogServiceModal'});
+      }
       function renderPackageServiceChoices(query=''){
         const box=document.getElementById('catalogPackageServiceChoices');if(!box)return;const q=String(query||'').toLowerCase(),category=document.getElementById('catalogPackageCategory')?.value||'',selected=new Set(state.packageBuilderSelectedNames||[]),items=state.soloServices.filter(s=>s.active!==false&&(!category||String(s.category||'')===category)&&(`${s.name||''} ${s.category||''}`).toLowerCase().includes(q));box.innerHTML=items.map(s=>`<label class="package-service-choice"><input type="checkbox" value="${escapeHtml(s.name)}" data-price="${Number(s.price||0)}" ${selected.has(s.name)?'checked':''} onchange="app.togglePackageBuilderService(this.value,this.checked)"><span><strong>${escapeHtml(displayPackageServiceName(s.name))}</strong><small>${formatCurrency(s.price||0)}</small></span></label>`).join('')||`<div class="typeahead-empty">No matching services in this category</div>`;updatePackagePriceSummary()
       }
@@ -9256,77 +9385,60 @@ ${description}`))actionCallback();return;}
       function openCatalogPackageModal(code=''){
         ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a category and services first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select the category where this bundle belongs.');return}const pkg=code?state.packagesList.find(p=>p.product_code===code):null;state.packageBuilderSelectedNames=[...(pkg?.includedServiceNames||[])];document.getElementById('catalogPackageModalTitle').textContent=pkg?'Edit Package':'Create Package';document.getElementById('catalogPackageCode').value=pkg?.product_code||'';document.getElementById('catalogPackageName').value=pkg?normalizeBroadcastPackageName(pkg.name):'';document.getElementById('catalogPackageSellingPrice').value=pkg?.sellingPrice??'';document.getElementById('catalogPackageDeleteBtn')?.classList.toggle('hidden',!pkg);const categorySel=document.getElementById('catalogPackageCategory');categorySel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(displayCategory(c))}</option>`).join('');categorySel.value=pkg?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);document.getElementById('catalogPackageServiceSearch').value='';renderPackageServiceChoices('');openModal('catalogPackageModal')
       }
-      function saveCatalogPackage(){
-        const code=document.getElementById('catalogPackageCode').value,name=document.getElementById('catalogPackageName').value.trim(),category=document.getElementById('catalogPackageCategory').value,selling=Number(document.getElementById('catalogPackageSellingPrice').value),included=[...(state.packageBuilderSelectedNames||[])],selected=new Set(included),original=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);if(!name||!category||!included.length||!Number.isFinite(selling)||selling<0){showToast('Add a package name, category, at least one service, and a valid offer price.');return}const payload={name:name.toUpperCase(),category,description:'Includes:\n'+included.map(x=>'• '+x).join('\n'),type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:true};if(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(pkg)Object.assign(pkg,payload)}else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload})}persistCatalogState();queueCatalogCloudSync();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast(code?'Package updated.':'Package created.')
+      async function saveCatalogPackage(){
+        const code=String(document.getElementById('catalogPackageCode').value||'').trim();
+        const name=normalizeHumanText(document.getElementById('catalogPackageName').value,120).toUpperCase();
+        const category=String(document.getElementById('catalogPackageCategory').value||'').trim();
+        const selling=Number(document.getElementById('catalogPackageSellingPrice').value);
+        const included=[...new Set(state.packageBuilderSelectedNames||[])],selected=new Set(included);
+        const original=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);
+        if(!name||!category||!included.length||!validReasonableMoney(selling)){showToast('Add a package name, category, at least one service, and a valid non-negative offer price.');return;}
+        if(!state.catalogCategories.some(x=>String(x).toLowerCase()===category.toLowerCase())){showToast('Choose an existing category.');return;}
+        if(included.some(x=>!state.soloServices.some(s=>s.active!==false&&s.name===x))){showToast('One or more selected services are no longer available.');return;}
+        if(state.packagesList.some(p=>String(p.product_code)!==code&&String(p.name||'').trim().toLowerCase()===name.toLowerCase())){showToast('A package with that name already exists.');return;}
+        const payload={name,category,description:'Includes:\n'+included.map(x=>'• '+x).join('\n'),type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:true};
+        await commitCatalogMutation(()=>{
+          if(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(!pkg)throw new Error('Package no longer exists.');Object.assign(pkg,payload);}
+          else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload});}
+        },code?'Package updated.':'Package created.',{modalId:'catalogPackageModal'});
       }
-      function deleteCatalogCategory(){const name=document.getElementById('catalogCategoryOldName')?.value.trim();if(!name)return;const usedServices=state.soloServices.filter(s=>String(s.category||'')===name).length,usedPackages=state.packagesList.filter(p=>String(p.category||'')===name).length;requestDestructivePin('Delete Category',`Delete "${name}"? ${usedServices+usedPackages?`It contains ${usedServices} service${usedServices===1?'':'s'} and ${usedPackages} package${usedPackages===1?'':'s'}; move or delete them first.`:'The category is empty.'}`,()=>{if(usedServices||usedPackages){showToast('Move or delete the items in this category first.');return;}state.catalogCategories=state.catalogCategories.filter(c=>c!==name);if(state.catalogManagerCategory===name)state.catalogManagerCategory='ALL';persistCatalogState();queueCatalogCloudSync();closeModal('catalogCategoryModal');renderPricelist();showToast('Category deleted.');});}
-      function deleteCatalogService(){const code=document.getElementById('catalogServiceCode')?.value;if(!code)return;const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));requestDestructivePin('Delete Service',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} package${bundles.length===1?'':'s'}.`:''}`,()=>{state.soloServices=state.soloServices.filter(s=>s.product_code!==code);state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});persistCatalogState();queueCatalogCloudSync();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast('Service deleted.');});}
-      function deleteCatalogPackage(){const code=document.getElementById('catalogPackageCode')?.value;if(!code)return;const pkg=state.packagesList.find(p=>p.product_code===code);if(!pkg)return;requestDestructivePin('Delete Package',`Delete "${pkg.name}"?`,()=>{state.packagesList=state.packagesList.filter(p=>p.product_code!==code);persistCatalogState();queueCatalogCloudSync();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast('Package deleted.');});}
+      function deleteCatalogCategory(){
+        const name=normalizeHumanText(document.getElementById('catalogCategoryOldName')?.value,80);if(!name)return;
+        const usedServices=state.soloServices.filter(s=>String(s.category||'')===name).length,usedPackages=state.packagesList.filter(p=>String(p.category||'')===name).length;
+        requestDestructivePin('Delete Category',`Delete "${name}"? ${usedServices+usedPackages?`It contains ${usedServices} service${usedServices===1?'':'s'} and ${usedPackages} package${usedPackages===1?'':'s'}; move or delete them first.`:'The category is empty.'}`,async()=>{
+          if(usedServices||usedPackages){showToast('Move or delete the items in this category first.');return;}
+          await commitCatalogMutation(()=>{state.catalogCategories=state.catalogCategories.filter(c=>c!==name);if(state.catalogManagerCategory===name)state.catalogManagerCategory='ALL';},'Category deleted.',{modalId:'catalogCategoryModal'});
+        });
+      }
+      function deleteCatalogService(){
+        const code=document.getElementById('catalogServiceCode')?.value;if(!code)return;const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;
+        const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));
+        requestDestructivePin('Delete Service',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} package${bundles.length===1?'':'s'}.`:''}`,async()=>{
+          await commitCatalogMutation(()=>{
+            state.soloServices=state.soloServices.filter(s=>s.product_code!==code);
+            state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});
+            state.packagesList=state.packagesList.filter(p=>(p.includedServiceNames||[]).length>0);
+          },'Service deleted.',{modalId:'catalogServiceModal'});
+        });
+      }
+      function deleteCatalogPackage(){
+        const code=document.getElementById('catalogPackageCode')?.value;if(!code)return;const pkg=state.packagesList.find(p=>p.product_code===code);if(!pkg)return;
+        requestDestructivePin('Delete Package',`Delete "${pkg.name}"?`,async()=>{await commitCatalogMutation(()=>{state.packagesList=state.packagesList.filter(p=>p.product_code!==code);},'Package deleted.',{modalId:'catalogPackageModal'});});
+      }
 
       function openEditServiceModal(code) { openCatalogServiceModal(code); }
 
       function openEditPackageModal(code) { openCatalogPackageModal(code); }
 
       /* VALIDATION FOR EDITING CATALOG / PACKAGES */
-      function savePricelistItem() {
-        const code = document.getElementById("pricelistItemId").value;
-        const type = document.getElementById("pricelistItemType").value;
-        const nameInput = document.getElementById("pricelistItemName");
-        const priceInput = document.getElementById("pricelistItemPrice");
-        const descInput = document.getElementById("pricelistItemDesc");
-        
-        const name = nameInput.value.trim().toUpperCase();
-        const desc = descInput.value.trim();
-        const price = Number(priceInput.value);
-
-        const errName = document.getElementById("pricelistItemNameError");
-        const errPrice = document.getElementById("pricelistItemPriceError");
-        if (errName) errName.innerText = "";
-        if (errPrice) errPrice.innerText = "";
-        nameInput.classList.remove("is-invalid");
-        priceInput.classList.remove("is-invalid");
-
-        let valid = true;
-        if (!name) {
-          if (errName) errName.innerText = "Name is required.";
-          nameInput.classList.add("is-invalid");
-          valid = false;
-        }
-        if (isNaN(price) || price < 0) {
-          if (errPrice) errPrice.innerText = "Price must be greater than or equal to ₱0.";
-          priceInput.classList.add("is-invalid");
-          valid = false;
-        }
-
-        if (!valid) {
-          showToast("Please fix the validation errors before saving.");
-          return;
-        }
-
-        if (type === 'SOLO') {
-          const item = state.soloServices.find(s => s.product_code === code);
-          if (item) {
-            item.name = name;
-            item.description = desc;
-            item.price = price;
-          }
-        } else {
-          const pkg = state.packagesList.find(p => p.product_code === code);
-          if (pkg) {
-            const origPrice = Number(document.getElementById("pricelistItemOriginalPrice").value || price);
-            pkg.name = normalizeBroadcastPackageName(name);
-            pkg.description = desc;
-            pkg.sellingPrice = price;
-            pkg.originalPrice = origPrice;
-            pkg.discount = Math.max(0, origPrice - price);
-          }
-        }
-
-        persistCatalogState();
-        closeModal("pricelistItemModal");
-        renderPricelist();
-        renderServiceCatalog();
-        showToast("Changes saved successfully to the database.");
+      async function savePricelistItem() {
+        const code=String(document.getElementById("pricelistItemId").value||'').trim(),type=document.getElementById("pricelistItemType").value;
+        const name=normalizeHumanText(document.getElementById("pricelistItemName").value,120).toUpperCase(),desc=String(document.getElementById("pricelistItemDesc").value||'').trim().slice(0,1000),price=Number(document.getElementById("pricelistItemPrice").value);
+        if(!name||!validReasonableMoney(price)){showToast("Enter a valid name and non-negative price.");return;}
+        await commitCatalogMutation(()=>{
+          if(type==='SOLO'){const item=state.soloServices.find(s=>s.product_code===code);if(!item)throw new Error('Service no longer exists.');item.name=name;item.description=desc;item.price=price;}
+          else{const pkg=state.packagesList.find(p=>p.product_code===code);if(!pkg)throw new Error('Package no longer exists.');const original=Number(document.getElementById("pricelistItemOriginalPrice").value||price);if(!validReasonableMoney(original))throw new Error('Original price is invalid.');pkg.name=normalizeBroadcastPackageName(name);pkg.description=desc;pkg.sellingPrice=price;pkg.originalPrice=original;pkg.discount=Math.max(0,original-price);}
+        },"Pricing updated.",{modalId:'pricelistItemModal'});
       }
 
       async function saveProjectNotes() {
