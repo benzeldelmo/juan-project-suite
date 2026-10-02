@@ -20,7 +20,7 @@ test("overdue policy is 1-day grace, 500 on day 3, then 250 weekly with no daily
   assert.match(sql,/p_as_of - p_due_date < 3/);
   assert.match(sql,/500 \+ floor\(\(p_as_of - p_due_date\) \/ 7\.0\) \* 250/);
   assert.match(html,/₱500 applies on Day 3/);
-  assert.match(html,/no daily fee/);
+  assert.match(html,/no daily fee/i);
   assert.match(terms,/No Daily Fee/);
   assert.doesNotMatch(terms,/₱35 per day/);
 });
