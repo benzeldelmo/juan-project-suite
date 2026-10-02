@@ -548,10 +548,12 @@ function shopRow(x){
 }
 function packageInclusions(x){
   const services=new Map((state.catalog.services||[]).map(s=>[String(s.id),s]));
-  return (state.catalog.packageItems||[]).filter(item=>String(item.package_id)===String(x.id)).sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0)).map(item=>{
+  const items=(state.catalog.packageItems||[]).filter(item=>String(item.package_id)===String(x.id)).sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0)).map(item=>{
     const service=services.get(String(item.service_id||'')),qty=Math.max(1,Number(item.quantity||1));
     return {name:item.item_name||service?.name||'Included service',qty};
   });
+  if(items.length)return items;
+  return String(x.description||'').replace(/\r/g,'').split('\n').map(line=>line.replace(/^\s*includes\s*:?\s*/i,'').replace(/^\s*[•*✓-]\s*/,'').trim()).filter(line=>line&&!/^includes\s*:?$/i.test(line)).map(name=>({name,qty:1}));
 }
 function priceListPackageCard(x){
   const price=Number(x.new_price||0),old=Number(x.original_price||0),items=packageInclusions(x),saved=Math.max(0,old-price);
@@ -592,7 +594,8 @@ function pricing(){
   const categoryMatches=x=>active==='all'||String(x.category_id||'')===active;
   const packages=[...(state.catalog.packages||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).filter(categoryMatches).filter(matches);
   const services=[...(state.catalog.services||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).filter(categoryMatches).filter(matches);
-  const categories='<button data-shop-category="all" class="'+(active==='all'?'active':'')+'">All</button>'+(state.catalog.categories||[]).map(c=>'<button data-shop-category="'+esc(c.id)+'" class="'+(active===String(c.id)?'active':'')+'">'+esc(c.name)+'</button>').join('');
+  const usedCategories=new Set([...(state.catalog.services||[]).map(x=>String(x.category_id||'')),...(state.catalog.packages||[]).map(x=>String(x.category_id||''))]);
+  const categories='<button data-shop-category="all" class="'+(active==='all'?'active':'')+'">All</button>'+(state.catalog.categories||[]).filter(c=>usedCategories.has(String(c.id))).map(c=>'<button data-shop-category="'+esc(c.id)+'" class="'+(active===String(c.id)?'active':'')+'">'+esc(c.name)+'</button>').join('');
   const ready=state.catalogLoaded;
   return '<div class="jp-public-pricing-page">'+
     '<header class="jp-public-pricing-sitebar"><a href="/" aria-label="JUAN PROJECT Online home">JUAN PROJECT <span>ONLINE</span></a></header>'+
