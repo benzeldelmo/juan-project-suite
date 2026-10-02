@@ -446,3 +446,34 @@ body.dark-mode #reportsContent .jp-payment-activity-scroll thead th{background:#
   #view-project-details .project-details-tabs{gap:20px!important;overflow-x:auto!important}
 }
 body.dark-mode .jp-private-badge{background:#242426}
+
+
+/* UX laws pass — Fitts, Jakob, Hick, Doherty */
+.btn:not(.btn-sm){min-height:44px!important}
+.form-control,.compact-sort,select,input:not([type="checkbox"]):not([type="radio"]),textarea{min-height:44px}
+.icon-more-button,.table-action-button,.modal-close{
+  min-width:44px!important;min-height:44px!important;width:44px;height:44px;
+  display:inline-grid!important;place-items:center!important;
+}
+.nav-item{min-height:44px!important}
+.project-details-tabs .tab-btn,.portal-tabs button,.jp-online-tabs button,.jp-catalog-tabs button{min-height:44px!important}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--text-primary)!important;
+  outline-offset:2px!important;
+}
+#view-pricelist .page-header .action-buttons-group{align-items:center!important;gap:8px!important;flex-wrap:wrap!important}
+#view-pricelist .jp-share-pricing{font-weight:600!important}
+#view-pricelist #jpCatalogMore{display:inline-flex!important}
+#projTab-invoice .invoice-actions-bar{align-items:center!important}
+#projTab-invoice .invoice-actions-bar .popover-wrap{display:inline-flex!important}
+.jp-notes-view{padding:0!important;border:0!important;background:transparent!important}
+.jp-notes-view+.form-control{margin-top:14px}
+.jp-notes-readable.hidden{display:none!important}
+.jp-notes-editor-hidden{display:none!important}
+
+/* Keep hit targets accessible without making dense tables visually heavy. */
+.data-table .icon-more-button,.unified-table .icon-more-button{margin:-6px 0!important}
+.filter-pill{min-height:36px}
+@media(pointer:coarse){
+  .filter-pill,.btn-sm{min-height:44px!important}
+}
