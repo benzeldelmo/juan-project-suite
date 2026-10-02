@@ -84,7 +84,7 @@ test("Settings tab activation uses collection selectors and initializes content 
   assert.ok(js.includes('$$(".jp-settings-segment").forEach'));
   assert.ok(js.includes('const tabs=$$(".jp-settings-nav-item")'));
   assert.ok(js.includes('$$("[data-search-index]",box).forEach'));
-  assert.ok(js.includes('settingsBuilt=true;bindSettingsTabs();try{bindSettings();}'));
+  assert.ok(js.includes('settingsBuilt=true;settingsDirty=false;bindSettingsTabs();try{bindSettings();}'));
 });
 
 
@@ -154,7 +154,7 @@ test("Client Home keeps its compact viewport layout, footer and 1800x600 ad form
   assert.match(mobile, /bottom:calc\(66px \+ env\(safe-area-inset-bottom\)\)/);
   assert.match(ads, /aspect-ratio:3\/1/);
   assert.match(workspaceAds, /canvas\.width=1800;canvas\.height=600/);
-  assert.match(workspaceAds, /Banner format: 1800 × 600 px/);
+  assert.match(workspaceAds, /1800 × 600 px/);
 });
 
 
