@@ -303,7 +303,7 @@ function enhanceServicesPricing(){
   if(title)title.textContent='Services & Pricing';if(sub)sub.textContent='Catalog';
   let desc=header.querySelector('.jp-services-description');
   if(!desc){desc=document.createElement('p');desc.className='jp-services-description';desc.textContent='Manage packages, solo services, pricing, and the client-facing catalog.';header.querySelector('div')?.append(desc);}
-  const pricingUrl='https://juan-project-online.vercel.app/pricing';
+  const pricingUrl='https://juan-project-online-juan-codes.vercel.app/pricing';
   let actions=header.querySelector('.action-buttons-group');
   if(actions&&actions.dataset.jpPricingActions!=='1'){
     actions.dataset.jpPricingActions='1';
