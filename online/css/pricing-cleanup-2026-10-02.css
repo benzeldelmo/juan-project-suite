@@ -1,0 +1,34 @@
+/* Public pricing cleanup — 2026-10-02 */
+@media (min-width:900px){
+  html,body{height:auto!important;min-height:100%!important;overflow:auto!important;background:#fff!important}
+  #root{width:100%!important;height:auto!important;min-height:100vh!important;padding:0!important;background:#fff!important}
+  .app.route-pricing{
+    width:100%!important;height:auto!important;min-height:100vh!important;margin:0!important;
+    display:block!important;background:#fff!important;border:0!important;border-radius:0!important;
+    box-shadow:none!important;overflow:visible!important;
+  }
+  .app.route-pricing>.page{
+    width:100%!important;height:auto!important;min-height:100vh!important;padding:0!important;
+    border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;
+  }
+}
+.route-pricing{background:#fff!important}
+.jp-public-pricing-page{min-height:100vh!important}
+.jp-public-pricing-content{padding-bottom:48px!important}
+.jp-public-pricing-page .jp-pricelist-packages{
+  align-items:start!important;
+}
+.jp-public-pricing-page .jp-pricelist-package-card{
+  min-height:0!important;height:auto!important;align-self:start!important;
+}
+.jp-public-pricing-page .jp-package-card-copy p{display:none!important}
+.jp-public-pricing-page .jp-pricelist-package-price{margin:20px 0 16px!important}
+.jp-public-pricing-page .jp-package-inclusions{margin-top:0!important}
+.jp-package-inclusions-missing{
+  color:#86868b!important;font-size:12px!important;list-style:none!important;padding:0!important;
+}
+.jp-public-pricing-page .jp-pricelist-service-name b{text-transform:none!important}
+@media(max-width:720px){
+  .jp-public-pricing-content{padding-top:32px!important}
+  .jp-public-pricing-page .jp-pricelist-package-card{height:auto!important}
+}
