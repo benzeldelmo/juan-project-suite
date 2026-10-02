@@ -8,9 +8,10 @@ import {PAYMENT_INSTITUTIONS,getPaymentInstitution,validatePaymentReference,sani
 const root=document.getElementById('root');
 const QR_FALLBACK='/assets/unionbank-bankqr-placeholder.jpg';
 const REMEMBERED_CLIENT_KEY='JUAN_REMEMBERED_CLIENT';
+const PUBLIC_PRICING_PATH=/^\/pricing\/?$/.test(location.pathname);
 
 let state={
-  route:'home',portal:null,selected:null,receiptPath:null,extractedReceipt:null,
+  route:PUBLIC_PRICING_PATH?'pricing':'home',portal:null,selected:null,receiptPath:null,extractedReceipt:null,
   catalog:{categories:[],services:[],packages:[],packageItems:[]},catalogLoaded:false,
   gateOpen:false,orderFilter:'requests',shopItem:null,paymentProjectId:null,
   shopQuery:'',shopSort:'default',shopCategory:'all',paymentFlow:'',
@@ -562,7 +563,7 @@ function shop(){
   const count=window.JPMobileCommerce?.cartCount?.()||0,total=window.JPMobileCommerce?.cartTotal?.()||0;
   const chips='<button data-shop-category="all" class="'+(active==='all'?'active':'')+'">All</button><button data-shop-category="packages" class="'+(active==='packages'?'active':'')+'">Packages</button>'+(state.catalog.categories||[]).map(c=>'<button data-shop-category="'+esc(c.id)+'" class="'+(active===String(c.id)?'active':'')+'">'+esc(c.name)+'</button>').join('');
   const viewToggle='<div class="jp-shop-view-toggle" role="group" aria-label="Shop view"><button id="shopCardsView" class="'+(view==='cards'?'active':'')+'">Shop</button><button id="shopPricelistView" class="'+(view==='pricelist'?'active':'')+'">View Pricelist</button></div>';
-  const packageItems=packages.filter(matches).slice(0,5);
+  const packageItems=packages.filter(matches);
   const serviceItems=services.filter(x=>(active==='all'||active==='packages'||String(x.category_id)===active)&&matches(x));
   const pricelist='<div class="jp-pricelist">'+
     '<div class="jp-pricelist-head"><div><span>CURRENT PRICING</span><h2>JUAN PROJECT Pricelist</h2></div><small>Current catalog prices apply to new orders. Existing project prices stay unchanged unless edited in Workspace.</small></div>'+
@@ -578,8 +579,29 @@ function shop(){
 }
 function findShopItem(key){const [kind,id]=String(key).split(':');if(kind==='Package')return {...state.catalog.packages.find(x=>String(x.id)===String(id)),kind};return {...state.catalog.services.find(x=>String(x.id)===String(id)),kind:'Service'}}
 
-function routePage(){if(state.route==='home')return home();if(state.route==='shop')return shop();if(state.route==='orders')return orders();if(state.route==='project')return project();if(state.route==='payment')return payment();if(state.route==='invoice')return invoice();if(state.route==='account')return account();return home()}
-function render(){root.innerHTML=`<div class="app ${isLoggedIn()?'client-mode':'guest-mode'} route-${esc(state.route||'home')}"><main class="page route-${esc(state.route||'home')}">${routePage()}</main>${nav()}${gateOverlay()}${shopOverlay()}${notificationOverlay()}${clientMessageOverlay()}</div>`;bind();window.dispatchEvent(new Event('juan-online-render'));}
+function pricing(){
+  const q=String(state.shopQuery||'').trim().toLowerCase();
+  const matches=x=>!q||[x.name,x.description,categoryName(x.category_id),x.product_code].some(v=>String(v||'').toLowerCase().includes(q));
+  const packages=[...(state.catalog.packages||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).filter(matches);
+  const services=[...(state.catalog.services||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).filter(matches);
+  const ready=state.catalogLoaded;
+  return '<div class="jp-public-pricing-page">'+
+    '<header class="jp-public-pricing-header"><div><span>JUAN PROJECT ONLINE</span><h1>Services & Pricing</h1><p>Packages and solo services available for new projects.</p></div><a class="btn primary small" href="/#shop">Start a Project</a></header>'+
+    '<div class="jp-public-pricing-search"><span>'+icon('search',17)+'</span><input id="shopSearch" value="'+esc(state.shopQuery)+'" placeholder="Search packages or services..." aria-label="Search pricing"></div>'+
+    (!ready?'<div class="card empty guided-empty"><b>Loading current pricing…</b><span>Fetching the latest services and packages.</span></div>':
+      '<div class="jp-pricelist">'+
+        '<div class="jp-pricelist-section-head"><h3>Packages</h3><span>'+packages.length+' package'+(packages.length===1?'':'s')+'</span></div>'+
+        '<div class="jp-pricelist-packages">'+(packages.map(priceListPackageCard).join('')||'<div class="card empty guided-empty"><b>No matching packages</b></div>')+'</div>'+
+        '<div class="jp-pricelist-section-head"><h3>Solo Services</h3><span>'+services.length+' service'+(services.length===1?'':'s')+'</span></div>'+
+        '<div class="jp-pricelist-table"><div class="jp-pricelist-table-head"><span>Service</span><span>Category</span><span>Price</span><span></span></div>'+(services.map(priceListServiceRow).join('')||'<div class="card empty guided-empty"><b>No matching solo services</b></div>')+'</div>'+
+      '</div>')+
+    '<footer class="jp-public-pricing-foot"><span>Prices shown are the current JUAN PROJECT catalog.</span><a href="/">JUAN PROJECT Online</a></footer>'+
+  '</div>';
+}
+
+
+function routePage(){if(state.route==='pricing')return pricing();if(state.route==='home')return home();if(state.route==='shop')return shop();if(state.route==='orders')return orders();if(state.route==='project')return project();if(state.route==='payment')return payment();if(state.route==='invoice')return invoice();if(state.route==='account')return account();return home()}
+function render(){const publicPricing=state.route==='pricing';root.innerHTML=`<div class="app ${isLoggedIn()?'client-mode':'guest-mode'} route-${esc(state.route||'home')}"><main class="page route-${esc(state.route||'home')}">${routePage()}</main>${publicPricing?'':nav()}${gateOverlay()}${shopOverlay()}${notificationOverlay()}${clientMessageOverlay()}</div>`;bind();window.dispatchEvent(new Event('juan-online-render'));}
 
 function bind(){
   document.querySelectorAll('.nav [data-r]').forEach(b=>b.onclick=()=>{const r=b.dataset.r;if(!isLoggedIn()&&['orders','payment'].includes(r))return gate(r);state.route=r;render()});
@@ -713,15 +735,15 @@ function bind(){
   // Always paint a usable storefront immediately. Remembered sessions restore
   // in the background and replace it with the client portal when ready.
   const remembered=localStorage.getItem(REMEMBERED_CLIENT_KEY)==='1';
-  welcomeScreen();
+  if(PUBLIC_PRICING_PATH)render();else welcomeScreen();
 
   // Public catalog never blocks guest UI.
-  getCatalog().then(c=>{state.catalog=c;state.catalogLoaded=true;if(!isLoggedIn()&&state.route==='shop')render();}).catch(e=>console.warn('Catalog unavailable:',e?.message||e));
+  getCatalog().then(c=>{state.catalog=c;state.catalogLoaded=true;if(state.route==='pricing'||(!isLoggedIn()&&state.route==='shop'))render();}).catch(e=>console.warn('Catalog unavailable:',e?.message||e));
 
-  if(remembered){
+  if(remembered&&!PUBLIC_PRICING_PATH){
     try{await getSupabase();const s=await session();if(s)await loadPortal();else{localStorage.removeItem(REMEMBERED_CLIENT_KEY);state.portal=null;welcomeScreen()}}
     catch(e){console.warn('Saved client session could not be restored:',e?.message||e);state.portal=null;renderPortalLoadError(e);}
   }
 })();
 
-window.juanOnlineRefresh=async()=>{if(window.JuanTest?.session()){await loadPortal();}else{state.catalog=await getCatalog();state.catalogLoaded=true;render();}};
+window.juanOnlineRefresh=async()=>{if(PUBLIC_PRICING_PATH){state.catalog=await getCatalog();state.catalogLoaded=true;state.route='pricing';render();return;}if(window.JuanTest?.session()){await loadPortal();}else{state.catalog=await getCatalog();state.catalogLoaded=true;render();}};
