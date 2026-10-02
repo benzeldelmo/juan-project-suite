@@ -345,3 +345,104 @@ body.dark-mode .nav-item.active{background:#2a2a2d!important}
 body.dark-mode .data-table thead th,
 body.dark-mode .unified-table thead th,
 body.dark-mode #reportsContent .jp-payment-activity-scroll thead th{background:#242426!important}
+
+/* Workspace Ultra refinement */
+.brand-title{font-size:15px!important;font-weight:800!important;letter-spacing:-.02em!important}
+.brand-subtitle-large{display:flex!important;align-items:center!important;gap:7px!important;font-size:11px!important;font-weight:700!important;letter-spacing:.08em!important;margin-top:2px!important}
+.jp-private-badge{display:inline-flex;align-items:center;padding:3px 6px;border:1px solid var(--border-medium);border-radius:999px;font-size:8px;letter-spacing:.08em;color:var(--text-tertiary);background:var(--bg-card)}
+.jp-compact-connection{display:inline-flex!important;width:auto!important;margin-top:9px!important;padding:0!important;border:0!important;background:transparent!important;font-size:10px!important;color:var(--text-tertiary)!important;gap:5px!important}
+.jp-compact-connection .status-dot{width:6px!important;height:6px!important}
+.nav-section-label{margin-top:28px!important}
+.nav-section-label:first-child{margin-top:2px!important}
+.main-content>.view{max-width:1600px;margin-left:auto!important;margin-right:auto!important}
+.quick-actions-fab{display:flex!important}
+
+/* Project detail becomes one SaaS workspace, not a nested sidebar. */
+#view-project-details .project-details-workspace{display:block!important}
+#view-project-details .project-details-tabs{
+  width:100%!important;
+  max-width:none!important;
+  position:static!important;
+  height:auto!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:28px!important;
+  padding:0!important;
+  margin:0 0 22px!important;
+  border:0!important;
+  border-bottom:1px solid var(--border-subtle)!important;
+  background:transparent!important;
+}
+#view-project-details .project-details-tabs .tab-btn{
+  width:auto!important;min-height:42px!important;padding:11px 1px 10px!important;
+  border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;
+  background:transparent!important;display:inline-flex!important;gap:7px!important;
+}
+#view-project-details .project-details-tabs .tab-btn.active{border-bottom-color:var(--text-primary)!important;color:var(--text-primary)!important}
+#view-project-details .project-details-tabs .tab-btn svg{display:none!important}
+#view-project-details .project-details-content{min-width:0!important;width:100%!important}
+#view-project-details .jp-progress-collapsed{display:none!important}
+.jp-project-compact-summary{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;
+  margin:0 0 18px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:14px;overflow:hidden;
+}
+.jp-project-compact-summary>div{padding:15px 18px;border-right:1px solid var(--border-subtle)}
+.jp-project-compact-summary>div:last-child{border-right:0}
+.jp-project-compact-summary span{display:block;font-size:10px;color:var(--text-tertiary);font-weight:650;margin-bottom:5px}
+.jp-project-compact-summary strong{display:block;font-size:14px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jp-project-compact-summary .jp-summary-status.overdue{color:#dc2626}
+.jp-project-compact-summary .jp-summary-status.grace{color:#b45309}
+#projTab-deliverables .project-deliverables-summary,#projTab-deliverables .deliverables-progress-summary{box-shadow:none!important}
+.jp-notes-view{padding:18px!important}
+.jp-notes-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.jp-notes-head h3{margin:3px 0 0;font-size:17px}
+.jp-notes-readable{margin-top:16px;white-space:pre-wrap;line-height:1.65;color:var(--text-secondary);font-size:13px}
+.jp-notes-editor-hidden{display:none!important}
+
+/* Services & Pricing */
+.jp-services-description{margin:5px 0 0!important;color:var(--text-tertiary)!important;font-size:12px!important;line-height:1.45!important}
+.jp-catalog-tabs{
+  display:flex;gap:26px;border-bottom:1px solid var(--border-subtle);margin:-5px 0 18px;
+}
+.jp-catalog-tabs button{
+  appearance:none;border:0;border-bottom:2px solid transparent;background:transparent;
+  padding:11px 1px 10px;color:var(--text-secondary);font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+}
+.jp-catalog-tabs button.active{color:var(--text-primary);border-bottom-color:var(--text-primary)}
+#view-pricelist .catalog-manager-main{display:block!important}
+#view-pricelist .catalog-manager-main>.card{margin-bottom:0!important}
+#view-pricelist .catalog-services-table th:nth-child(2),#view-pricelist .catalog-services-table td:nth-child(2){width:24%}
+#view-pricelist .catalog-services-table th:nth-child(3),#view-pricelist .catalog-services-table td:nth-child(3){width:20%}
+#view-pricelist .catalog-services-table th:nth-child(4),#view-pricelist .catalog-services-table td:nth-child(4){width:34%}
+
+/* Intermediate responsive state: compact Workspeys-style rail instead of a squeezed full sidebar. */
+@media (min-width:768px) and (max-width:1199px){
+  .sidebar{
+    width:76px!important;padding:20px 10px 14px!important;align-items:center!important;
+    top:0!important;bottom:0!important;left:0!important;right:auto!important;height:100vh!important;
+    flex-direction:column!important;border-right:1px solid var(--border-subtle)!important;border-top:0!important;
+  }
+  .brand{display:block!important;padding:0 0 18px!important;text-align:center!important;width:100%!important}
+  .brand-title{font-size:11px!important;line-height:1.05!important}
+  .brand-subtitle-large,.jp-compact-connection{display:none!important}
+  .nav-menu{display:flex!important;flex-direction:column!important;width:100%!important;gap:5px!important;overflow:visible!important}
+  .nav-section-label{display:none!important}
+  .nav-item{
+    display:flex!important;flex:0 0 auto!important;width:52px!important;height:44px!important;min-height:44px!important;
+    padding:0!important;margin:0 auto!important;justify-content:center!important;align-items:center!important;border-radius:10px!important;
+  }
+  .nav-item .icon{width:18px!important;height:18px!important}
+  .nav-item .nav-label{display:none!important}
+  .user-profile{display:flex!important;margin-top:auto!important;border:0!important;padding:8px 0!important;justify-content:center!important;width:100%!important}
+  .user-profile .user-info{display:none!important}
+  .user-profile .user-avatar{margin:0!important}
+  .main-content{margin-left:76px!important;width:calc(100% - 76px)!important;padding:28px 26px 64px!important}
+  #view-project-details .project-primary-actions{flex-wrap:wrap!important;justify-content:flex-end!important}
+}
+@media(max-width:767px){
+  .jp-project-compact-summary{grid-template-columns:1fr 1fr}
+  .jp-project-compact-summary>div:nth-child(2n){border-right:0}
+  .jp-project-compact-summary>div{border-bottom:1px solid var(--border-subtle)}
+  #view-project-details .project-details-tabs{gap:20px!important;overflow-x:auto!important}
+}
+body.dark-mode .jp-private-badge{background:#242426}
