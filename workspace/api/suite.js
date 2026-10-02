@@ -443,9 +443,23 @@ export default async function handler(req,res){
       if(amount<=0)fail('Payment amount must be greater than zero.');
       const paymentDate=String(payment.payment_date||'').trim();
       if(!/^\d{4}-\d{2}-\d{2}$/.test(paymentDate)||Number.isNaN(new Date(paymentDate+'T00:00:00').getTime()))fail('Choose a valid payment date.');
-      const project=await svc.from('projects').select('id,client_id,project_code').eq('id',projectId).maybeSingle();
+      if(paymentDate>today())fail('Payment date cannot be in the future.');
+      const paymentId=String(b.payment_id||b.paymentId||'').trim();
+      const project=await svc.from('projects').select('id,client_id,project_code,total_amount,late_fee_total').eq('id',projectId).maybeSingle();
       if(project.error)throw project.error;if(!project.data)fail('Project not found.',404);
       const pre=await svc.rpc('refresh_juan_project_financials',{p_project_id:projectId});if(pre.error)throw pre.error;
+      let existing=null;
+      if(paymentId){
+        const found=await svc.from('payments').select('*').eq('id',paymentId).eq('project_id',projectId).is('deleted_at',null).maybeSingle();
+        if(found.error)throw found.error;if(!found.data)fail('Payment record not found.',404);existing=found.data;
+      }
+      const active=await svc.from('payments').select('id,amount_paid').eq('project_id',projectId).is('deleted_at',null);
+      if(active.error)throw active.error;
+      const paidExcludingCurrent=(active.data||[]).filter(x=>String(x.id)!==paymentId).reduce((sum,x)=>sum+Number(x.amount_paid||0),0);
+      const amountDue=Math.max(0,Number(project.data.total_amount||0)+Number(project.data.late_fee_total||0));
+      const remainingBeforeSave=Math.max(0,amountDue-paidExcludingCurrent);
+      if(amount>remainingBeforeSave+0.005)fail('Payment amount cannot be greater than the remaining balance.',400);
+      const referenceNo=String(payment.reference_no||'').trim().replace(/\s+/g,' ').slice(0,120)||null;
       const row={
         project_id:projectId,
         client_id:project.data.client_id||null,
@@ -453,24 +467,29 @@ export default async function handler(req,res){
         payment_date:paymentDate,
         payment_method:String(payment.payment_method||'Payment').trim().slice(0,120)||'Payment',
         sender_institution:String(payment.sender_institution||'').trim().slice(0,80)||null,
-        reference_no:String(payment.reference_no||'').trim().slice(0,120)||null,
+        reference_no:referenceNo,
         notes:String(payment.notes||'').trim().slice(0,3000)||null,
         receipt_path:String(payment.receipt_path||'').trim().slice(0,500)||null,
         receipt_filename:String(payment.receipt_filename||'').trim().slice(0,255)||null,
         updated_at:now()
       };
-      const paymentId=String(b.payment_id||b.paymentId||'').trim();
       let saved;
       if(paymentId){
-        const existing=await svc.from('payments').select('*').eq('id',paymentId).eq('project_id',projectId).is('deleted_at',null).maybeSingle();
-        if(existing.error)throw existing.error;if(!existing.data)fail('Payment record not found.',404);
         const updated=await svc.from('payments').update(row).eq('id',paymentId).eq('project_id',projectId).is('deleted_at',null).select('*').single();
-        if(updated.error)throw updated.error;saved=updated.data;
-        const log=await svc.from('payment_audit_logs').insert({payment_id:String(paymentId),project_id:projectId,action:'EDIT',before_value:existing.data,after_value:saved,changed_by:user.id});if(log.error)throw log.error;
+        if(updated.error){
+          if(updated.error.code==='23505')fail('That payment reference is already used by another payment.',409);
+          throw updated.error;
+        }
+        saved=updated.data;
+        const log=await svc.from('payment_audit_logs').insert({payment_id:String(paymentId),project_id:projectId,action:'EDIT',before_value:existing,after_value:saved,changed_by:user.id});if(log.error)throw log.error;
         await audit(svc,'Payment edited',project.data.project_code||projectId,user.id);
       }else{
         const inserted=await svc.from('payments').insert(row).select('*').single();
-        if(inserted.error)throw inserted.error;saved=inserted.data;
+        if(inserted.error){
+          if(inserted.error.code==='23505')fail('That payment reference is already used by another payment.',409);
+          throw inserted.error;
+        }
+        saved=inserted.data;
         const log=await svc.from('payment_audit_logs').insert({payment_id:String(saved.id),project_id:projectId,action:'CREATE',before_value:null,after_value:saved,changed_by:user.id});if(log.error)throw log.error;
         await audit(svc,'Payment recorded',project.data.project_code||projectId,user.id);
       }
