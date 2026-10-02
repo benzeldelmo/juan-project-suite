@@ -142,31 +142,50 @@ async function issueInvoiceSnapshot(project){
 }
 function enhanceProjectNotes(){
   const tab=document.getElementById('projTab-notes');if(!tab)return;
-  const textarea=tab.querySelector('textarea');if(!textarea||tab.dataset.jpNotesEnhanced==='1')return;
-  tab.dataset.jpNotesEnhanced='1';
-  const wrap=document.createElement('section');wrap.className='card jp-notes-view';
-  const value=textarea.value||textarea.textContent||'';
-  wrap.innerHTML='<div class="jp-notes-head"><div><div class="section-kicker">PROJECT</div><h3>Notes</h3></div><button type="button" class="btn btn-secondary btn-sm jp-notes-edit">Edit</button></div><div class="jp-notes-readable"></div>';
-  const readable=wrap.querySelector('.jp-notes-readable');readable.textContent=value.trim()||'No notes yet.';
-  textarea.parentElement?.insertBefore(wrap,textarea);textarea.classList.add('jp-notes-editor-hidden');
-  wrap.querySelector('.jp-notes-edit').onclick=()=>{textarea.classList.toggle('jp-notes-editor-hidden');textarea.focus();};
-  textarea.addEventListener('input',()=>{readable.textContent=textarea.value.trim()||'No notes yet.'});
+  const textarea=tab.querySelector('textarea');if(!textarea)return;
+  const host=textarea.closest('.card')||tab;
+  host.querySelector(':scope > .card-title')?.classList.add('hidden');
+  let wrap=host.querySelector('.jp-notes-view');
+  if(!wrap){
+    wrap=document.createElement('section');wrap.className='jp-notes-view';
+    wrap.innerHTML='<div class="jp-notes-head"><div><div class="section-kicker">PROJECT</div><h3>Notes</h3></div><button type="button" class="btn btn-secondary btn-sm jp-notes-edit">Edit</button></div><div class="jp-notes-readable"></div>';
+    host.insertBefore(wrap,textarea);
+  }
+  const readable=wrap.querySelector('.jp-notes-readable'),edit=wrap.querySelector('.jp-notes-edit');
+  const sync=()=>{readable.textContent=textarea.value.trim()||'No notes yet.'};sync();
+  textarea.classList.add('jp-notes-editor-hidden');readable.classList.remove('hidden');edit.textContent='Edit';
+  if(textarea.dataset.jpNotesBound!=='1'){
+    textarea.dataset.jpNotesBound='1';
+    textarea.addEventListener('input',sync);
+    edit.onclick=async()=>{
+      const editing=textarea.classList.contains('jp-notes-editor-hidden');
+      textarea.classList.toggle('jp-notes-editor-hidden',!editing);
+      readable.classList.toggle('hidden',editing);
+      edit.textContent=editing?'Done':'Edit';
+      if(editing){textarea.focus();return;}
+      try{await window.app?.saveProjectNotes?.();}catch(e){window.showToast?.(e?.message||'Notes could not be saved.');}
+    };
+  }
 }
 function enhanceInvoiceActions(p){
   const tab=document.getElementById('projTab-invoice'),bar=tab?.querySelector('.invoice-actions-bar');if(!bar||!p)return;
-  let btn=document.getElementById('jpIssueInvoiceSnapshot');
-  if(!btn){
-    btn=document.createElement('button');btn.id='jpIssueInvoiceSnapshot';btn.className='btn btn-secondary btn-sm';
-    const icon=window.JuanWorkspaceIcon?.('file','sm')||'';
-    btn.innerHTML=icon+'<span>Issue Snapshot</span>';
-    bar.prepend(btn);
-  }
-  btn.onclick=async()=>{
-    if(btn.disabled)return;btn.disabled=true;
-    const old=btn.innerHTML;btn.textContent='Issuing…';
-    try{await issueInvoiceSnapshot(p)}catch(e){window.showToast?.(e?.message||String(e))}
-    finally{btn.disabled=false;btn.innerHTML=old;}
-  };
+  if(bar.dataset.jpSaasInvoice==='1')return;
+  bar.dataset.jpSaasInvoice='1';
+  bar.innerHTML='<button type="button" class="btn btn-primary btn-sm" id="jpInvoicePrimaryAction">Send Balance Email</button>'+
+    '<div class="popover-wrap" id="jpInvoiceMore"><button type="button" class="icon-more-button vertical-more" aria-label="More invoice actions">⋮</button>'+
+    '<div class="popover-panel client-row-menu">'+
+      '<button type="button" class="popover-action" data-invoice-action="snapshot">Issue Snapshot</button>'+
+      '<button type="button" class="popover-action" data-invoice-action="pdf">Save as PDF</button>'+
+      '<button type="button" class="popover-action" data-invoice-action="image">Save as Image</button>'+
+      '<button type="button" class="popover-action" data-invoice-action="deadline">Send Deadline Reminder</button>'+
+    '</div></div>';
+  bar.querySelector('#jpInvoicePrimaryAction').onclick=()=>window.app?.sendBalanceReminderEmail?.();
+  const more=bar.querySelector('#jpInvoiceMore .icon-more-button');
+  more.onclick=e=>window.app?.togglePopover?.('jpInvoiceMore',e);
+  bar.querySelector('[data-invoice-action="snapshot"]').onclick=async()=>{try{await issueInvoiceSnapshot(p)}catch(e){window.showToast?.(e?.message||String(e))}};
+  bar.querySelector('[data-invoice-action="pdf"]').onclick=()=>window.app?.saveInvoicePDF?.();
+  bar.querySelector('[data-invoice-action="image"]').onclick=()=>window.app?.saveInvoiceImage?.();
+  bar.querySelector('[data-invoice-action="deadline"]').onclick=()=>window.app?.sendDeadlineReminderEmail?.();
 }
 function enhancePaymentsPage(){
   const view=document.querySelector('#view-payments.active');if(!view)return;
@@ -187,7 +206,7 @@ function enhanceSettingsPage(){
 function ensureSaaSStyles(){
   if(document.getElementById('jpSaaSRefreshStyles'))return;
   const link=document.createElement('link');
-  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261002-1';
+  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261002-ultra-ux3';
   document.head.append(link);
 }
 function navIcon(name){
@@ -268,6 +287,15 @@ function standardizePageNames(){
     if(sub)sub.textContent=entry[1][0];if(title)title.textContent=entry[1][1];
   });
 }
+function syncCatalogPanel(panel='services'){
+  const view=document.getElementById('view-pricelist');if(!view)return;
+  const tabs=view.querySelector('.jp-catalog-tabs'),services=document.getElementById('catalogServicesCard'),packages=document.getElementById('catalogPackagesCard');
+  tabs?.querySelectorAll('button').forEach(x=>{const active=x.dataset.catalogPanel===panel;x.classList.toggle('active',active);x.setAttribute('aria-selected',active?'true':'false');});
+  if(services)services.classList.toggle('hidden',panel!=='services');
+  if(packages)packages.classList.toggle('hidden',panel!=='packages');
+  const primary=document.getElementById('jpCatalogPrimaryAction');
+  if(primary){primary.textContent=panel==='packages'?'+ New Package':'+ New Service';primary.onclick=()=>panel==='packages'?window.app?.openCatalogPackageModal?.():window.app?.openCatalogServiceModal?.();}
+}
 function enhanceServicesPricing(){
   const view=document.querySelector('#view-pricelist.active');if(!view)return;
   const header=view.querySelector('.page-header');if(!header)return;
@@ -275,29 +303,28 @@ function enhanceServicesPricing(){
   if(title)title.textContent='Services & Pricing';if(sub)sub.textContent='Catalog';
   let desc=header.querySelector('.jp-services-description');
   if(!desc){desc=document.createElement('p');desc.className='jp-services-description';desc.textContent='Manage packages, solo services, pricing, and the client-facing catalog.';header.querySelector('div')?.append(desc);}
+  const pricingUrl='https://juan-project-online.vercel.app/pricing';
   let actions=header.querySelector('.action-buttons-group');
-  if(actions&&!actions.querySelector('#jpPreviewPricing')){
-    const preview=document.createElement('button');preview.id='jpPreviewPricing';preview.className='btn btn-secondary';preview.textContent='Preview Pricing';
-    preview.onclick=()=>window.open('https://juanproject-online.vercel.app/pricing','_blank','noopener,noreferrer');
-    const share=document.createElement('button');share.id='jpSharePricing';share.className='btn btn-secondary';share.textContent='Share';
-    share.onclick=async()=>{const url='https://juanproject-online.vercel.app/pricing';try{await navigator.clipboard.writeText(url);window.showToast?.('Pricing link copied.')}catch{window.open(url,'_blank','noopener,noreferrer')}};
-    actions.prepend(share);actions.prepend(preview);
+  if(actions&&actions.dataset.jpPricingActions!=='1'){
+    actions.dataset.jpPricingActions='1';
+    actions.innerHTML='<button type="button" class="btn btn-secondary" id="jpPreviewPricing">Preview Pricing</button>'+
+      '<button type="button" class="btn btn-secondary jp-share-pricing" id="jpSharePricing">Share</button>'+
+      '<button type="button" class="btn btn-primary" id="jpCatalogPrimaryAction">+ New Service</button>'+
+      '<div class="popover-wrap" id="jpCatalogMore"><button type="button" class="icon-more-button vertical-more" aria-label="More catalog actions">⋮</button><div class="popover-panel client-row-menu"><button type="button" class="popover-action" id="jpCatalogCategories">Manage Categories</button></div></div>';
+    actions.querySelector('#jpPreviewPricing').onclick=()=>window.open(pricingUrl,'_blank','noopener,noreferrer');
+    actions.querySelector('#jpSharePricing').onclick=async()=>{try{await navigator.clipboard.writeText(pricingUrl);window.showToast?.('Pricing link copied.')}catch{window.open(pricingUrl,'_blank','noopener,noreferrer')}};
+    actions.querySelector('#jpCatalogMore .icon-more-button').onclick=e=>window.app?.togglePopover?.('jpCatalogMore',e);
+    actions.querySelector('#jpCatalogCategories').onclick=()=>window.app?.openCatalogCategoryModal?.();
   }
   let tabs=view.querySelector('.jp-catalog-tabs');
   if(!tabs){
-    tabs=document.createElement('div');tabs.className='jp-catalog-tabs';
-    tabs.innerHTML='<button type="button" data-catalog-panel="services" class="active">Solo Services</button><button type="button" data-catalog-panel="packages">Packages</button>';
+    tabs=document.createElement('div');tabs.className='jp-catalog-tabs';tabs.setAttribute('role','tablist');
+    tabs.innerHTML='<button type="button" role="tab" data-catalog-panel="services" class="active">Solo Services</button><button type="button" role="tab" data-catalog-panel="packages">Packages</button>';
     const toolbar=view.querySelector('.catalog-toolbar');if(toolbar)toolbar.before(tabs);else header.after(tabs);
-    tabs.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{
-      tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===btn));
-      const services=document.getElementById('catalogServicesCard'),packages=document.getElementById('catalogPackagesCard');
-      if(services)services.classList.toggle('hidden',btn.dataset.catalogPanel!=='services');
-      if(packages)packages.classList.toggle('hidden',btn.dataset.catalogPanel!=='packages');
-    });
+    tabs.querySelectorAll('button').forEach(btn=>btn.onclick=()=>syncCatalogPanel(btn.dataset.catalogPanel));
   }
-  const services=document.getElementById('catalogServicesCard'),packages=document.getElementById('catalogPackagesCard');
-  if(services&&!tabs.querySelector('[data-catalog-panel="packages"]').classList.contains('active'))services.classList.remove('hidden');
-  if(packages&&!tabs.querySelector('[data-catalog-panel="packages"]').classList.contains('active'))packages.classList.add('hidden');
+  const active=tabs.querySelector('button.active')?.dataset.catalogPanel||'services';
+  syncCatalogPanel(active);
 }
 function makeOnlineTabs(active){
   const tabs=document.createElement('div');tabs.className='jp-online-tabs';tabs.setAttribute('role','tablist');
