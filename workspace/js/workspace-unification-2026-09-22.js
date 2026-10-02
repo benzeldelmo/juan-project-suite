@@ -115,19 +115,23 @@ async function enhanceFinancialHistory(){
 function enhanceProjectPage(){
   const view=document.querySelector('#view-project-details.active');if(!view)return;
   const p=activeProject();if(!p)return;
-  const sig=[p.id,p.total_amount,p.late_fee_total,p.financial_status,p.payment_due_date,p.grace_period_end,p.overdue_started_at,(p.payments||[]).length].join('|');
-  let panel=document.getElementById('jpProjectFinanceSummary');
-  if(!panel||panel.dataset.signature!==sig){
-    const wrap=document.createElement('div');wrap.innerHTML=financeHTML(p);
-    const fresh=wrap.firstElementChild;fresh.id='jpProjectFinanceSummary';fresh.dataset.signature=sig;
-    if(panel)panel.replaceWith(fresh);
-    else{
-      const progress=document.getElementById('projectOverallProgress');
-      const tabs=view.querySelector('.project-details-tabs');
-      if(progress)progress.after(fresh);else if(tabs)tabs.before(fresh);
-    }
+  const progress=document.getElementById('projectOverallProgress'),tabs=view.querySelector('.project-details-tabs');
+  const percent=document.getElementById('projectOverallProgressPercent')?.textContent||'0%';
+  const bal=balance(p),fee=Number(p.late_fee_total||0),status=p.financial_status||p.payment_status||(bal<=0?'PAID':'UNPAID');
+  let summary=document.getElementById('jpProjectCompactSummary');
+  if(!summary){
+    summary=document.createElement('div');summary.id='jpProjectCompactSummary';summary.className='jp-project-compact-summary';
+    if(progress)progress.after(summary);else if(tabs)tabs.before(summary);
+  }
+  summary.innerHTML='<div><span>Progress</span><strong>'+esc(percent)+' Complete</strong></div><div><span>Balance</span><strong>'+peso(bal)+'</strong></div><div><span>Status</span><strong class="jp-summary-status '+statusClass(status)+'">'+esc(status)+'</strong></div><div><span>Due</span><strong>'+date(p.payment_due_date)+'</strong></div>'+(fee>0?'<div><span>Overdue Fees</span><strong>'+peso(fee)+'</strong></div>':'');
+  if(progress)progress.classList.add('jp-progress-collapsed');
+  document.getElementById('jpProjectFinanceSummary')?.remove();
+  if(tabs){
+    const labels={'project-data':'Overview','deliverables':'Deliverables','payment-tracker':'Payments','invoice':'Invoice','notes':'Notes'};
+    tabs.querySelectorAll('[data-project-tab]').forEach(btn=>{const span=btn.querySelector('span');if(span)span.textContent=labels[btn.dataset.projectTab]||span.textContent;});
   }
   enhanceInvoiceActions(p);
+  enhanceProjectNotes();
 }
 async function issueInvoiceSnapshot(project){
   const rt=window.JuanSuiteRuntime;
@@ -135,6 +139,18 @@ async function issueInvoiceSnapshot(project){
   const out=await rt.request('/api/suite',{action:'issue-invoice',project_id:project.id});
   window.showToast?.('Invoice snapshot issued'+(out?.invoice?.invoice_number?' · '+out.invoice.invoice_number:'')+'.');
   return out;
+}
+function enhanceProjectNotes(){
+  const tab=document.getElementById('projTab-notes');if(!tab)return;
+  const textarea=tab.querySelector('textarea');if(!textarea||tab.dataset.jpNotesEnhanced==='1')return;
+  tab.dataset.jpNotesEnhanced='1';
+  const wrap=document.createElement('section');wrap.className='card jp-notes-view';
+  const value=textarea.value||textarea.textContent||'';
+  wrap.innerHTML='<div class="jp-notes-head"><div><div class="section-kicker">PROJECT</div><h3>Notes</h3></div><button type="button" class="btn btn-secondary btn-sm jp-notes-edit">Edit</button></div><div class="jp-notes-readable"></div>';
+  const readable=wrap.querySelector('.jp-notes-readable');readable.textContent=value.trim()||'No notes yet.';
+  textarea.parentElement?.insertBefore(wrap,textarea);textarea.classList.add('jp-notes-editor-hidden');
+  wrap.querySelector('.jp-notes-edit').onclick=()=>{textarea.classList.toggle('jp-notes-editor-hidden');textarea.focus();};
+  textarea.addEventListener('input',()=>{readable.textContent=textarea.value.trim()||'No notes yet.'});
 }
 function enhanceInvoiceActions(p){
   const tab=document.getElementById('projTab-invoice'),bar=tab?.querySelector('.invoice-actions-bar');if(!bar||!p)return;
@@ -193,32 +209,44 @@ function makeNavLabel(text){
 }
 function restructureSaaSSidebar(){
   const menu=document.querySelector('.nav-menu');if(!menu)return;
-  if(menu.dataset.jpSaasNav==='1'){syncSaaSNavActive();return;}
   const byView={};
   menu.querySelectorAll('.nav-item').forEach(el=>{if(el.dataset.view)byView[el.dataset.view]=el;});
-  const spec=[
-    ['WORKSPACE',[
-      ['my-works','Home','home'],['projects','Projects','projects'],['clients','Clients','clients'],['calendar','Calendar','calendar']
-    ]],
-    ['BUSINESS',[
-      ['payments','Finance','finance'],['reports','Reports','reports'],['pricelist','Services','services'],['online-portal','Online','online']
-    ]],
-    ['SYSTEM',[
-      ['settings','Settings','settings']
-    ]]
-  ];
-  menu.innerHTML='';
-  spec.forEach(group=>{
-    menu.append(makeNavLabel(group[0]));
-    group[1].forEach(item=>{
-      const el=byView[item[0]];if(!el)return;
-      el.innerHTML='<span class="icon">'+navIcon(item[2])+'</span><span>'+item[1]+'</span>';
-      el.removeAttribute('id');
-      if(item[0]==='online-portal')el.id='jpOnlineNav';
-      menu.append(el);
+  if(menu.dataset.jpSaasNav!=='ultra-2'){
+    const spec=[
+      ['WORK',[
+        ['my-works','Home','home'],['projects','Projects','projects'],['clients','Clients','clients']
+      ]],
+      ['FINANCE',[
+        ['payments','Finance','finance'],['reports','Reports','reports']
+      ]],
+      ['OPERATIONS',[
+        ['calendar','Calendar','calendar'],['pricelist','Services & Pricing','services'],['online-portal','Online','online']
+      ]],
+      ['SYSTEM',[
+        ['settings','Settings','settings']
+      ]]
+    ];
+    menu.innerHTML='';
+    spec.forEach(group=>{
+      menu.append(makeNavLabel(group[0]));
+      group[1].forEach(item=>{
+        const el=byView[item[0]];if(!el)return;
+        el.innerHTML='<span class="icon">'+navIcon(item[2])+'</span><span class="nav-label">'+item[1]+'</span>';
+        el.title=item[1];el.removeAttribute('id');
+        if(item[0]==='online-portal')el.id='jpOnlineNav';
+        menu.append(el);
+      });
     });
-  });
-  menu.dataset.jpSaasNav='1';
+    menu.dataset.jpSaasNav='ultra-2';
+  }
+  const brand=document.querySelector('.brand');
+  if(brand){
+    const title=brand.querySelector('.brand-title'),sub=brand.querySelector('.brand-subtitle-large');
+    if(title)title.textContent='JUAN PROJECT';
+    if(sub)sub.innerHTML='WORKSPACE ULTRA <span class="jp-private-badge">PRIVATE</span>';
+    const status=document.getElementById('connectionStatusIndicator');
+    if(status){status.classList.add('jp-compact-connection');const st=status.querySelector('#statusText');if(st)st.textContent=/offline/i.test(st.textContent||'')?'Offline':'Connected';}
+  }
   syncSaaSNavActive();
 }
 function syncSaaSNavActive(){
@@ -231,7 +259,7 @@ function standardizePageNames(){
   const names={
     'view-my-works':['Workspace','Home'],
     'view-payments':['Billing & Collections','Finance'],
-    'view-pricelist':['Catalog','Services'],
+    'view-pricelist':['Catalog','Services & Pricing'],
     'view-reports':['Finance & Insights','Reports']
   };
   Object.entries(names).forEach(entry=>{
@@ -239,6 +267,37 @@ function standardizePageNames(){
     const sub=root.querySelector('.greeting-subtitle'),title=root.querySelector('.page-title');
     if(sub)sub.textContent=entry[1][0];if(title)title.textContent=entry[1][1];
   });
+}
+function enhanceServicesPricing(){
+  const view=document.querySelector('#view-pricelist.active');if(!view)return;
+  const header=view.querySelector('.page-header');if(!header)return;
+  const title=header.querySelector('.page-title'),sub=header.querySelector('.greeting-subtitle');
+  if(title)title.textContent='Services & Pricing';if(sub)sub.textContent='Catalog';
+  let desc=header.querySelector('.jp-services-description');
+  if(!desc){desc=document.createElement('p');desc.className='jp-services-description';desc.textContent='Manage packages, solo services, pricing, and the client-facing catalog.';header.querySelector('div')?.append(desc);}
+  let actions=header.querySelector('.action-buttons-group');
+  if(actions&&!actions.querySelector('#jpPreviewPricing')){
+    const preview=document.createElement('button');preview.id='jpPreviewPricing';preview.className='btn btn-secondary';preview.textContent='Preview Pricing';
+    preview.onclick=()=>window.open('https://juanproject-online.vercel.app/pricing','_blank','noopener,noreferrer');
+    const share=document.createElement('button');share.id='jpSharePricing';share.className='btn btn-secondary';share.textContent='Share';
+    share.onclick=async()=>{const url='https://juanproject-online.vercel.app/pricing';try{await navigator.clipboard.writeText(url);window.showToast?.('Pricing link copied.')}catch{window.open(url,'_blank','noopener,noreferrer')}};
+    actions.prepend(share);actions.prepend(preview);
+  }
+  let tabs=view.querySelector('.jp-catalog-tabs');
+  if(!tabs){
+    tabs=document.createElement('div');tabs.className='jp-catalog-tabs';
+    tabs.innerHTML='<button type="button" data-catalog-panel="services" class="active">Solo Services</button><button type="button" data-catalog-panel="packages">Packages</button>';
+    const toolbar=view.querySelector('.catalog-toolbar');if(toolbar)toolbar.before(tabs);else header.after(tabs);
+    tabs.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{
+      tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===btn));
+      const services=document.getElementById('catalogServicesCard'),packages=document.getElementById('catalogPackagesCard');
+      if(services)services.classList.toggle('hidden',btn.dataset.catalogPanel!=='services');
+      if(packages)packages.classList.toggle('hidden',btn.dataset.catalogPanel!=='packages');
+    });
+  }
+  const services=document.getElementById('catalogServicesCard'),packages=document.getElementById('catalogPackagesCard');
+  if(services&&!tabs.querySelector('[data-catalog-panel="packages"]').classList.contains('active'))services.classList.remove('hidden');
+  if(packages&&!tabs.querySelector('[data-catalog-panel="packages"]').classList.contains('active'))packages.classList.add('hidden');
 }
 function makeOnlineTabs(active){
   const tabs=document.createElement('div');tabs.className='jp-online-tabs';tabs.setAttribute('role','tablist');
@@ -393,6 +452,7 @@ function run(){
   if(active==='view-project-details'){enhanceProjectPage();enhanceFinancialHistory();}
   else if(active==='view-payments')enhancePaymentsPage();
   else if(active==='view-reports')renderSaaSReports();
+  else if(active==='view-pricelist')enhanceServicesPricing();
   else if(active==='view-settings')enhanceSettingsPage();
 }
 function scheduleRun(){
