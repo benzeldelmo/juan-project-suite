@@ -206,7 +206,7 @@ function enhanceSettingsPage(){
 function ensureSaaSStyles(){
   if(document.getElementById('jpSaaSRefreshStyles'))return;
   const link=document.createElement('link');
-  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261002-ultra-ux3';
+  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261002-ultra-ux4';
   document.head.append(link);
 }
 function navIcon(name){
