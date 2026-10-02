@@ -113,8 +113,11 @@ export async function enforceRateLimit(req, svc, scope, subject = '', maxHits = 
 }
 
 export function sendError(res, error) {
-  console.error(error);
-  return res.status(error?.status || 500).json({ error: error?.message || 'Unexpected server error.' });
+  const status=Number(error?.status || 500);
+  const message=error?.message || 'Unexpected server error.';
+  if(status>=500)console.error(error);
+  else console.warn(`[${status}] ${message}`);
+  return res.status(status).json({ error: message });
 }
 
 
