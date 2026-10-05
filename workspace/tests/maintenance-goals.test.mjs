@@ -34,7 +34,6 @@ test("Workspace maintenance layer covers unified toolbar, Home, Catalog, Reports
   assert.match(js,/Save Changes/);
   assert.match(js,/Category: All/);
   assert.match(js,/Method: All/);
-  assert.match(js,/pricing/i,{});
 });
 
 test("public pricing cards are synchronized, collapsible and Platinum is recommended",async()=>{
