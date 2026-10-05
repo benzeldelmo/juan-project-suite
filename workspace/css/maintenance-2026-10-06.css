@@ -1,0 +1,171 @@
+/* JUAN PROJECT Workspace maintenance pass — goals 1–18 — 2026-10-06 */
+
+/* Global 8px rhythm + neutral control language */
+html body .view-toolbar.unified-toolbar,
+html body #view-reports .jp-payment-toolbar{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:8px!important;
+  margin:16px 0!important;
+}
+html body .view-toolbar.unified-toolbar>.form-control,
+html body #view-reports .jp-payment-toolbar>input{min-width:0!important;width:100%!important}
+html body .unified-toolbar .toolbar-actions,
+html body #view-reports .jp-payment-toolbar{
+  align-items:center!important;
+}
+html body .unified-toolbar .toolbar-actions{display:flex!important;gap:8px!important;flex-wrap:nowrap!important}
+html body .unified-toolbar input,
+html body .unified-toolbar select,
+html body #view-reports .jp-payment-toolbar input,
+html body #view-reports .jp-payment-toolbar select{
+  height:44px!important;min-height:44px!important;
+  border:1px solid var(--border-medium)!important;border-radius:12px!important;
+  background:var(--bg-card)!important;color:var(--text-primary)!important;
+  font:inherit!important;font-size:13px!important;padding:0 12px!important;
+  box-shadow:none!important;
+}
+html body .unified-toolbar select,
+html body #view-reports .jp-payment-toolbar select{min-width:136px!important;white-space:nowrap!important}
+html body .filter-pills{display:flex!important;gap:8px!important;align-items:center!important;flex-wrap:nowrap!important}
+html body .filter-pills button{
+  height:44px!important;padding:0 16px!important;border-radius:12px!important;
+  border:1px solid var(--border-medium)!important;background:var(--bg-card)!important;
+  color:var(--text-secondary)!important;box-shadow:none!important;
+}
+html body .filter-pills button.active{
+  background:#f0f0f2!important;border-color:#d8d8dc!important;color:var(--text-primary)!important;
+}
+
+/* Goal 13: Home should use natural content height, not forced page-height stretching */
+html body #view-my-works.active,
+html body #overviewDashboard{height:auto!important;min-height:0!important;overflow:visible!important}
+html body #overviewDashboard>.overview-priority-grid{
+  height:auto!important;min-height:0!important;align-items:start!important;
+  grid-template-columns:minmax(0,1.7fr) minmax(320px,.78fr)!important;gap:16px!important;
+}
+html body #overviewDashboard>.overview-priority-grid>.card{
+  height:auto!important;min-height:320px!important;align-self:start!important;
+}
+html body #overviewDashboard>.overview-priority-grid>div:last-child{
+  height:auto!important;min-height:0!important;display:grid!important;
+  grid-template-rows:auto auto!important;gap:16px!important;align-self:start!important;
+}
+html body #overviewDashboard>.overview-priority-grid>div:last-child>.card{
+  height:auto!important;min-height:0!important;
+}
+html body #overviewDashboard .jp-maintenance-empty-card{
+  min-height:250px!important;
+}
+html body #overviewDashboard .jp-maintenance-empty-card .expand-card-btn,
+html body #overviewDashboard .jp-maintenance-empty-card [aria-label*="Expand" i]{display:none!important}
+html body .quick-actions-fab{
+  background:#1d1d1f!important;color:#fff!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.16)!important;
+}
+html body .overview-cal-day.today,
+html body .calendar-cell.today{
+  background:#f3f3f5!important;border-color:#9a9aa0!important;color:var(--text-primary)!important;
+  box-shadow:none!important;
+}
+
+/* Goal 8: centered, neutral project detail navigation */
+html body #view-project-details .project-details-tabs{
+  background:var(--bg-card)!important;border:1px solid var(--border-subtle)!important;
+  border-radius:16px!important;padding:0!important;gap:0!important;
+}
+html body #view-project-details .project-details-tabs .tab-btn{
+  min-width:132px!important;height:52px!important;border:0!important;border-right:0!important;
+  background:transparent!important;color:var(--text-secondary)!important;justify-content:center!important;
+}
+html body #view-project-details .project-details-tabs .tab-btn.active{
+  color:var(--text-primary)!important;background:transparent!important;
+}
+
+/* Goals 6–7: deliverable packages compact, one package name, collapsible children */
+html body #view-project-details .deliverable-group-block.package-group{
+  margin:8px 0!important;border-radius:14px!important;overflow:hidden!important;
+}
+html body #view-project-details .deliverable-group-block.package-group>.deliverable-checklist-row{
+  min-height:56px!important;padding:8px 16px!important;
+}
+html body #view-project-details .deliverable-package-children .deliverable-child-row{
+  min-height:46px!important;padding:6px 16px!important;
+}
+html body #view-project-details .deliverable-child-row .deliverable-checklist-copy span{display:none!important}
+
+/* Goals 9, 14, 15: Catalog uses same compact toolbar as Projects/Clients/Finance */
+html body #view-pricelist .jp-catalog-tabs{display:none!important}
+html body #view-pricelist .catalog-toolbar{margin:16px 0!important}
+html body #view-pricelist .catalog-toolbar .toolbar-actions{display:flex!important;gap:8px!important}
+html body #view-pricelist #catalogTypeSelect{min-width:128px!important}
+html body #view-pricelist #catalogCategorySelect{min-width:160px!important}
+html body #view-pricelist #catalogSort{min-width:190px!important}
+html body #view-pricelist .catalog-manager-main{gap:16px!important}
+
+/* Goal 4: consistent content-sized Catalog modals */
+html body #catalogCategoryModal .modal-card{width:min(520px,calc(100vw - 32px))!important}
+html body #catalogServiceModal .modal-card{width:min(620px,calc(100vw - 32px))!important}
+html body #catalogPackageModal .modal-card{width:min(760px,calc(100vw - 32px))!important}
+html body #catalogCategoryModal .modal-body,
+html body #catalogServiceModal .modal-body,
+html body #catalogPackageModal .modal-body{padding-top:8px!important;padding-bottom:8px!important}
+html body #catalogCategoryModal .form-group,
+html body #catalogServiceModal .form-group,
+html body #catalogPackageModal .form-group{margin-bottom:16px!important}
+html body #catalogCategoryModal .form-control,
+html body #catalogServiceModal .form-control:not(textarea),
+html body #catalogPackageModal .form-control:not(textarea){
+  height:44px!important;min-height:44px!important;border-radius:12px!important;
+}
+html body #catalogServiceDescription{min-height:72px!important;height:72px!important;resize:vertical!important}
+html body .catalog-modal-footer{
+  min-height:72px!important;padding:16px 24px!important;gap:8px!important;align-items:center!important;
+}
+html body .catalog-modal-footer .btn{min-height:44px!important;border-radius:12px!important}
+html body .catalog-modal-footer .btn-text.text-danger{
+  border:1px solid rgba(255,59,48,.18)!important;background:rgba(255,59,48,.04)!important;
+  padding:0 14px!important;text-decoration:none!important;
+}
+
+/* Goal 11: Reports table containment and one toolbar language */
+html body #view-reports .jp-payment-activity{border-radius:18px!important;overflow:hidden!important}
+html body #view-reports .jp-payment-toolbar{
+  grid-template-columns:minmax(260px,1fr) 150px 160px 160px!important;
+  padding:0 20px 16px!important;margin:0!important;
+}
+html body #view-reports .jp-payment-activity-scroll{overflow-x:auto!important;border-radius:0 0 18px 18px!important}
+html body #view-reports .jp-payment-status{white-space:nowrap!important}
+
+/* Goal 12: semantic status colors only; navigation/filter selection stays neutral */
+html body .nav-menu .nav-item.active,
+html body .jp-settings-nav-item.active{background:#efeff1!important;color:var(--text-primary)!important}
+html body .nav-menu .nav-item.active .icon-svg,
+html body .jp-settings-nav-item.active{color:var(--text-primary)!important}
+html body .filter-pills button.active,
+html body #view-pricelist .jp-catalog-tabs button.active{color:var(--text-primary)!important}
+
+/* Goal 18: auth modal follows the Workspace visual system */
+html body .workspace-auth-gate{background:rgba(245,245,247,.92)!important}
+html body .workspace-auth-card{width:min(440px,calc(100vw - 32px))!important;border-radius:20px!important;padding:24px!important}
+html body .workspace-auth-card input{height:44px!important;border-radius:12px!important}
+html body .workspace-auth-card #workspaceAuthSubmit{height:44px!important;background:#1d1d1f!important;color:#fff!important}
+html body .workspace-auth-offline{display:none!important}
+
+/* Responsive toolbar behavior */
+@media(max-width:1024px){
+  html body .view-toolbar.unified-toolbar,
+  html body #view-reports .jp-payment-toolbar{grid-template-columns:1fr!important}
+  html body .unified-toolbar .toolbar-actions{flex-wrap:wrap!important}
+  html body #view-reports .jp-payment-toolbar{padding:0 16px 16px!important}
+  html body #view-reports .jp-payment-toolbar select{width:100%!important}
+  html body #overviewDashboard>.overview-priority-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:720px){
+  html body .unified-toolbar .toolbar-actions{display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important}
+  html body .unified-toolbar .toolbar-actions select{width:100%!important;min-width:0!important}
+  html body .filter-pills{grid-column:1/-1!important;overflow-x:auto!important;padding-bottom:2px!important}
+  html body #view-pricelist .catalog-toolbar .toolbar-actions{display:grid!important;grid-template-columns:1fr!important}
+  html body #view-project-details .project-details-tabs .tab-btn{flex:0 0 124px!important}
+}
