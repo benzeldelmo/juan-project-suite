@@ -1,0 +1,161 @@
+/* JUAN PROJECT Online public pricing — SaaS comparison — 2026-10-06 */
+.jp-public-pricing-page{
+  --pricing-max:1440px;
+  min-height:100vh;background:#fff;color:#1d1d1f;
+}
+.jp-public-pricing-sitebar,
+.jp-public-pricing-content,
+.jp-public-pricing-foot{
+  width:60%;max-width:var(--pricing-max);margin-inline:auto;box-sizing:border-box;
+}
+.jp-public-pricing-sitebar{
+  min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+.jp-public-brand{font-size:13px;font-weight:800;letter-spacing:.04em;color:#1d1d1f;text-decoration:none;white-space:nowrap}
+.jp-public-brand span{font-weight:500;color:#7a7a80}
+.jp-public-pricing-sitebar nav{display:flex;align-items:center;gap:24px}
+.jp-public-pricing-sitebar nav a{
+  font-size:11px;font-weight:700;letter-spacing:.04em;color:#66666c;text-decoration:none;
+  min-height:40px;display:flex;align-items:center;border-bottom:2px solid transparent;
+}
+.jp-public-pricing-sitebar nav a:hover{color:#1d1d1f;border-bottom-color:#1d1d1f}
+
+.jp-public-pricing-content{padding:64px 0 72px}
+.jp-public-pricing-title h1{margin:0;font-size:42px;line-height:1.05;letter-spacing:-.04em;font-weight:800}
+.jp-public-pricing-title p{margin:8px 0 0;color:#6e6e73;font-size:15px}
+.jp-public-pricing-toolbar{
+  margin-top:32px;display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:8px;align-items:center;
+}
+.jp-public-pricing-search{height:48px;display:flex;align-items:center;gap:10px;border:1px solid rgba(0,0,0,.11);border-radius:14px;padding:0 14px;background:#f7f7f8}
+.jp-public-pricing-search input{border:0;outline:0;background:transparent;width:100%;font:inherit;font-size:14px;color:#1d1d1f}
+.jp-public-pricing-toolbar select{
+  height:48px;border:1px solid rgba(0,0,0,.11);border-radius:14px;background:#fff;color:#1d1d1f;
+  padding:0 38px 0 14px;font:inherit;font-size:13px;
+}
+
+.jp-pricelist{margin-top:48px}
+.jp-pricelist-section-head{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px;
+}
+.jp-pricelist-section-head>div{display:flex;align-items:baseline;gap:12px}
+.jp-pricelist-section-head h2{margin:0;font-size:22px;line-height:1.2;font-weight:800;letter-spacing:-.02em}
+.jp-pricelist-section-head span{font-size:10px;font-weight:700;color:#8a8a90;letter-spacing:.05em}
+#pricingInclusionsToggle{
+  height:40px;border:1px solid rgba(0,0,0,.11);border-radius:999px;background:#fff;color:#1d1d1f;
+  padding:0 14px;font-size:10px;font-weight:750;letter-spacing:.03em;cursor:pointer;
+}
+#pricingInclusionsToggle:hover{background:#f5f5f7}
+
+.jp-public-pricing-page .jp-pricelist-packages{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:16px!important;align-items:stretch!important;
+}
+.jp-public-pricing-page .jp-pricelist-package-card{
+  position:relative;display:flex!important;flex-direction:column!important;height:100%!important;min-height:0!important;
+  padding:24px!important;border:1px solid rgba(0,0,0,.12)!important;border-radius:18px!important;
+  background:#fff!important;box-shadow:none!important;box-sizing:border-box;
+}
+.jp-public-pricing-page .jp-pricelist-package-card.is-recommended{
+  border:2px solid #1d1d1f!important;box-shadow:0 12px 36px rgba(0,0,0,.08)!important;
+}
+.jp-package-card-copy{min-height:86px}
+.jp-package-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.jp-package-title-row h3{
+  margin:0!important;font-size:14px!important;line-height:1.3!important;font-weight:800!important;
+  letter-spacing:.005em!important;color:#1d1d1f!important;
+}
+.jp-package-recommended{
+  display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;
+  background:#1d1d1f;color:#fff!important;font-size:9px!important;font-weight:800!important;letter-spacing:.04em!important;
+}
+.jp-package-count{display:block;margin-top:8px;font-size:10px!important;font-weight:700!important;color:#8a8a90!important;letter-spacing:.05em!important}
+
+.jp-public-pricing-page .jp-pricelist-package-price{
+  margin:24px 0 0!important;display:flex!important;flex-direction:column!important;gap:4px!important;align-items:flex-start!important;
+}
+.jp-public-pricing-page .jp-pricelist-package-price strong{
+  order:1;color:#1d1d1f!important;font-size:28px!important;line-height:1.05!important;font-weight:800!important;letter-spacing:-.035em!important;
+}
+.jp-public-pricing-page .jp-pricelist-package-price span{
+  order:2;color:#168a5a!important;font-size:11px!important;font-weight:750!important;
+}
+.jp-public-pricing-page .jp-pricelist-package-price s{
+  order:3;color:#9a9aa0!important;font-size:11px!important;
+}
+
+.jp-public-pricing-page .jp-package-inclusions{
+  margin-top:24px!important;padding-top:16px!important;border-top:1px solid rgba(0,0,0,.08)!important;flex:1;
+}
+.jp-public-pricing-page .jp-package-inclusions>span{
+  font-size:9px!important;line-height:1!important;font-weight:800!important;letter-spacing:.08em!important;color:#86868b!important;
+}
+.jp-package-collapsed-summary{
+  margin-top:16px;padding:12px;border-radius:12px;background:#f6f6f7;color:#5e5e63;
+  font-size:10px;font-weight:750;letter-spacing:.04em;text-align:center;
+}
+.jp-public-pricing-page .jp-package-inclusions ul{margin:16px 0 0!important;padding:0!important;list-style:none!important;display:grid!important;gap:8px!important}
+.jp-public-pricing-page .jp-package-inclusions li{
+  display:grid!important;grid-template-columns:14px minmax(0,1fr)!important;gap:8px!important;
+  color:#55555a!important;font-size:10px!important;line-height:1.35!important;font-weight:650!important;letter-spacing:.04em!important;
+}
+.jp-package-check{color:#5f6f66!important;font-size:10px!important}
+
+.jp-solo-services-head{margin-top:64px!important}
+.jp-public-pricing-page .jp-pricelist-table{
+  overflow:hidden;border:1px solid rgba(0,0,0,.1);border-radius:16px;background:#fff;
+}
+.jp-public-pricing-page .jp-pricelist-table-head,
+.jp-public-pricing-page .jp-pricelist-table-row{
+  display:grid!important;grid-template-columns:minmax(0,1.5fr) minmax(180px,.8fr) 140px!important;gap:16px!important;align-items:center!important;
+}
+.jp-public-pricing-page .jp-pricelist-table-head{min-height:44px;padding:0 20px;background:#f7f7f8;border-bottom:1px solid rgba(0,0,0,.08)}
+.jp-public-pricing-page .jp-pricelist-table-head span{font-size:9px;font-weight:800;letter-spacing:.07em;color:#88888e}
+.jp-public-pricing-page .jp-pricelist-table-row{min-height:56px;padding:0 20px;border-bottom:1px solid rgba(0,0,0,.07)}
+.jp-public-pricing-page .jp-pricelist-table-row:last-child{border-bottom:0}
+.jp-public-pricing-page .jp-pricelist-service-name b{font-size:11px;font-weight:800;letter-spacing:.01em;text-transform:uppercase}
+.jp-public-pricing-page .jp-pricelist-table-row>span{font-size:11px;color:#66666c}
+.jp-public-pricing-page .jp-pricelist-table-row>strong{text-align:right;font-size:12px}
+
+.jp-pricing-info-section{
+  margin-top:64px;padding-top:32px;border-top:1px solid rgba(0,0,0,.08);max-width:720px;
+}
+.jp-pricing-info-section>span{font-size:9px;font-weight:800;letter-spacing:.08em;color:#8a8a90}
+.jp-pricing-info-section h2{margin:8px 0 0;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.jp-pricing-info-section p{margin:8px 0 0;color:#6e6e73;font-size:13px;line-height:1.55}
+.jp-pricing-info-section a{display:inline-block;margin-top:16px;color:#1d1d1f;font-size:11px;font-weight:750;text-decoration:none}
+
+.jp-public-pricing-foot{
+  min-height:104px;padding:24px 0 32px;border-top:1px solid rgba(0,0,0,.08);
+  display:flex;justify-content:space-between;gap:32px;color:#77777d;font-size:10px;
+}
+.jp-public-pricing-foot>div{display:flex;flex-direction:column;gap:6px;max-width:620px}
+.jp-public-pricing-foot b{color:#1d1d1f;font-size:11px}
+.jp-public-pricing-foot a{color:#1d1d1f;font-weight:700;text-decoration:none}
+.jp-public-pricing-foot p{margin:0;line-height:1.5}
+
+@media(max-width:1599px) and (min-width:1101px){
+  .jp-public-pricing-sitebar,.jp-public-pricing-content,.jp-public-pricing-foot{width:84%}
+}
+@media(max-width:1100px){
+  .jp-public-pricing-sitebar,.jp-public-pricing-content,.jp-public-pricing-foot{width:auto;margin-inline:32px}
+  .jp-public-pricing-page .jp-pricelist-packages{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:720px){
+  .jp-public-pricing-sitebar,.jp-public-pricing-content,.jp-public-pricing-foot{margin-inline:16px}
+  .jp-public-pricing-sitebar{min-height:56px}
+  .jp-public-pricing-sitebar nav{gap:12px;overflow-x:auto}
+  .jp-public-pricing-sitebar nav a{font-size:9px;white-space:nowrap}
+  .jp-public-pricing-content{padding:40px 0 56px}
+  .jp-public-pricing-title h1{font-size:32px}
+  .jp-public-pricing-toolbar{grid-template-columns:1fr;margin-top:24px}
+  .jp-public-pricing-page .jp-pricelist-packages{grid-template-columns:1fr!important}
+  .jp-public-pricing-page .jp-pricelist-package-card{padding:20px!important}
+  .jp-pricelist-section-head{align-items:flex-end}
+  .jp-pricelist-section-head>div{display:block}
+  .jp-pricelist-section-head>div span{display:block;margin-top:4px}
+  .jp-public-pricing-page .jp-pricelist-table{overflow-x:auto}
+  .jp-public-pricing-page .jp-pricelist-table-head,
+  .jp-public-pricing-page .jp-pricelist-table-row{min-width:640px}
+  .jp-public-pricing-foot{flex-direction:column;padding-bottom:40px}
+}

@@ -1,8 +1,9 @@
-name: Workspace master cleanup CI
+name: Workspace maintenance CI
 on:
   push:
     branches:
       - workspace/master-cleanup-2026-10-02
+      - maintenance/master-goals-2026-10-06
   pull_request:
     branches:
       - main

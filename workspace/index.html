@@ -1894,7 +1894,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
         <header class="page-header"><div><div class="greeting-subtitle">Workspace</div><h1 class="page-title">Projects</h1></div><button class="btn btn-primary" onclick="app.navigateTo('new-order')">+ New Order</button></header>
         <div class="view-toolbar unified-toolbar projects-toolbar">
           <input id="projectsSearch" class="form-control" placeholder="Search Project ID, project name, or client..." oninput="app.queueViewRender('projects')">
-          <div class="toolbar-actions"><select id="projectsSort" class="compact-sort" onchange="app.setListSort('projects',this.value)"><option value="default">Default (by ID)</option><option value="date">By Date</option><option value="payment">By Payment</option></select><div class="filter-pills" id="projectFilters"></div></div>
+          <div class="toolbar-actions"><select id="projectsSort" class="compact-sort" onchange="app.setListSort('projects',this.value)"><option value="default">Sort: Default</option><option value="date">Sort: Date</option><option value="payment">Sort: Payment</option></select><div class="filter-pills" id="projectFilters"></div></div>
         </div>
         <div class="card table-card">
           <div class="table-responsive">
@@ -1911,7 +1911,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
         <header class="page-header"><div><div class="greeting-subtitle">Finance</div><h1 class="page-title">Invoices & Payments</h1></div></header>
         <div class="view-toolbar unified-toolbar payments-toolbar">
           <input id="paymentsSearch" class="form-control" placeholder="Search Project ID, project name, or client..." oninput="app.queueViewRender('payments')">
-          <div class="toolbar-actions"><select id="paymentsSort" class="compact-sort" onchange="app.setListSort('payments',this.value)"><option value="default">Default (by ID)</option><option value="date">Due Date</option><option value="payment">Amount Paid</option><option value="balance">Balance</option></select><div class="filter-pills" id="paymentFilters"></div></div>
+          <div class="toolbar-actions"><select id="paymentsSort" class="compact-sort" onchange="app.setListSort('payments',this.value)"><option value="default">Sort: Default</option><option value="date">Sort: Due Date</option><option value="payment">Sort: Amount Paid</option><option value="balance">Sort: Balance</option></select><div class="filter-pills" id="paymentFilters"></div></div>
         </div>
         <div id="mobilePaymentApprovals" class="mobile-payment-approvals" aria-live="polite"></div>
         <div class="card table-card"><div class="table-responsive"><table class="data-table unified-table"><thead><tr><th>Project ID</th><th>Project Name</th><th>Client</th><th>Total</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th><th class="table-actions-col" aria-label="Actions"></th></tr></thead><tbody id="paymentsTableBody"></tbody></table></div></div>
@@ -2144,9 +2144,10 @@ table.jp-packages-table col:nth-child(6){width:7%}
         <div class="view-toolbar unified-toolbar catalog-toolbar">
           <input type="text" class="form-control" id="catalogManagerSearch" placeholder="Search services, packages, or inclusions..." oninput="app.queueViewRender('catalog')">
           <div class="toolbar-actions">
+            <select id="catalogTypeSelect" class="compact-sort" onchange="app.setCatalogManagerFilter(this.value)"><option value="All">Type: All</option><option value="Services">Type: Services</option><option value="Packages">Type: Packages</option></select>
             <div id="catalogManagerFilters" class="hidden"></div>
             <select id="catalogCategorySelect" class="compact-sort" onchange="app.selectCatalogCategory(this.value)"></select>
-            <select id="catalogSort" class="compact-sort" onchange="app.setListSort('catalog',this.value)"><option value="default">Default</option><option value="name">Name: A–Z</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option></select>
+            <select id="catalogSort" class="compact-sort" onchange="app.setListSort('catalog',this.value)"><option value="default">Sort: Default</option><option value="name">Sort: Name A–Z</option><option value="price-asc">Sort: Price Low to High</option><option value="price-desc">Sort: Price High to Low</option></select>
           </div>
         </div>
         <div class="catalog-manager-main catalog-manager-simple">
@@ -10042,6 +10043,7 @@ ${description}`))actionCallback();return;}
   </script>
   <script src="/js/v1-2-ux.js?v=20260923-ads-nav-fix-1"></script>
   <link rel="stylesheet" href="/css/master-cleanup-2026-10-02.css?v=20261002-master-1">
+  <link rel="stylesheet" href="/css/maintenance-2026-10-06.css?v=20261006-18-goals-1">
 
 <style>
 @media (max-width: 720px) {
@@ -10821,6 +10823,7 @@ ${description}`))actionCallback();return;}
 <script src="/js/workspace-icon-system-2026-09-22.js?v=20260923-0225"></script>
   <script src="/js/consistency-pass.js?v=20260925-deliverable-payment-rush-1"></script>
   <script src="/js/workspace-unification-2026-09-22.js?v=20261002-ultra-approved-1"></script>
+  <script src="/js/maintenance-2026-10-06.js?v=20261006-18-goals-1"></script>
 </body>
 </html>
 <style id="v111-maintenance-patch">
