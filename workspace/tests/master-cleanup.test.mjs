@@ -104,6 +104,6 @@ test("master cleanup UI rules are wired", async()=>{
   assert.match(css,/project-details-tabs \.tab-btn\.active::after/);
   assert.match(css,/deliverable-group-block\.collapsed \.deliverable-package-children/);
   assert.match(css,/jp-payment-activity-scroll/);
-  assert.match(online,/<h2>Services<\/h2>/);
+  assert.match(online,/<h2>SERVICES<\/h2>/);
   assert.doesNotMatch(online,/x\.description\?'<p>'\+esc\(x\.description\)/);
 });
