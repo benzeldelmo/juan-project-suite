@@ -107,6 +107,8 @@
     if(openCategory)app.openCatalogCategoryModal=(existing='')=>{const r=openCategory(existing);afterCategoryOpen(existing);return r};
     const openPackage=app.openCatalogPackageModal?.bind(app);
     if(openPackage)app.openCatalogPackageModal=(code='')=>{const r=openPackage(code);afterPackageOpen(code);return r};
+    if(app.openEditServiceModal)app.openEditServiceModal=(code)=>app.openCatalogServiceModal(code);
+    if(app.openEditPackageModal)app.openEditPackageModal=(code)=>app.openCatalogPackageModal(code);
 
     const saveService=app.saveCatalogService?.bind(app);
     if(saveService)app.saveCatalogService=async()=>{normalizeMoneyInput($('#catalogServicePrice'));return saveService()};
