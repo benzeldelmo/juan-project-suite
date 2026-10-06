@@ -9,13 +9,21 @@
   width:60%;max-width:var(--pricing-max);margin-inline:auto;box-sizing:border-box;
 }
 .jp-public-pricing-sitebar{
-  min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  min-height:64px;display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;
+  align-items:center!important;column-gap:32px!important;padding:0!important;
   border-bottom:1px solid rgba(0,0,0,.08);
 }
-.jp-public-brand{font-size:13px;font-weight:800;letter-spacing:.04em;color:#1d1d1f;text-decoration:none;white-space:nowrap}
+.jp-public-brand{
+  justify-self:start!important;font-size:13px;font-weight:800;letter-spacing:.04em;
+  color:#1d1d1f;text-decoration:none;white-space:nowrap;
+}
 .jp-public-brand span{font-weight:500;color:#7a7a80}
-.jp-public-pricing-sitebar nav{display:flex;align-items:center;gap:24px}
+.jp-public-pricing-sitebar nav{
+  justify-self:end!important;display:flex!important;align-items:center!important;
+  justify-content:flex-end!important;gap:28px!important;min-width:0;
+}
 .jp-public-pricing-sitebar nav a{
+  flex:0 0 auto!important;white-space:nowrap!important;
   font-size:11px;font-weight:700;letter-spacing:.04em;color:#66666c;text-decoration:none;
   min-height:40px;display:flex;align-items:center;border-bottom:2px solid transparent;
 }
@@ -143,9 +151,9 @@
 }
 @media(max-width:720px){
   .jp-public-pricing-sitebar,.jp-public-pricing-content,.jp-public-pricing-foot{margin-inline:16px}
-  .jp-public-pricing-sitebar{min-height:56px}
-  .jp-public-pricing-sitebar nav{gap:12px;overflow-x:auto}
-  .jp-public-pricing-sitebar nav a{font-size:9px;white-space:nowrap}
+  .jp-public-pricing-sitebar{min-height:56px;column-gap:16px!important;padding:0!important}
+  .jp-public-pricing-sitebar nav{gap:12px!important;overflow-x:auto;justify-self:end!important;max-width:100%}
+  .jp-public-pricing-sitebar nav a{font-size:9px;white-space:nowrap!important}
   .jp-public-pricing-content{padding:40px 0 56px}
   .jp-public-pricing-title h1{font-size:32px}
   .jp-public-pricing-toolbar{grid-template-columns:1fr;margin-top:24px}
