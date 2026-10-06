@@ -90,6 +90,11 @@ test("public pricing contains navigation, legal copy, responsive SaaS layout and
   assert.match(css,/grid-template-columns:1fr!important/);
   assert.match(css,/is-recommended/);
   assert.match(css,/align-items:stretch/);
+  assert.match(css,/grid-template-columns:auto minmax\(0,1fr\)!important/);
+  assert.match(css,/padding:0!important/);
+  assert.match(css,/justify-self:start!important/);
+  assert.match(css,/justify-self:end!important/);
+  assert.match(css,/white-space:nowrap!important/);
 });
 
 test("catalog create/edit/delete regression suite remains present",async()=>{
