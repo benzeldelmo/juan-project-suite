@@ -131,7 +131,7 @@ test("project editing update #4 reconciles canonical client before project write
 
   const orderEdit=sliceBetween(html,"function saveProjectOrderItem","function requestDeleteProjectOrderItem");
   const deliverableEdit=sliceBetween(html,"async function saveProjectDeliverable","function removeProjectDeliverablesByIds");
-  const clientEdit=sliceBetween(html,"async function submitEditClient","function removeClient/");
+  const clientEdit=sliceBetween(html,"async function submitEditClient","function ensureCatalogCategories");
   assert.doesNotMatch(orderEdit,/requestDestructivePin/);
   assert.doesNotMatch(deliverableEdit,/requestDestructivePin/);
   assert.doesNotMatch(clientEdit,/Confirm Client Changes/);
