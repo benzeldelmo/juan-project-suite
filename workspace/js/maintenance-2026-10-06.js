@@ -59,7 +59,7 @@
   }
 
   function markEmptyHomeCards(){
-    [['#overviewCurrentProjects',/no current projects/i],['#overviewUpcomingDeadlines',/no upcoming deadlines/i]].forEach(([sel,re])=>{
+    [['#overviewCurrentProjects',/no (active|current) projects/i],['#overviewUpcomingDeadlines',/no upcoming deadlines/i]].forEach(([sel,re])=>{
       const content=$(sel); if(!content)return;
       const card=content.closest('.card'); if(!card)return;
       const empty=re.test(content.textContent||'');
@@ -69,6 +69,13 @@
         if(isExpand)btn.hidden=empty;
       });
     });
+  }
+
+  function syncOnlineManagementState(){
+    const portal=document.getElementById('view-online-portal');
+    const ads=document.getElementById('view-in-house-ads');
+    const active=portal?.classList.contains('active')||ads?.classList.contains('active');
+    document.body.classList.toggle('jp-online-management-active',!!active);
   }
 
   function applyAuthCopy(){
@@ -136,6 +143,7 @@
       syncToolbarLanguage();
       markEmptyHomeCards();
       applyAuthCopy();
+      syncOnlineManagementState();
       if($('#catalogServiceModal')?.classList.contains('active'))enhanceMoneyInput($('#catalogServicePrice'));
       if($('#catalogPackageModal')?.classList.contains('active'))enhanceMoneyInput($('#catalogPackageSellingPrice'));
     }finally{sweeping=false}
