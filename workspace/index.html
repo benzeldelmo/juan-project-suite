@@ -2642,12 +2642,12 @@ table.jp-packages-table col:nth-child(6){width:7%}
       <div class="form-group reset-pin-field">
         <label class="form-label" for="destructivePinInput">PIN</label>
         <div class="secure-pin-grid" id="destructivePinDigits" aria-label="6-digit secure PIN">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 1">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 2">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 3">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 4">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 5">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 6">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 1">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 2">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 3">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 4">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 5">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 6">
         </div>
         <input type="hidden" id="destructivePinInput">
         <span class="inline-error hidden" id="destructivePinError">Incorrect PIN. Try again.</span>
@@ -2673,12 +2673,12 @@ table.jp-packages-table col:nth-child(6){width:7%}
       <div class="form-group reset-pin-field">
         <label class="form-label" for="resetDataPinInput">PIN</label>
         <div class="secure-pin-grid" id="resetDataPinDigits" aria-label="6-digit secure PIN">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 1">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 2">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 3">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 4">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 5">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 6">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 1">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 2">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 3">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 4">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 5">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 6">
 </div><input type="hidden" id="resetDataPinInput">
         <div class="inline-error hidden" id="resetDataPinError">Incorrect PIN. Please try again.</div>
       </div>
@@ -5056,8 +5056,10 @@ ${description}`))actionCallback();return;}
 
 
       const WORKSPACE_PIN_SHA256="6e728170f84461519554d7250fb3295c2b249e2dc4a3fae207970f66ab26726c";
-      function sensitiveAuthFresh(){return false;}
-      function clearSensitiveAuth(){}
+      let sensitiveAuthVerifiedAt=0;
+      const SENSITIVE_AUTH_TTL_MS=10*60*1000;
+      function sensitiveAuthFresh(){return sensitiveAuthVerifiedAt>0&&(Date.now()-sensitiveAuthVerifiedAt)<SENSITIVE_AUTH_TTL_MS;}
+      function clearSensitiveAuth(){sensitiveAuthVerifiedAt=0;}
 
       function setupSecurePinBoxes(groupId,hiddenId,submitFn){
         const group=document.getElementById(groupId),hidden=document.getElementById(hiddenId);if(!group||!hidden)return;
@@ -5091,6 +5093,7 @@ ${description}`))actionCallback();return;}
         return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
       }
       function requestDestructivePin(title,description,callback){
+        if(sensitiveAuthFresh()&&typeof callback==='function'){return callback();}
         state.pendingDestructiveAction=typeof callback==='function'?callback:null;
         const titleEl=document.getElementById('destructivePinTitle'),desc=document.getElementById('destructivePinDescription'),error=document.getElementById('destructivePinError');
         if(titleEl)titleEl.textContent=title||'Confirm sensitive action';
@@ -5111,6 +5114,7 @@ ${description}`))actionCallback();return;}
         try{
           if(btn){btn.disabled=true;btn.textContent='Checking…';}
           if((await hashWorkspacePin(pin))!==WORKSPACE_PIN_SHA256)throw new Error('Incorrect PIN. Try again.');
+          sensitiveAuthVerifiedAt=Date.now();
           markSecurePinInvalid('destructivePinDigits',false);if(error)error.classList.add('hidden');
           const action=state.pendingDestructiveAction;state.pendingDestructiveAction=null;closeModal('destructivePinModal');
           if(action)await action();
@@ -5535,14 +5539,14 @@ ${description}`))actionCallback();return;}
       function renderOverviewCurrentProjects(){
         const box=document.getElementById('overviewCurrentProjects'); if(!box)return;
         const active=state.projects.filter(p=>!p.deleted&&p.status!=="Completed"&&p.delivery_status!=="Delivered"&&!p.archived_at).sort(compareProjectPriority);
-        box.innerHTML=active.map(p=>{const tag=projectDeadlineTag(p),priority=projectIsPriority(p),ds=(p.deliverables||[]).filter(d=>!d.is_group),done=ds.filter(d=>d.completed).length,prog=ds.length?Math.round(done/ds.length*100):getProjectProgress(p),bal=getProjectBalance(p);return `<div class="current-project-card" onclick="app.openProjectDetails('${p.id}')"><div class="current-project-top"><div class="current-project-copy"><div class="project-ref-row"><span class="project-ref">${formatProjectId(p)}</span></div><div class="current-project-name">${escapeHtml(p.title||'Untitled Project')}</div><div class="current-project-client">${escapeHtml(p.client_name||'No client')}</div></div><div class="current-project-right"><div class="current-project-tag-stack">${priority?'<span class="project-tag priority">PRIORITY</span>':''}<span class="project-tag ${tag.cls}">${escapeHtml(tag.label)}</span></div><div class="current-project-balance">Balance: <strong>${formatCurrency(bal)}</strong></div></div></div><div class="current-project-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${prog}%"></div></div><span>${done}/${ds.length||0}</span></div></div>`}).join('')||`<div class="empty-compact-state"><strong>No current projects</strong><span>Active projects will appear here.</span></div>`;
+        box.innerHTML=active.map(p=>{const tag=projectDeadlineTag(p),priority=projectIsPriority(p),ds=(p.deliverables||[]).filter(d=>!d.is_group),done=ds.filter(d=>d.completed).length,prog=ds.length?Math.round(done/ds.length*100):getProjectProgress(p),bal=getProjectBalance(p);return `<div class="current-project-card" onclick="app.openProjectDetails('${p.id}')"><div class="current-project-top"><div class="current-project-copy"><div class="project-ref-row"><span class="project-ref">${formatProjectId(p)}</span></div><div class="current-project-name">${escapeHtml(p.title||'Untitled Project')}</div><div class="current-project-client">${escapeHtml(p.client_name||'No client')}</div></div><div class="current-project-right"><div class="current-project-tag-stack">${priority?'<span class="project-tag priority">PRIORITY</span>':''}<span class="project-tag ${tag.cls}">${escapeHtml(tag.label)}</span></div><div class="current-project-balance">Balance: <strong>${formatCurrency(bal)}</strong></div></div></div><div class="current-project-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${prog}%"></div></div><span>${done}/${ds.length||0}</span></div></div>`}).join('')||`<div class="empty-compact-state jp-home-empty-state"><strong>NO ACTIVE PROJECTS</strong><span>Create a new order to start tracking a project here.</span><button type="button" class="btn btn-secondary btn-sm" onclick="app.navigateTo('new-order')">NEW ORDER</button></div>`;
       }
 
       function renderOverviewUpcomingDeadlines(){
         const box=document.getElementById('overviewUpcomingDeadlines'); if(!box)return;
         const items=state.projects.filter(p=>!p.deleted&&p.status!=="Completed"&&p.delivery_status!=="Delivered"&&p.deadline_date).sort(compareProjectPriority);
         const card=box.closest('.card');if(card)card.style.display='flex';
-        box.innerHTML=items.length?items.map(p=>{const tag=projectDeadlineTag(p);return `<div class="attention-row" onclick="app.openProjectDetails('${p.id}')"><div class="attention-date">${escapeHtml(parseDateSafe(p.deadline_date)?.toLocaleDateString('en-PH',{month:'short',day:'numeric'})||'—')}</div><div><div class="attention-title">${escapeHtml(p.title)}</div><div class="attention-sub">${escapeHtml(formatProjectId(p)+' • '+(p.client_name||'Project'))}</div></div><span class="project-tag ${tag.cls}">${escapeHtml(tag.label)}</span></div>`}).join(''):`<div class="empty-compact-state"><strong>No upcoming deadlines</strong><span>Nothing needs deadline attention right now.</span></div>`;
+        box.innerHTML=items.length?items.map(p=>{const tag=projectDeadlineTag(p);return `<div class="attention-row" onclick="app.openProjectDetails('${p.id}')"><div class="attention-date">${escapeHtml(parseDateSafe(p.deadline_date)?.toLocaleDateString('en-PH',{month:'short',day:'numeric'})||'—')}</div><div><div class="attention-title">${escapeHtml(p.title)}</div><div class="attention-sub">${escapeHtml(formatProjectId(p)+' • '+(p.client_name||'Project'))}</div></div><span class="project-tag ${tag.cls}">${escapeHtml(tag.label)}</span></div>`}).join(''):`<div class="empty-compact-state jp-home-empty-state"><strong>NO UPCOMING DEADLINES</strong><span>Projects with approaching deadlines will appear here.</span></div>`;
       }
       function renderOverviewMiniCalendar(){
         const box=document.getElementById('overviewMiniCalendar'),title=document.getElementById('overviewCalendarTitle'); if(!box)return; const now=new Date(),y=now.getFullYear(),m=now.getMonth(); if(title)title.textContent=now.toLocaleDateString('en-PH',{month:'long',year:'numeric'});
@@ -5561,10 +5565,10 @@ ${description}`))actionCallback();return;}
         const kpi = document.getElementById("overviewKpis");
         if (kpi) {
           kpi.innerHTML = `
-            <div class="kpi-card urgency-card"><div class="overview-kpi-head"><div class="kpi-label">Active Projects</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span></div><div class="kpi-value">${active.length}</div><div class="kpi-sub">Currently in production</div></div>
-            <div class="kpi-card urgency-card"><div class="overview-kpi-head"><div class="kpi-label">Not Done</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><div class="kpi-value">${unfinished}</div><div class="kpi-sub">Unfinished deliverables</div></div>
-            <div class="kpi-card ${dueSoon?'attention-kpi':''}"><div class="overview-kpi-head"><div class="kpi-label">Due in 7 Days</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span></div><div class="kpi-value">${dueSoon}</div><div class="kpi-sub">Needs attention soon</div></div>
-            <div class="kpi-card ${overdue?'danger-kpi':''}"><div class="overview-kpi-head"><div class="kpi-label">Overdue</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0z"/></svg></span></div><div class="kpi-value">${overdue}</div><div class="kpi-sub">Past project deadline</div></div>`;
+            <div class="kpi-card urgency-card"><div class="overview-kpi-head"><div class="kpi-label">Active Projects</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span></div><div class="kpi-value">${active.length}</div><div class="kpi-sub">${active.length?'Currently in production':'No projects currently in production'}</div></div>
+            <div class="kpi-card urgency-card"><div class="overview-kpi-head"><div class="kpi-label">Not Done</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><div class="kpi-value">${unfinished}</div><div class="kpi-sub">${unfinished?'Unfinished deliverables':'No unfinished deliverables'}</div></div>
+            <div class="kpi-card ${dueSoon?'attention-kpi':''}"><div class="overview-kpi-head"><div class="kpi-label">Due in 7 Days</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span></div><div class="kpi-value">${dueSoon}</div><div class="kpi-sub">${dueSoon?'Needs attention soon':'Nothing due within the next 7 days'}</div></div>
+            <div class="kpi-card ${overdue?'danger-kpi':''}"><div class="overview-kpi-head"><div class="kpi-label">Overdue</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0z"/></svg></span></div><div class="kpi-value">${overdue}</div><div class="kpi-sub">${overdue?'Past project deadline':'No overdue projects'}</div></div>`;
         }
         animateNumbersIn(kpi);
         renderOverviewCurrentProjects();
@@ -5839,7 +5843,7 @@ ${description}`))actionCallback();return;}
         const box=document.getElementById('overviewUpcomingEvents');if(!box)return;const now=new Date();now.setHours(0,0,0,0);
         const raw=[...(Array.isArray(state.calendarEvents)?state.calendarEvents:[]),...(Array.isArray(state.manualEvents)?state.manualEvents:[])];
         const events=raw.filter(e=>{const d=parseDateSafe(e.date||e.start_date||e.start);return d&&d>=now}).sort((a,b)=>parseDateSafe(a.date||a.start_date||a.start)-parseDateSafe(b.date||b.start_date||b.start)).slice(0,2);
-        box.innerHTML=`<div class="overview-events-label">Upcoming Events</div>`+(events.length?events.map(e=>`<div class="overview-event-row"><span>${escapeHtml(formatProjectDate(e.date||e.start_date||e.start))}</span><strong>${escapeHtml(e.title||e.name||'Event')}</strong></div>`).join(''):`<div class="overview-event-empty">No upcoming events.</div>`);
+        box.innerHTML=`<div class="overview-events-label">Upcoming Events</div>`+(events.length?events.map(e=>`<div class="overview-event-row"><span>${escapeHtml(formatProjectDate(e.date||e.start_date||e.start))}</span><strong>${escapeHtml(e.title||e.name||'Event')}</strong></div>`).join(''):`<div class="overview-event-empty"><strong>NO UPCOMING EVENTS</strong><span>Project deadlines and scheduled events will appear here.</span></div>`);
       }
 
       function renderProjects() {
@@ -8201,7 +8205,6 @@ ${description}`))actionCallback();return;}
       }
       async function saveProjectData(options={}){
         const silent=options?.silent===true,proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj||projectDataAutosaveBusy)return;
-        if(options?.authorized!==true){requestDestructivePin('Confirm Project Changes','Save changes to this project information?',()=>saveProjectData({...options,authorized:true}));return;}
         const name=normalizeHumanText(document.getElementById('projectDataProjectName')?.value,120),email=normalizeProjectClientEmail(document.getElementById('projectDataClientEmail')?.value),clientName=normalizeHumanText(document.getElementById('projectDataClientName')?.value,120),startValue=document.getElementById('projectDataStartDate')?.value||'',deadlineValue=document.getElementById('projectDataDeadline')?.value||'';
         if(!name){setProjectDataAutosaveStatus('Project name is required.','error');return}
         if(!clientName){setProjectDataAutosaveStatus('Client name is required.','error');return}
@@ -8222,14 +8225,28 @@ ${description}`))actionCallback();return;}
             return;
           }
           try{
-            client=reconcileLocalProjectClient(proj,previousClientId,previousEmail);
+            const response=await onlinePortalRequest('POST',{
+              action:'reconcile-project-client',
+              projectId:proj.id,
+              name:proj.client_name,
+              email:proj.client_email,
+              phone:proj.client_phone,
+              address:proj.client_address
+            });
+            client=applyCloudClientReconcile(proj,response,previousClientId);
+            if(!client?.id)throw new Error('Client could not be linked to this project.');
+            proj.client_id=client.id;
             await syncProjectToDatabase(proj,{quiet:true});
             cloudSynced=true;
-            try{const response=await onlinePortalRequest('POST',{action:'reconcile-project-client',projectId:proj.id,name:proj.client_name,email:proj.client_email,phone:proj.client_phone,address:proj.client_address});const cloudClient=applyCloudClientReconcile(proj,response,previousClientId);if(cloudClient)client=cloudClient;}catch(portalError){console.warn('Project saved; portal reconciliation needs attention:',portalError?.message||portalError);}
           }catch(e){
+            proj.client_id=previousClientId;
             console.error('Project autosave failed:',e);
             setProjectDataAutosaveStatus('Save failed · database unchanged.','error');
-            showToast(`Project save failed: ${e?.message||e}`);
+            const raw=String(e?.message||e||'');
+            const friendly=/projects_client_id_fkey|foreign key/i.test(raw)
+              ? 'The selected client is no longer available. Refresh Clients and select a valid client before saving.'
+              : raw;
+            showToast(`Project save failed: ${friendly}`);
             return;
           }
           persistClientsState();persistProjectsState();
@@ -8431,7 +8448,6 @@ ${description}`))actionCallback();return;}
       }
       function saveProjectOrderItem(authorized=false){
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-        if(!authorized){requestDestructivePin('Confirm Order Item Changes','Save this order item change?',()=>saveProjectOrderItem(true));return;}
         if(!Array.isArray(proj.project_items))proj.project_items=[];
         const name=normalizeHumanText(document.getElementById('projectOrderItemName').value,160);
         const qtyRaw=Number(document.getElementById('projectOrderItemQty').value);
@@ -8463,7 +8479,6 @@ ${description}`))actionCallback();return;}
       function openProjectDeliverableModal(){state.projectDeliverableSelected=null;const input=document.getElementById('projectDeliverableName');if(input)input.value='';document.getElementById('projectDeliverableSuggestions')?.classList.remove('open');openModal('projectDeliverableModal');setTimeout(()=>renderProjectDeliverableSuggestions(''),30);}
       async function saveProjectDeliverable(authorized=false){
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-        if(!authorized){requestDestructivePin('Confirm Deliverable Changes','Add this deliverable to the project?',()=>{void saveProjectDeliverable(true)});return;}
         const name=document.getElementById('projectDeliverableName').value.trim();if(!name){showToast('Deliverable name is required.');return;}if(!Array.isArray(proj.deliverables))proj.deliverables=[];
         const snapshot=proj.deliverables.map(d=>({...d}));
         const selected=state.projectDeliverableSelected&&String(state.projectDeliverableSelected.name||'').toLowerCase()===name.toLowerCase()?state.projectDeliverableSelected:null;const baseId=`del_manual_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
@@ -9240,7 +9255,6 @@ ${description}`))actionCallback();return;}
       }
 
       async function submitEditClient(authorized=false) {
-        if(!authorized){requestDestructivePin('Confirm Client Changes','Save changes to this client record?',()=>submitEditClient(true));return;}
         const clientId = document.getElementById("editClientId").value;
         const nameInput = document.getElementById("editClientName");
         const emailInput = document.getElementById("editClientEmail");
@@ -10043,7 +10057,7 @@ ${description}`))actionCallback();return;}
   </script>
   <script src="/js/v1-2-ux.js?v=20260923-ads-nav-fix-1"></script>
   <link rel="stylesheet" href="/css/master-cleanup-2026-10-02.css?v=20261002-master-1">
-  <link rel="stylesheet" href="/css/maintenance-2026-10-06.css?v=20261006-18-goals-1">
+  <link rel="stylesheet" href="/css/maintenance-2026-10-06.css?v=20261006-cycle2-1">
 
 <style>
 @media (max-width: 720px) {
@@ -10823,7 +10837,7 @@ ${description}`))actionCallback();return;}
 <script src="/js/workspace-icon-system-2026-09-22.js?v=20260923-0225"></script>
   <script src="/js/consistency-pass.js?v=20260925-deliverable-payment-rush-1"></script>
   <script src="/js/workspace-unification-2026-09-22.js?v=20261002-ultra-approved-1"></script>
-  <script src="/js/maintenance-2026-10-06.js?v=20261006-18-goals-1"></script>
+  <script src="/js/maintenance-2026-10-06.js?v=20261006-cycle2-1"></script>
 </body>
 </html>
 <style id="v111-maintenance-patch">

@@ -560,9 +560,9 @@ function priceListPackageCard(x){
   const recommended=/PLATINUM/i.test(String(x.name||'')),expanded=!!state.pricingInclusionsExpanded,count=items.length;
   const list=items.length?items.map(item=>'<li><span class="jp-package-check">✓</span><span>'+esc(String(item.name||'').toUpperCase())+(item.qty>1?' ×'+item.qty:'')+'</span></li>').join(''):'<li class="jp-package-inclusions-missing">PACKAGE INCLUSIONS ARE BEING UPDATED.</li>';
   return '<article class="jp-pricelist-package-card '+(recommended?'is-recommended ':'')+(expanded?'is-expanded':'is-collapsed')+'">'+
-    '<div class="jp-package-card-copy"><div class="jp-package-title-row"><h3>'+esc(String(x.name||'').toUpperCase())+'</h3>'+(recommended?'<span class="jp-package-recommended">RECOMMENDED</span>':'')+'</div><span class="jp-package-count">'+count+' INCLUDED SERVICE'+(count===1?'':'S')+'</span></div>'+
+    '<div class="jp-package-card-copy"><h3>'+esc(String(x.name||'').toUpperCase())+'</h3><div class="jp-package-recommended-slot">'+(recommended?'<span class="jp-package-recommended">RECOMMENDED</span>':'<span class="jp-package-recommended is-placeholder" aria-hidden="true">RECOMMENDED</span>')+'</div><span class="jp-package-count">'+count+' INCLUDED SERVICE'+(count===1?'':'S')+'</span></div>'+
     '<div class="jp-pricelist-package-price"><strong>'+peso(price)+'</strong>'+(old>price?'<span>Save '+peso(saved)+'</span><s>'+peso(old)+'</s>':'')+'</div>'+
-    '<div class="jp-package-inclusions"><span>INCLUDES</span>'+(expanded?'<ul>'+list+'</ul>':'<div class="jp-package-collapsed-summary">'+count+' SERVICES INCLUDED</div>')+'</div>'+
+    '<button type="button" class="jp-package-inclusions jp-package-inclusions-toggle" aria-expanded="'+(expanded?'true':'false')+'"><span class="jp-package-inclusions-label">INCLUDES · '+count+' SERVICE'+(count===1?'':'S')+' '+(expanded?'↑':'↓')+'</span>'+(expanded?'<ul>'+list+'</ul>':'<div class="jp-package-collapsed-summary">VIEW INCLUDED SERVICES</div>')+'</button>'+
   '</article>';
 }
 function priceListServiceRow(x){
@@ -601,16 +601,16 @@ function pricing(){
   const packages=[...(state.catalog.packages||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).filter(categoryMatches).filter(matches);
   const services=[...(state.catalog.services||[])].sort((a,b)=>String(a.product_code||a.id).localeCompare(String(b.product_code||b.id),undefined,{numeric:true})).filter(categoryMatches).filter(matches);
   const usedCategories=new Set([...(state.catalog.services||[]).map(x=>String(x.category_id||'')),...(state.catalog.packages||[]).map(x=>String(x.category_id||''))]);
-  const categoryOptions='<option value="all">Category: All</option>'+(state.catalog.categories||[]).filter(c=>usedCategories.has(String(c.id))).map(c=>'<option value="'+esc(c.id)+'" '+(active===String(c.id)?'selected':'')+'>Category: '+esc(c.name)+'</option>').join('');
+  const categoryFilters='<button type="button" data-shop-category="all" class="'+(active==='all'?'active':'')+'">ALL</button>'+(state.catalog.categories||[]).filter(c=>usedCategories.has(String(c.id))).map(c=>'<button type="button" data-shop-category="'+esc(c.id)+'" class="'+(active===String(c.id)?'active':'')+'">'+esc(String(c.name||'').toUpperCase())+'</button>').join('');
   const ready=state.catalogLoaded,expanded=!!state.pricingInclusionsExpanded;
   return '<div class="jp-public-pricing-page">'+
     '<header class="jp-public-pricing-sitebar"><a class="jp-public-brand" href="/" aria-label="JUAN PROJECT Online home">JUAN PROJECT <span>ONLINE</span></a><nav aria-label="Pricing navigation"><a href="#pricingPackages">SERVICES &amp; PACKAGES</a><a href="#pricingAbout">ABOUT</a><a href="#pricingContact">CONTACT</a></nav></header>'+
     '<main class="jp-public-pricing-content">'+
       '<div class="jp-public-pricing-title"><h1>SERVICES &amp; PACKAGES</h1><p>Browse current packages and services.</p></div>'+
-      '<div class="jp-public-pricing-toolbar"><div class="jp-public-pricing-search"><span>'+icon('search',17)+'</span><input id="shopSearch" value="'+esc(state.shopQuery)+'" placeholder="Search services or packages" aria-label="Search services and packages"></div><select id="pricingCategorySelect" aria-label="Filter pricing by category">'+categoryOptions+'</select></div>'+
+      '<div class="jp-public-pricing-toolbar"><div class="jp-public-pricing-search"><span>'+icon('search',17)+'</span><input id="shopSearch" value="'+esc(state.shopQuery)+'" placeholder="Search services or packages" aria-label="Search services and packages"></div><div class="jp-public-pricing-categories" aria-label="Filter pricing by category">'+categoryFilters+'</div></div>'+
       (!ready?'<div class="jp-pricing-loading"><b>Loading current pricing…</b><span>Fetching the latest catalog.</span></div>':
         '<div class="jp-pricelist">'+
-          '<div class="jp-pricelist-section-head" id="pricingPackages"><div><h2>PACKAGES</h2><span>'+packages.length+' PACKAGE'+(packages.length===1?'':'S')+'</span></div><button id="pricingInclusionsToggle" type="button">'+(expanded?'COLLAPSE INCLUSIONS ↑':'VIEW INCLUSIONS ↓')+'</button></div>'+
+          '<div class="jp-pricelist-section-head" id="pricingPackages"><div><h2>PACKAGES</h2><span>'+packages.length+' PACKAGE'+(packages.length===1?'':'S')+'</span></div></div>'+
           '<div class="jp-pricelist-packages">'+(packages.map(priceListPackageCard).join('')||'<div class="jp-pricing-empty">No matching packages.</div>')+'</div>'+
           '<div class="jp-pricelist-section-head jp-solo-services-head"><div><h2>SERVICES</h2><span>'+services.length+' SERVICE'+(services.length===1?'':'S')+'</span></div></div>'+
           '<div class="jp-pricelist-table"><div class="jp-pricelist-table-head"><span>SERVICE</span><span>CATEGORY</span><span>PRICE</span></div>'+(services.map(priceListServiceRow).join('')||'<div class="jp-pricing-empty">No matching services.</div>')+'</div>'+
@@ -625,8 +625,7 @@ function routePage(){if(state.route==='pricing')return pricing();if(state.route=
 function render(){const publicPricing=state.route==='pricing';root.innerHTML=`<div class="app ${isLoggedIn()?'client-mode':'guest-mode'} route-${esc(state.route||'home')}"><main class="page route-${esc(state.route||'home')}">${routePage()}</main>${publicPricing?'':nav()}${gateOverlay()}${shopOverlay()}${notificationOverlay()}${clientMessageOverlay()}</div>`;bind();window.dispatchEvent(new Event('juan-online-render'));}
 
 function bind(){
-  const pricingCategorySelect=document.getElementById('pricingCategorySelect');if(pricingCategorySelect)pricingCategorySelect.onchange=()=>{state.shopCategory=pricingCategorySelect.value||'all';render()};
-  const pricingInclusionsToggle=document.getElementById('pricingInclusionsToggle');if(pricingInclusionsToggle)pricingInclusionsToggle.onclick=()=>{state.pricingInclusionsExpanded=!state.pricingInclusionsExpanded;render()};
+  document.querySelectorAll('.jp-package-inclusions-toggle').forEach(btn=>btn.onclick=()=>{state.pricingInclusionsExpanded=!state.pricingInclusionsExpanded;render()});
   document.querySelectorAll('.nav [data-r]').forEach(b=>b.onclick=()=>{const r=b.dataset.r;if(!isLoggedIn()&&['orders','payment'].includes(r))return gate(r);state.route=r;render()});
   document.querySelectorAll('.nav [data-guest-action]').forEach(b=>b.onclick=()=>{if(b.dataset.guestAction==='track')return window.JPMobileCommerce?.openTrack?.();if(b.dataset.guestAction==='login')return authScreen();});
   document.querySelectorAll('[data-open]').forEach(x=>x.onclick=()=>{if(!isLoggedIn())return gate('orders');state.selected=x.dataset.open;state.route='project';render()});

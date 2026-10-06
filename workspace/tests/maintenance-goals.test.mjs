@@ -61,7 +61,7 @@ test("public pricing cards are synchronized, collapsible and Platinum is recomme
   const collapsed=ctx.priceListPackageCard(pkg);
   assert.match(collapsed,/RECOMMENDED/);
   assert.match(collapsed,/2 INCLUDED SERVICES/);
-  assert.match(collapsed,/2 SERVICES INCLUDED/);
+  assert.match(collapsed,/INCLUDES · 2 SERVICES/);
   assert.doesNotMatch(collapsed,/<ul>/);
   ctx.state.pricingInclusionsExpanded=true;
   const expanded=ctx.priceListPackageCard(pkg);
@@ -84,7 +84,7 @@ test("public pricing contains navigation, legal copy, responsive SaaS layout and
   assert.match(online,/LAST UPDATED: OCTOBER 2026/);
   assert.match(online,/subject to change without prior notice/);
   assert.doesNotMatch(online,/Browse current packages and solo services/);
-  assert.match(css,/width:60%/);
+  assert.match(css,/width:74%/);
   assert.match(css,/grid-template-columns:repeat\(4/);
   assert.match(css,/grid-template-columns:repeat\(2/);
   assert.match(css,/grid-template-columns:1fr!important/);
@@ -102,4 +102,73 @@ test("catalog create/edit/delete regression suite remains present",async()=>{
   assert.match(testSource,/sample service can be added/);
   assert.match(testSource,/sample service deletion removes package references/);
   assert.match(testSource,/legacy package inclusions repair before unrelated service price edits/);
+});
+
+
+test("pricing update #1 uses in-card synchronized inclusions and category buttons",async()=>{
+  const [online,css]=await Promise.all([
+    read("../online/js/app.js"),
+    read("../online/css/pricing-saas-2026-10-06.css")
+  ]);
+  assert.match(online,/jp-package-inclusions-toggle/);
+  assert.doesNotMatch(online,/id="pricingInclusionsToggle"/);
+  assert.doesNotMatch(online,/id="pricingCategorySelect"/);
+  assert.match(online,/jp-public-pricing-categories/);
+  assert.match(online,/data-shop-category="all"/);
+  assert.match(css,/width:74%/);
+  assert.match(css,/grid-template-rows:54px 26px 16px/);
+  assert.match(css,/jp-package-recommended\.is-placeholder/);
+  assert.match(css,/\.jp-package-inclusions\{/);
+});
+
+test("project editing update #4 reconciles canonical client before project write and normal edits do not request PIN",async()=>{
+  const html=await read("index.html");
+  const saveProject=sliceBetween(html,"async function saveProjectData(options={})","function renderProjectTasks");
+  const reconcileAt=saveProject.indexOf("action:'reconcile-project-client'");
+  const projectWriteAt=saveProject.indexOf("await syncProjectToDatabase");
+  assert.ok(reconcileAt>=0&&projectWriteAt>reconcileAt,"client must be reconciled before project FK write");
+  assert.doesNotMatch(saveProject,/requestDestructivePin/);
+
+  const orderEdit=sliceBetween(html,"function saveProjectOrderItem","function requestDeleteProjectOrderItem");
+  const deliverableEdit=sliceBetween(html,"async function saveProjectDeliverable","function removeProjectDeliverablesByIds");
+  const clientEdit=sliceBetween(html,"async function submitEditClient","function ensureCatalogCategories");
+  assert.doesNotMatch(orderEdit,/requestDestructivePin/);
+  assert.doesNotMatch(deliverableEdit,/requestDestructivePin/);
+  assert.doesNotMatch(clientEdit,/Confirm Client Changes/);
+  assert.match(html,/requestDestructivePin\('Delete Project'/);
+  assert.match(html,/requestDestructivePin\('Delete Payment'/);
+});
+
+test("PIN fields avoid password-manager overlays and protected actions reuse recent verification",async()=>{
+  const html=await read("index.html");
+  const modal=sliceBetween(html,'id="destructivePinModal"','<!-- PIN-PROTECTED RESET DATA -->');
+  assert.doesNotMatch(modal,/type="password"/);
+  assert.match(modal,/data-1p-ignore="true"/);
+  assert.match(html,/SENSITIVE_AUTH_TTL_MS=10\*60\*1000/);
+  assert.match(html,/sensitiveAuthFresh\(\)/);
+  assert.match(html,/sensitiveAuthVerifiedAt=Date\.now\(\)/);
+});
+
+test("Home updates #2-3 provide actionable empty states and bento geometry",async()=>{
+  const [html,css]=await Promise.all([read("index.html"),read("css/maintenance-2026-10-06.css")]);
+  assert.match(html,/NO ACTIVE PROJECTS/);
+  assert.match(html,/Create a new order to start tracking a project here/);
+  assert.match(html,/NO UPCOMING DEADLINES/);
+  assert.match(html,/NO UPCOMING EVENTS/);
+  assert.match(html,/No projects currently in production/);
+  assert.match(css,/align-items:stretch!important/);
+  assert.match(css,/min-height:500px!important/);
+  assert.match(css,/grid-template-rows:minmax\(184px,\.72fr\) minmax\(300px,1\.28fr\)/);
+});
+
+test("Online updates #5-6 use underline-only centered navigation and management layout",async()=>{
+  const [css,js]=await Promise.all([read("css/maintenance-2026-10-06.css"),read("js/maintenance-2026-10-06.js")]);
+  assert.match(css,/#view-online-portal>\.portal-tabs/);
+  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/);
+  assert.match(css,/border-bottom-color:#1d1d1f!important/);
+  assert.match(css,/background:transparent!important/);
+  assert.match(css,/transition:none!important/);
+  assert.match(css,/portal-summary-grid/);
+  assert.match(css,/border-radius:14px 14px 0 0!important/);
+  assert.match(js,/jp-online-management-active/);
 });
