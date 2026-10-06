@@ -61,7 +61,7 @@ test("public pricing cards are synchronized, collapsible and Platinum is recomme
   const collapsed=ctx.priceListPackageCard(pkg);
   assert.match(collapsed,/RECOMMENDED/);
   assert.match(collapsed,/2 INCLUDED SERVICES/);
-  assert.match(collapsed,/2 SERVICES INCLUDED/);
+  assert.match(collapsed,/INCLUDES · 2 SERVICES/);
   assert.doesNotMatch(collapsed,/<ul>/);
   ctx.state.pricingInclusionsExpanded=true;
   const expanded=ctx.priceListPackageCard(pkg);
@@ -118,7 +118,7 @@ test("pricing update #1 uses in-card synchronized inclusions and category button
   assert.match(css,/width:74%/);
   assert.match(css,/grid-template-rows:54px 26px 16px/);
   assert.match(css,/jp-package-recommended\.is-placeholder/);
-  assert.match(css,/jp-package-inclusions-toggle/);
+  assert.match(css,/\.jp-package-inclusions\{/);
 });
 
 test("project editing update #4 reconciles canonical client before project write and normal edits do not request PIN",async()=>{
