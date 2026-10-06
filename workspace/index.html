@@ -2642,12 +2642,12 @@ table.jp-packages-table col:nth-child(6){width:7%}
       <div class="form-group reset-pin-field">
         <label class="form-label" for="destructivePinInput">PIN</label>
         <div class="secure-pin-grid" id="destructivePinDigits" aria-label="6-digit secure PIN">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 1">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 2">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 3">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 4">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 5">
-          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 6">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 1">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 2">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 3">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 4">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 5">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 6">
         </div>
         <input type="hidden" id="destructivePinInput">
         <span class="inline-error hidden" id="destructivePinError">Incorrect PIN. Try again.</span>
@@ -2673,12 +2673,12 @@ table.jp-packages-table col:nth-child(6){width:7%}
       <div class="form-group reset-pin-field">
         <label class="form-label" for="resetDataPinInput">PIN</label>
         <div class="secure-pin-grid" id="resetDataPinDigits" aria-label="6-digit secure PIN">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 1">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 2">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 3">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 4">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 5">
-<input type="password" inputmode="numeric" maxlength="1" autocomplete="off" class="secure-pin-digit" aria-label="PIN digit 6">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 1">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 2">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 3">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 4">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 5">
+<input type="text" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" data-1p-ignore="true" data-lpignore="true" class="secure-pin-digit" aria-label="PIN digit 6">
 </div><input type="hidden" id="resetDataPinInput">
         <div class="inline-error hidden" id="resetDataPinError">Incorrect PIN. Please try again.</div>
       </div>
@@ -5056,8 +5056,10 @@ ${description}`))actionCallback();return;}
 
 
       const WORKSPACE_PIN_SHA256="6e728170f84461519554d7250fb3295c2b249e2dc4a3fae207970f66ab26726c";
-      function sensitiveAuthFresh(){return false;}
-      function clearSensitiveAuth(){}
+      let sensitiveAuthVerifiedAt=0;
+      const SENSITIVE_AUTH_TTL_MS=10*60*1000;
+      function sensitiveAuthFresh(){return sensitiveAuthVerifiedAt>0&&(Date.now()-sensitiveAuthVerifiedAt)<SENSITIVE_AUTH_TTL_MS;}
+      function clearSensitiveAuth(){sensitiveAuthVerifiedAt=0;}
 
       function setupSecurePinBoxes(groupId,hiddenId,submitFn){
         const group=document.getElementById(groupId),hidden=document.getElementById(hiddenId);if(!group||!hidden)return;
@@ -5091,6 +5093,7 @@ ${description}`))actionCallback();return;}
         return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
       }
       function requestDestructivePin(title,description,callback){
+        if(sensitiveAuthFresh()&&typeof callback==='function'){return callback();}
         state.pendingDestructiveAction=typeof callback==='function'?callback:null;
         const titleEl=document.getElementById('destructivePinTitle'),desc=document.getElementById('destructivePinDescription'),error=document.getElementById('destructivePinError');
         if(titleEl)titleEl.textContent=title||'Confirm sensitive action';
@@ -5111,6 +5114,7 @@ ${description}`))actionCallback();return;}
         try{
           if(btn){btn.disabled=true;btn.textContent='Checking…';}
           if((await hashWorkspacePin(pin))!==WORKSPACE_PIN_SHA256)throw new Error('Incorrect PIN. Try again.');
+          sensitiveAuthVerifiedAt=Date.now();
           markSecurePinInvalid('destructivePinDigits',false);if(error)error.classList.add('hidden');
           const action=state.pendingDestructiveAction;state.pendingDestructiveAction=null;closeModal('destructivePinModal');
           if(action)await action();
@@ -8201,7 +8205,6 @@ ${description}`))actionCallback();return;}
       }
       async function saveProjectData(options={}){
         const silent=options?.silent===true,proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj||projectDataAutosaveBusy)return;
-        if(options?.authorized!==true){requestDestructivePin('Confirm Project Changes','Save changes to this project information?',()=>saveProjectData({...options,authorized:true}));return;}
         const name=normalizeHumanText(document.getElementById('projectDataProjectName')?.value,120),email=normalizeProjectClientEmail(document.getElementById('projectDataClientEmail')?.value),clientName=normalizeHumanText(document.getElementById('projectDataClientName')?.value,120),startValue=document.getElementById('projectDataStartDate')?.value||'',deadlineValue=document.getElementById('projectDataDeadline')?.value||'';
         if(!name){setProjectDataAutosaveStatus('Project name is required.','error');return}
         if(!clientName){setProjectDataAutosaveStatus('Client name is required.','error');return}
@@ -8222,14 +8225,28 @@ ${description}`))actionCallback();return;}
             return;
           }
           try{
-            client=reconcileLocalProjectClient(proj,previousClientId,previousEmail);
+            const response=await onlinePortalRequest('POST',{
+              action:'reconcile-project-client',
+              projectId:proj.id,
+              name:proj.client_name,
+              email:proj.client_email,
+              phone:proj.client_phone,
+              address:proj.client_address
+            });
+            client=applyCloudClientReconcile(proj,response,previousClientId);
+            if(!client?.id)throw new Error('Client could not be linked to this project.');
+            proj.client_id=client.id;
             await syncProjectToDatabase(proj,{quiet:true});
             cloudSynced=true;
-            try{const response=await onlinePortalRequest('POST',{action:'reconcile-project-client',projectId:proj.id,name:proj.client_name,email:proj.client_email,phone:proj.client_phone,address:proj.client_address});const cloudClient=applyCloudClientReconcile(proj,response,previousClientId);if(cloudClient)client=cloudClient;}catch(portalError){console.warn('Project saved; portal reconciliation needs attention:',portalError?.message||portalError);}
           }catch(e){
+            proj.client_id=previousClientId;
             console.error('Project autosave failed:',e);
             setProjectDataAutosaveStatus('Save failed · database unchanged.','error');
-            showToast(`Project save failed: ${e?.message||e}`);
+            const raw=String(e?.message||e||'');
+            const friendly=/projects_client_id_fkey|foreign key/i.test(raw)
+              ? 'The selected client is no longer available. Refresh Clients and select a valid client before saving.'
+              : raw;
+            showToast(`Project save failed: ${friendly}`);
             return;
           }
           persistClientsState();persistProjectsState();
@@ -8431,7 +8448,6 @@ ${description}`))actionCallback();return;}
       }
       function saveProjectOrderItem(authorized=false){
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-        if(!authorized){requestDestructivePin('Confirm Order Item Changes','Save this order item change?',()=>saveProjectOrderItem(true));return;}
         if(!Array.isArray(proj.project_items))proj.project_items=[];
         const name=normalizeHumanText(document.getElementById('projectOrderItemName').value,160);
         const qtyRaw=Number(document.getElementById('projectOrderItemQty').value);
@@ -8463,7 +8479,6 @@ ${description}`))actionCallback();return;}
       function openProjectDeliverableModal(){state.projectDeliverableSelected=null;const input=document.getElementById('projectDeliverableName');if(input)input.value='';document.getElementById('projectDeliverableSuggestions')?.classList.remove('open');openModal('projectDeliverableModal');setTimeout(()=>renderProjectDeliverableSuggestions(''),30);}
       async function saveProjectDeliverable(authorized=false){
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-        if(!authorized){requestDestructivePin('Confirm Deliverable Changes','Add this deliverable to the project?',()=>{void saveProjectDeliverable(true)});return;}
         const name=document.getElementById('projectDeliverableName').value.trim();if(!name){showToast('Deliverable name is required.');return;}if(!Array.isArray(proj.deliverables))proj.deliverables=[];
         const snapshot=proj.deliverables.map(d=>({...d}));
         const selected=state.projectDeliverableSelected&&String(state.projectDeliverableSelected.name||'').toLowerCase()===name.toLowerCase()?state.projectDeliverableSelected:null;const baseId=`del_manual_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
@@ -9240,7 +9255,6 @@ ${description}`))actionCallback();return;}
       }
 
       async function submitEditClient(authorized=false) {
-        if(!authorized){requestDestructivePin('Confirm Client Changes','Save changes to this client record?',()=>submitEditClient(true));return;}
         const clientId = document.getElementById("editClientId").value;
         const nameInput = document.getElementById("editClientName");
         const emailInput = document.getElementById("editClientEmail");
