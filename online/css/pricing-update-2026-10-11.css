@@ -162,7 +162,6 @@
   }
   .jp-public-pricing-page .jp-pricelist-package-card.is-featured{
     width:100%!important;
-    transform:none;
   }
   .jp-public-pricing-page .jp-pricelist-package-price>strong{
     font-size:34px!important;
