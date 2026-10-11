@@ -17,6 +17,7 @@ let state={
   shopQuery:'',shopSort:'default',shopCategory:'all',paymentFlow:'',
   notificationOpen:false,senderInstitution:'',guestGateContext:'default',receiptPreviewUrl:'',receiptPreviewType:'',receiptPreviewName:'',clientMessage:null,pendingClientMessage:null,shopView:'cards',pricingInclusionsExpanded:false
 };
+const pricingRevealSeen=new Set();
 window.JPOAppState=state;
 
 let portalRealtimeChannel=null;
@@ -555,14 +556,14 @@ function packageInclusions(x){
   if(items.length)return items;
   return String(x.description||'').replace(/\r/g,'').split('\n').map(line=>line.replace(/^\s*includes\s*:?\s*/i,'').replace(/^\s*[•*✓-]\s*/,'').trim()).filter(line=>line&&!/^includes\s*:?$/i.test(line)).map(name=>({name,qty:1}));
 }
-function priceListPackageCard(x){
+function priceListPackageCard(x,index=0){
   const price=Number(x.new_price||0),old=Number(x.original_price||0),items=packageInclusions(x),saved=Math.max(0,old-price);
-  const recommended=/PLATINUM/i.test(String(x.name||'')),expanded=!!state.pricingInclusionsExpanded,count=items.length;
+  const featured=/PLATINUM/i.test(String(x.name||'')),count=items.length,revealKey='package:'+String(x.id||x.product_code||index);
   const list=items.length?items.map(item=>'<li><span class="jp-package-check">✓</span><span>'+esc(String(item.name||'').toUpperCase())+(item.qty>1?' ×'+item.qty:'')+'</span></li>').join(''):'<li class="jp-package-inclusions-missing">PACKAGE INCLUSIONS ARE BEING UPDATED.</li>';
-  return '<article class="jp-pricelist-package-card '+(recommended?'is-recommended ':'')+(expanded?'is-expanded':'is-collapsed')+'">'+
-    '<div class="jp-package-card-copy"><h3>'+esc(String(x.name||'').toUpperCase())+'</h3><div class="jp-package-recommended-slot">'+(recommended?'<span class="jp-package-recommended">RECOMMENDED</span>':'<span class="jp-package-recommended is-placeholder" aria-hidden="true">RECOMMENDED</span>')+'</div><span class="jp-package-count">'+count+' INCLUDED SERVICE'+(count===1?'':'S')+'</span></div>'+
-    '<div class="jp-pricelist-package-price"><strong>'+peso(price)+'</strong>'+(old>price?'<span>Save '+peso(saved)+'</span><s>'+peso(old)+'</s>':'')+'</div>'+
-    '<button type="button" class="jp-package-inclusions jp-package-inclusions-toggle" aria-expanded="'+(expanded?'true':'false')+'"><span class="jp-package-inclusions-label">INCLUDES · '+count+' SERVICE'+(count===1?'':'S')+' '+(expanded?'↑':'↓')+'</span>'+(expanded?'<ul>'+list+'</ul>':'<div class="jp-package-collapsed-summary">VIEW INCLUDED SERVICES</div>')+'</button>'+
+  return '<article class="jp-pricelist-package-card '+(featured?'is-featured':'')+'" data-pricing-reveal data-pricing-reveal-key="'+esc(revealKey)+'" style="--jp-reveal-delay:'+(index*70)+'ms">'+
+    '<div class="jp-package-card-copy"><h3>'+esc(String(x.name||'').toUpperCase())+'</h3></div>'+
+    '<div class="jp-pricelist-package-price"><strong>'+peso(price)+'</strong>'+(old>price?'<div class="jp-package-price-meta"><span>Save '+peso(saved)+'</span><s>'+peso(old)+'</s></div>':'')+'</div>'+
+    '<div class="jp-package-inclusions"><div class="jp-package-inclusions-label">'+count+' service'+(count===1?'':'s')+' included</div><ul>'+list+'</ul></div>'+
   '</article>';
 }
 function priceListServiceRow(x){
@@ -611,9 +612,9 @@ function pricing(){
       (!ready?'<div class="jp-pricing-loading"><b>Loading current pricing…</b><span>Fetching the latest catalog.</span></div>':
         '<div class="jp-pricelist">'+
           '<div class="jp-pricelist-section-head" id="pricingPackages"><div><h2>PACKAGES</h2><span>'+packages.length+' PACKAGE'+(packages.length===1?'':'S')+'</span></div></div>'+
-          '<div class="jp-pricelist-packages">'+(packages.map(priceListPackageCard).join('')||'<div class="jp-pricing-empty">No matching packages.</div>')+'</div>'+
-          '<div class="jp-pricelist-section-head jp-solo-services-head"><div><h2>SERVICES</h2><span>'+services.length+' SERVICE'+(services.length===1?'':'S')+'</span></div></div>'+
-          '<div class="jp-pricelist-table"><div class="jp-pricelist-table-head"><span>SERVICE</span><span>CATEGORY</span><span>PRICE</span></div>'+(services.map(priceListServiceRow).join('')||'<div class="jp-pricing-empty">No matching services.</div>')+'</div>'+
+          '<div class="jp-pricelist-packages">'+(packages.map((x,index)=>priceListPackageCard(x,index)).join('')||'<div class="jp-pricing-empty">No matching packages.</div>')+'</div>'+
+          '<div class="jp-pricelist-section-head jp-solo-services-head" data-pricing-reveal data-pricing-reveal-key="services-head"><div><h2>SERVICES</h2><span>'+services.length+' SERVICE'+(services.length===1?'':'S')+'</span></div></div>'+
+          '<div class="jp-pricelist-table" data-pricing-reveal data-pricing-reveal-key="services-table" style="--jp-reveal-delay:70ms"><div class="jp-pricelist-table-head"><span>SERVICE</span><span>CATEGORY</span><span>PRICE</span></div>'+(services.map(priceListServiceRow).join('')||'<div class="jp-pricing-empty">No matching services.</div>')+'</div>'+
         '</div>')+
       '<section class="jp-pricing-info-section" id="pricingAbout"><span>ABOUT</span><h2>JUAN PROJECT ONLINE</h2><p>JUAN PROJECT Online presents the current service catalog and package pricing published from Workspace.</p><a href="/terms.html">TERMS OF SERVICE →</a></section>'+
       '<section class="jp-pricing-info-section" id="pricingContact"><span>CONTACT</span><h2>CONTACT JUAN PROJECT</h2><p>Contact details will be published here soon.</p></section>'+
@@ -622,7 +623,19 @@ function pricing(){
   '</div>';
 }
 function routePage(){if(state.route==='pricing')return pricing();if(state.route==='home')return home();if(state.route==='shop')return shop();if(state.route==='orders')return orders();if(state.route==='project')return project();if(state.route==='payment')return payment();if(state.route==='invoice')return invoice();if(state.route==='account')return account();return home()}
-function render(){const publicPricing=state.route==='pricing';root.innerHTML=`<div class="app ${isLoggedIn()?'client-mode':'guest-mode'} route-${esc(state.route||'home')}"><main class="page route-${esc(state.route||'home')}">${routePage()}</main>${publicPricing?'':nav()}${gateOverlay()}${shopOverlay()}${notificationOverlay()}${clientMessageOverlay()}</div>`;bind();window.dispatchEvent(new Event('juan-online-render'));}
+function initPricingReveal(){
+  if(state.route!=='pricing')return;
+  const nodes=[...document.querySelectorAll('[data-pricing-reveal]')];
+  if(!nodes.length)return;
+  const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const reveal=node=>{const key=node.dataset.pricingRevealKey||'';node.classList.add('is-visible');if(key)pricingRevealSeen.add(key);};
+  nodes.forEach(node=>{if(pricingRevealSeen.has(node.dataset.pricingRevealKey||''))node.classList.add('is-visible');});
+  const pending=nodes.filter(node=>!node.classList.contains('is-visible'));
+  if(reduce||!('IntersectionObserver' in window)){pending.forEach(reveal);return;}
+  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){reveal(entry.target);observer.unobserve(entry.target);}}),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+  pending.forEach(node=>observer.observe(node));
+}
+function render(){const publicPricing=state.route==='pricing';root.innerHTML=`<div class="app ${isLoggedIn()?'client-mode':'guest-mode'} route-${esc(state.route||'home')}"><main class="page route-${esc(state.route||'home')}">${routePage()}</main>${publicPricing?'':nav()}${gateOverlay()}${shopOverlay()}${notificationOverlay()}${clientMessageOverlay()}</div>`;bind();if(publicPricing)requestAnimationFrame(initPricingReveal);window.dispatchEvent(new Event('juan-online-render'));}
 
 function bind(){
   document.querySelectorAll('.jp-package-inclusions-toggle').forEach(btn=>btn.onclick=()=>{state.pricingInclusionsExpanded=!state.pricingInclusionsExpanded;render()});
