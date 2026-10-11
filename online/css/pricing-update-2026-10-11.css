@@ -1,0 +1,223 @@
+/* JUAN PROJECT Online pricing refinement — 2026-10-11 */
+.jp-public-pricing-page .jp-pricelist-packages{
+  gap:16px!important;
+  align-items:stretch!important;
+}
+.jp-public-pricing-page .jp-pricelist-package-card{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:100%!important;
+  height:auto!important;
+  padding:24px!important;
+  border:1px solid rgba(29,29,31,.12)!important;
+  border-radius:18px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+  box-sizing:border-box;
+}
+.jp-public-pricing-page .jp-pricelist-package-card.is-featured{
+  border-color:rgba(0,122,72,.72)!important;
+  background:linear-gradient(180deg,rgba(44,243,158,.055),rgba(44,243,158,.018))!important;
+  box-shadow:0 14px 38px rgba(0,86,50,.10)!important;
+}
+.jp-public-pricing-page .jp-package-card-copy{
+  min-height:0!important;
+  display:block!important;
+}
+.jp-public-pricing-page .jp-package-card-copy h3{
+  margin:0!important;
+  min-height:42px;
+  font-size:14px!important;
+  line-height:1.35!important;
+  font-weight:800!important;
+  letter-spacing:.005em!important;
+  color:#1d1d1f!important;
+}
+.jp-public-pricing-page .jp-package-recommended-slot,
+.jp-public-pricing-page .jp-package-recommended,
+.jp-public-pricing-page .jp-package-count{
+  display:none!important;
+}
+.jp-public-pricing-page .jp-pricelist-package-price{
+  margin:28px 0 0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:0!important;
+}
+.jp-public-pricing-page .jp-pricelist-package-price>strong{
+  font-size:30px!important;
+  line-height:1.08!important;
+  letter-spacing:-.035em!important;
+  color:#1d1d1f!important;
+}
+.jp-package-price-meta{
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:6px;
+}
+.jp-package-price-meta span{
+  color:#008f52!important;
+  font-size:11px!important;
+  line-height:1.3!important;
+  font-weight:750!important;
+}
+.jp-package-price-meta s{
+  color:#a0a0a5!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+}
+.jp-public-pricing-page .jp-package-inclusions{
+  width:100%!important;
+  margin:28px 0 0!important;
+  padding:18px 0 0!important;
+  border:0!important;
+  border-top:1px solid rgba(29,29,31,.09)!important;
+  background:transparent!important;
+  text-align:left!important;
+  color:inherit!important;
+  cursor:default!important;
+  box-sizing:border-box;
+}
+.jp-public-pricing-page .jp-package-inclusions-label{
+  display:block!important;
+  color:#77777d!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+  font-weight:700!important;
+  letter-spacing:.02em!important;
+  text-transform:none!important;
+}
+.jp-public-pricing-page .jp-package-inclusions ul{
+  display:grid!important;
+  gap:8px!important;
+  list-style:none!important;
+  margin:14px 0 0!important;
+  padding:0!important;
+}
+.jp-public-pricing-page .jp-package-inclusions li{
+  display:grid!important;
+  grid-template-columns:14px minmax(0,1fr)!important;
+  gap:8px!important;
+  align-items:start!important;
+  color:#5d5d63!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+  font-weight:650!important;
+  letter-spacing:.025em!important;
+}
+.jp-public-pricing-page .jp-package-check{
+  color:#008f52!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+}
+.jp-public-pricing-page .jp-solo-services-head{
+  margin-top:56px!important;
+  margin-bottom:16px!important;
+}
+.jp-public-pricing-page [data-pricing-reveal]{
+  opacity:0;
+  filter:blur(10px);
+  transform:translateY(16px);
+  transition:
+    opacity 400ms ease-out var(--jp-reveal-delay,0ms),
+    filter 400ms ease-out var(--jp-reveal-delay,0ms),
+    transform 400ms ease-out var(--jp-reveal-delay,0ms);
+  will-change:opacity,filter,transform;
+}
+.jp-public-pricing-page [data-pricing-reveal].is-visible{
+  opacity:1;
+  filter:blur(0);
+  transform:translateY(0);
+  will-change:auto;
+}
+
+@media (min-width:1200px){
+  .jp-public-pricing-page .jp-pricelist-packages{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}
+@media (min-width:768px) and (max-width:1199px){
+  .jp-public-pricing-page .jp-pricelist-packages{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media (max-width:767px){
+  .jp-public-pricing-sitebar,
+  .jp-public-pricing-content,
+  .jp-public-pricing-foot{
+    width:calc(100% - 32px)!important;
+    max-width:none!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-packages{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:16px!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-package-card{
+    width:100%!important;
+    padding:20px!important;
+    border-radius:16px!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-package-card.is-featured{
+    width:100%!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-package-price>strong{
+    font-size:34px!important;
+  }
+  .jp-public-pricing-page .jp-package-inclusions{
+    margin-top:24px!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-table{
+    display:grid!important;
+    gap:12px!important;
+    overflow:visible!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-table-head{
+    display:none!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-table-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:
+      "service price"
+      "category price";
+    gap:4px 16px!important;
+    min-height:0!important;
+    padding:16px!important;
+    border:1px solid rgba(29,29,31,.10)!important;
+    border-radius:14px!important;
+    background:#fff!important;
+    box-sizing:border-box;
+  }
+  .jp-public-pricing-page .jp-pricelist-service-name{
+    grid-area:service;
+  }
+  .jp-public-pricing-page .jp-pricelist-table-row>span:nth-child(2){
+    grid-area:category;
+    color:#8a8a90!important;
+    font-size:10px!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-table-row>strong{
+    grid-area:price;
+    align-self:center;
+    min-height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    font-size:13px!important;
+    color:#008f52!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .jp-public-pricing-page [data-pricing-reveal]{
+    opacity:1!important;
+    filter:none!important;
+    transform:none!important;
+    transition:none!important;
+  }
+}

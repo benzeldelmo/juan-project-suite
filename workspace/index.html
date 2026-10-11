@@ -1571,7 +1571,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
   <link rel="stylesheet" href="/css/workspace-unification-2026-09-22.css?v=20260928-ui-consistency-v2">
   <link rel="stylesheet" href="/css/workspace-icon-system-2026-09-22.css?v=20260923-0105">
   <link rel="stylesheet" href="/css/typography-sf-pro.css?v=20260923-1">
-</head>
+<link href="./css/update-2026-10-11.css?v=20261011-1" rel="stylesheet"/></head>
 <body>
   <div class="app-container">
     <!-- SIDEBAR -->
@@ -1891,7 +1891,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
 
       <!-- VIEW: PROJECTS -->
       <section id="view-projects" class="view">
-        <header class="page-header"><div><div class="greeting-subtitle">Workspace</div><h1 class="page-title">Projects</h1></div><button class="btn btn-primary" onclick="app.navigateTo('new-order')">+ New Order</button></header>
+        <header class="page-header"><div><div class="greeting-subtitle">Workspace</div><h1 class="page-title">Projects</h1></div><div class="action-buttons-group projects-header-actions"><button class="btn btn-secondary" type="button" onclick="app.navigateTo('orders')"><svg class="icon-svg sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><circle cx="4" cy="6" r="1"></circle><circle cx="4" cy="12" r="1"></circle><circle cx="4" cy="18" r="1"></circle></svg>View Orders</button><button class="btn btn-primary" type="button" onclick="app.navigateTo('new-order')">+ New Order</button></div></header>
         <div class="view-toolbar unified-toolbar projects-toolbar">
           <input id="projectsSearch" class="form-control" placeholder="Search Project ID, project name, or client..." oninput="app.queueViewRender('projects')">
           <div class="toolbar-actions"><select id="projectsSort" class="compact-sort" onchange="app.setListSort('projects',this.value)"><option value="default">Sort: Default</option><option value="date">Sort: Date</option><option value="payment">Sort: Payment</option></select><div class="filter-pills" id="projectFilters"></div></div>
@@ -2958,10 +2958,12 @@ table.jp-packages-table col:nth-child(6){width:7%}
       function normalizeClientIdentityEmail(value){ return String(value||'').trim().toLowerCase(); }
       function clientCodeNumber(value){ const m=String(value||'').toUpperCase().match(/^CL-(\d+)$/); return m?Number(m[1]):0; }
       function nextLocalClientCode(){
-        const used=(state.clients||[]).map(c=>clientCodeNumber(c?.client_code)).filter(Number.isFinite);
-        const historical=Object.values(CLIENT_ID_BY_EMAIL).map(clientCodeNumber);
-        const lastLocal=Number(localStorage.getItem('JUAN_CLIENT_ID_LAST')||CLIENT_ID_FLOOR)||CLIENT_ID_FLOOR;
-        const next=Math.max(CLIENT_ID_FLOOR,lastLocal,...used,...historical)+1;
+        const used=new Set((state.clients||[])
+          .filter(c=>!c?.archived_at)
+          .map(c=>clientCodeNumber(c?.client_code))
+          .filter(n=>Number.isFinite(n)&&n>0));
+        let next=CLIENT_ID_FLOOR+1;
+        while(used.has(next))next+=1;
         localStorage.setItem('JUAN_CLIENT_ID_LAST',String(next));
         return `CL-${String(next).padStart(3,'0')}`;
       }
@@ -8127,7 +8129,7 @@ ${description}`))actionCallback();return;}
       }
       function normalizeHumanText(value,max=160){return String(value||'').trim().replace(/\s+/g,' ').slice(0,max);}
 
-      function nextLocalClientCode(){const max=(state.clients||[]).reduce((m,c)=>Math.max(m,Number(String(c.client_code||'').match(/(\d+)$/)?.[1]||0)),0);return `CL-${String(max+1).padStart(3,'0')}`;}
+      function nextLocalClientCode(){const used=new Set((state.clients||[]).filter(c=>!c?.archived_at).map(c=>clientCodeNumber(c?.client_code)).filter(n=>Number.isFinite(n)&&n>0));let next=CLIENT_ID_FLOOR+1;while(used.has(next))next+=1;localStorage.setItem('JUAN_CLIENT_ID_LAST',String(next));return `CL-${String(next).padStart(3,'0')}`;}
       function getProjectClientRecord(proj){
         return state.clients.find(c=>String(c.id)===String(proj?.client_id))||null;
       }
