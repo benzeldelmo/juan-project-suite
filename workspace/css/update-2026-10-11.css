@@ -1,0 +1,37 @@
+/* JUAN Workspace update — 2026-10-11 */
+.projects-header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.projects-header-actions .btn{
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.projects-header-actions .btn-secondary{
+  background:#fff;
+  color:#1d1d1f;
+  border:1px solid rgba(29,29,31,.14);
+  box-shadow:none;
+}
+.projects-header-actions .btn-secondary:hover{
+  background:#f7f7f8;
+  border-color:rgba(29,29,31,.22);
+}
+@media (max-width:720px){
+  #view-projects .page-header{
+    align-items:flex-start;
+    gap:16px;
+  }
+  .projects-header-actions{
+    width:100%;
+  }
+  .projects-header-actions .btn{
+    flex:1 1 0;
+    min-width:0;
+  }
+}
