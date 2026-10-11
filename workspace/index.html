@@ -9211,16 +9211,21 @@ ${description}`))actionCallback();return;}
               }
 
               const archivedAt=new Date().toISOString();
+              const codeNo=clientCodeNumber(client.client_code);
+              const releasedClientCode=codeNo>CLIENT_ID_FLOOR
+                ? `${String(client.client_code||'CLIENT')}-ARCHIVED-${Date.now().toString(36).toUpperCase()}`
+                : client.client_code;
               const result=await supabaseClient
                 .from('clients')
-                .update({archived_at:archivedAt})
+                .update({archived_at:archivedAt,client_code:releasedClientCode})
                 .eq('id',clientId)
-                .select('id')
+                .select('id,client_code')
                 .single();
 
               if(result.error)throw result.error;
 
               client.archived_at=archivedAt;
+              client.client_code=result.data?.client_code||releasedClientCode;
 
               if(state.cart.selectedClientId===clientId){
                 state.cart.selectedClientId='';
