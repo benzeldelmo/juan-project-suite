@@ -6,70 +6,139 @@
   --jp-table-radius:14px;
 }
 
-/* Page rhythm */
+/* Canonical desktop shell: equal page gutters and one scrolling surface */
+@media(min-width:1024px){
+  .main-content{
+    margin-left:256px!important;
+    width:calc(100% - 256px)!important;
+    max-width:none!important;
+    min-width:0!important;
+    height:100dvh!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    padding:32px 40px!important;
+    box-sizing:border-box!important;
+  }
+  html[data-jp-sidebar-size="compact"] .main-content{
+    margin-left:230px!important;
+    width:calc(100% - 230px)!important;
+  }
+}
 .main-content>.view{padding-bottom:24px!important}
-#view-my-works.active{padding-bottom:24px!important;overflow:visible!important}
 
-/* Home: natural-height bento, equal 24px gaps, never crop content */
-#overviewDashboard{
+/* Reports are a normal vertically scrolling page; never trap the table in a clipped viewport. */
+body:has(#view-reports.active) .main-content{
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+}
+#view-reports.active{
+  display:block!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+  padding-bottom:24px!important;
+}
+#view-reports #reportsContent,
+#view-reports .reports-bento,
+#view-reports .report-recent-v2{
   height:auto!important;
   min-height:0!important;
   max-height:none!important;
   overflow:visible!important;
-  display:flex!important;
-  flex-direction:column!important;
-  gap:var(--jp-gap-major)!important;
 }
-#overviewDashboard>.kpi-grid{
-  gap:var(--jp-gap-major)!important;
-  margin:0!important;
-}
-#overviewDashboard>.overview-priority-grid{
-  flex:none!important;
-  min-height:0!important;
-  max-height:none!important;
+#view-reports .report-recent-v2 .table-responsive{
   height:auto!important;
+  max-height:none!important;
   overflow:visible!important;
-  align-items:start!important;
-  gap:var(--jp-gap-major)!important;
-  margin:0!important;
 }
-#overviewDashboard .overview-priority-grid>.card{
-  align-self:start!important;
-  min-height:0!important;
-  max-height:none!important;
-  height:auto!important;
-  overflow:visible!important;
-  margin:0!important;
-}
-#overviewDashboard .overview-priority-grid>div:last-child{
-  display:grid!important;
-  align-content:start!important;
-  align-items:start!important;
-  gap:var(--jp-gap-major)!important;
-  min-height:0!important;
-  max-height:none!important;
-  height:auto!important;
-}
-#overviewDashboard .overview-priority-grid>div:last-child>.card{
-  width:100%!important;
-  min-height:0!important;
-  max-height:none!important;
-  height:auto!important;
-  overflow:visible!important;
-  margin:0!important;
-}
-#overviewDashboard .current-projects-stack,
-#overviewCurrentProjects,
-#overviewUpcomingDeadlines,
-#overviewUpcomingEvents{
-  flex:none!important;
-  min-height:0!important;
-  max-height:none!important;
-  height:auto!important;
-  overflow:visible!important;
-  -webkit-mask-image:none!important;
-  mask-image:none!important;
+
+/* Home: one viewport-sized bento at normal desktop scale with equal 24px gaps. */
+@media(min-width:1024px){
+  #view-my-works.active{
+    display:flex!important;
+    flex-direction:column!important;
+    height:calc(100dvh - 64px)!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    padding-bottom:0!important;
+  }
+  #view-my-works>.page-header{
+    flex:0 0 auto!important;
+    margin-bottom:24px!important;
+  }
+  #overviewDashboard{
+    flex:1 1 auto!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:var(--jp-gap-major)!important;
+  }
+  #overviewDashboard>.kpi-grid{
+    flex:0 0 auto!important;
+    gap:var(--jp-gap-major)!important;
+    margin:0!important;
+  }
+  #overviewDashboard>.overview-priority-grid{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    height:auto!important;
+    overflow:hidden!important;
+    align-items:stretch!important;
+    gap:var(--jp-gap-major)!important;
+    margin:0!important;
+  }
+  #overviewDashboard .overview-priority-grid>.card{
+    align-self:stretch!important;
+    min-height:0!important;
+    max-height:none!important;
+    height:100%!important;
+    overflow:hidden!important;
+    margin:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #overviewDashboard .overview-priority-grid>div:last-child{
+    display:grid!important;
+    grid-template-rows:minmax(170px,.72fr) minmax(270px,1.28fr)!important;
+    align-content:stretch!important;
+    align-items:stretch!important;
+    gap:var(--jp-gap-major)!important;
+    min-height:0!important;
+    max-height:none!important;
+    height:100%!important;
+    overflow:hidden!important;
+  }
+  #overviewDashboard .overview-priority-grid>div:last-child>.card{
+    width:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    height:100%!important;
+    overflow:hidden!important;
+    margin:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #overviewCurrentProjects,
+  #overviewUpcomingDeadlines{
+    min-height:0!important;
+    max-height:none!important;
+    flex:1 1 auto!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+  }
+  #overviewMiniCalendar,
+  #overviewUpcomingEvents{
+    min-height:0!important;
+    max-height:none!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+  }
 }
 #overviewDashboard .overview-task-card{margin:0!important}
 #overviewDashboard+.mb-6{margin-top:24px!important}
@@ -282,7 +351,10 @@
 .jp-category-copy{min-width:0}
 .jp-category-copy strong{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jp-category-copy small{font-size:10px;color:var(--text-tertiary);display:block;margin-top:4px}
-.jp-category-actions{position:absolute;right:10px;top:10px;z-index:4}
+.jp-category-actions{position:absolute!important;right:10px!important;top:10px!important;left:auto!important;bottom:auto!important;z-index:6!important}
+.jp-category-card>.jp-category-actions.popover-wrap.open{position:absolute!important;right:10px!important;top:10px!important;left:auto!important;bottom:auto!important}
+.jp-catalog-browser-title>.jp-category-actions,
+.jp-catalog-browser-title>.jp-category-actions.popover-wrap.open{position:relative!important;top:auto!important;right:auto!important;left:auto!important;bottom:auto!important}
 .jp-category-more{
   width:30px;height:30px;
   border:0;border-radius:8px;
@@ -295,7 +367,6 @@
 .jp-category-menu .popover-action{display:flex!important;align-items:center;gap:9px}
 .jp-category-menu .popover-action .jp-lucide{width:15px;height:15px;flex:0 0 auto}
 .jp-category-menu .popover-action.text-danger{color:var(--status-red)!important}
-.jp-catalog-browser-title>.jp-category-actions{position:relative;top:auto;right:auto}
 .jp-catalog-browser-title>.jp-category-actions .popover-panel{left:0;right:auto}
 
 .jp-catalog-browser[data-view="folder"] .jp-category-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
