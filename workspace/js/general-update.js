@@ -12,7 +12,7 @@
   };
   var dateTime=function(v){if(!v)return "—";var d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString("en-PH",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});};
   var toast=function(m){if(window.showToast)window.showToast(m);};
-  var orders=[],filter="active",query="",overlay=null;
+  var orders=[],filter="pending",query="",overlay=null;
 
   function ready(fn,n){n=n||0;if(window.app&&window.JuanSuiteRuntime)return fn();if(n<60)setTimeout(function(){ready(fn,n+1);},100);}
   function closeOverlay(){if(overlay)overlay.remove();overlay=null;document.body.classList.remove("jp-general-modal-open");}
