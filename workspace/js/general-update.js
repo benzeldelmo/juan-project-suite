@@ -315,6 +315,57 @@
     m.querySelector(".jp-general-x").onclick=closeOverlay;document.getElementById("bannerSave").onclick=async function(){try{await API({action:"ad-settings",enabled:settings.enabled!==false,rotation_seconds:Number(document.getElementById("bannerSeconds").value||8),max_active_popups:1,auto_archive_expired:document.getElementById("adAutoArchive").checked});toast("Ad settings saved.");closeOverlay();done();}catch(e){toast(e.message);}};
   }
 
+  function forceLatestWorkspaceShell(){
+    try{
+      var stale=document.querySelector('link[data-jp-runtime-final]');
+      if(stale)stale.remove();
+      var css=document.createElement('link');
+      css.rel='stylesheet';
+      css.href='/css/update-2026-10-12.css?v=20261013-runtime-3';
+      css.setAttribute('data-jp-runtime-final','1');
+      document.body.appendChild(css);
+
+      var hard=document.getElementById('jpRuntimeFinalOverrides');
+      if(!hard){
+        hard=document.createElement('style');
+        hard.id='jpRuntimeFinalOverrides';
+        hard.textContent=[
+          '#overviewDashboard{gap:24px!important;}',
+          '#overviewDashboard>.kpi-grid{gap:24px!important;margin-bottom:0!important;}',
+          '#overviewDashboard>.overview-priority-grid{gap:24px!important;margin-bottom:0!important;}',
+          '#overviewDashboard .overview-priority-grid>div:last-child{gap:24px!important;}',
+          '#overviewDashboard .overview-priority-grid>.card,#overviewDashboard .overview-priority-grid>div:last-child>.card{margin:0!important;}',
+          '#overviewDashboard .overview-task-card{margin:0!important;}',
+          '.main-content>.view{padding-bottom:24px!important;}'
+        ].join('');
+        document.body.appendChild(hard);
+      }else{
+        document.body.appendChild(hard);
+      }
+
+      var portal=document.querySelector('.nav-item[data-view="online-portal"]');
+      if(portal){
+        var texts=Array.from(portal.childNodes).filter(function(n){return n.nodeType===3;});
+        if(texts.length)texts[texts.length-1].nodeValue='Portal';
+        else portal.appendChild(document.createTextNode('Portal'));
+      }
+      var ad=document.querySelector('.nav-item[data-view="in-house-ads"]');
+      if(!ad&&portal){
+        ad=portal.cloneNode(true);
+        ad.dataset.view='in-house-ads';
+        ad.classList.remove('active');
+        var adTexts=Array.from(ad.childNodes).filter(function(n){return n.nodeType===3;});
+        if(adTexts.length)adTexts[adTexts.length-1].nodeValue='Ad Management';
+        else ad.appendChild(document.createTextNode('Ad Management'));
+        ad.addEventListener('click',function(e){e.preventDefault();window.app.navigateTo('in-house-ads');});
+        portal.insertAdjacentElement('afterend',ad);
+      }else if(ad){
+        var adTextNodes=Array.from(ad.childNodes).filter(function(n){return n.nodeType===3;});
+        if(adTextNodes.length)adTextNodes[adTextNodes.length-1].nodeValue='Ad Management';
+      }
+    }catch(e){console.warn('JUAN runtime style finalizer failed',e);}
+  }
+
   function install(){
     document.getElementById("juanSuiteNavGroup")?.remove();document.getElementById("suiteHeaderRequests")?.remove();document.getElementById("suiteHeaderScanner")?.remove();document.querySelectorAll(".suite-order-shortcuts").forEach(function(x){x.remove();});document.getElementById("suiteProfilePreview")?.remove();
     ensureOrdersView();ensureAdsPage();var nav=document.getElementById("workspaceOrdersNav");if(nav){nav.dataset.view="orders";nav.removeAttribute("onclick");}
@@ -325,4 +376,6 @@
     window.JPGeneral={renderOrders:renderOrders,openOrder:openOrder,deleteOrder:deleteOrder,deleteAllOrders:deleteAllOrders,renderEditableClient:renderEditableClient,renderAds:renderAds,closeOverlay:closeOverlay};
   }
   ready(install);
+  if(document.readyState==='complete')setTimeout(forceLatestWorkspaceShell,0);
+  else window.addEventListener('load',function(){setTimeout(forceLatestWorkspaceShell,0);},{once:true});
 })();
