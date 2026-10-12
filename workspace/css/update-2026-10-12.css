@@ -127,3 +127,52 @@
 #overviewDashboard .overview-task-card{
   margin:0!important;
 }
+
+
+/* Services & Pricing toolbar — fixed control geometry and spacing */
+#view-pricelist .catalog-toolbar{
+  display:grid!important;
+  grid-template-columns:minmax(320px,1fr) auto!important;
+  align-items:center!important;
+  gap:16px!important;
+  margin-bottom:24px!important;
+}
+#view-pricelist .catalog-toolbar .toolbar-actions{
+  display:grid!important;
+  grid-template-columns:144px 232px 192px!important;
+  align-items:center!important;
+  justify-content:end!important;
+  gap:16px!important;
+  min-width:0!important;
+}
+#view-pricelist .catalog-toolbar #catalogManagerSearch,
+#view-pricelist .catalog-toolbar .compact-sort{
+  height:44px!important;
+  min-height:44px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  border-radius:12px!important;
+}
+#view-pricelist .catalog-toolbar .compact-sort{
+  width:100%!important;
+  min-width:0!important;
+  padding:0 36px 0 14px!important;
+}
+#view-pricelist .catalog-toolbar #catalogManagerFilters{
+  display:none!important;
+}
+@media(max-width:1180px){
+  #view-pricelist .catalog-toolbar{
+    grid-template-columns:1fr!important;
+  }
+  #view-pricelist .catalog-toolbar .toolbar-actions{
+    width:100%!important;
+    grid-template-columns:minmax(130px,.8fr) minmax(200px,1.2fr) minmax(170px,1fr)!important;
+  }
+}
+@media(max-width:720px){
+  #view-pricelist .catalog-toolbar .toolbar-actions{
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+}
