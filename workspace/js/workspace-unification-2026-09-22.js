@@ -288,7 +288,7 @@ function enhanceSettingsPage(){
 function ensureSaaSStyles(){
   if(document.getElementById('jpSaaSRefreshStyles'))return;
   const link=document.createElement('link');
-  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261002-ultra-approved-1';
+  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261013-canonical-1';
   document.head.append(link);
 }
 function navIcon(name){
@@ -321,7 +321,7 @@ function restructureSaaSSidebar(){
         ['payments','Finance','finance'],['reports','Reports','reports']
       ]],
       ['OPERATIONS',[
-        ['calendar','Calendar','calendar'],['pricelist','Services & Pricing','services'],['online-portal','Online','online']
+        ['calendar','Calendar','calendar'],['pricelist','Services & Pricing','services'],['online-portal','Portal','online'],['in-house-ads','Ad Management','online']
       ]],
       ['SYSTEM',[
         ['settings','Settings','settings']
@@ -353,8 +353,7 @@ function restructureSaaSSidebar(){
 function syncSaaSNavActive(){
   const st=state(),active=String(st.activeView||'my-works');
   document.querySelectorAll('.nav-menu .nav-item').forEach(el=>el.classList.remove('active'));
-  const view=active==='in-house-ads'?'online-portal':active;
-  document.querySelector('.nav-menu .nav-item[data-view="'+view+'"]')?.classList.add('active');
+  document.querySelector('.nav-menu .nav-item[data-view="'+active+'"]')?.classList.add('active');
 }
 function standardizePageNames(){
   const names={
@@ -381,9 +380,7 @@ function enhanceServicesPricing(){
   const header=view.querySelector('.page-header');if(!header)return;
   const title=header.querySelector('.page-title'),sub=header.querySelector('.greeting-subtitle');
   if(title)title.textContent='Services & Pricing';if(sub)sub.textContent='Catalog';
-  let desc=header.querySelector('.jp-services-description');
-  if(!desc){desc=document.createElement('p');desc.className='jp-services-description';header.querySelector('div')?.append(desc);}
-  desc.textContent='Manage services, packages, and pricing shared with JUAN PROJECT Online.';
+  header.querySelectorAll('.jp-services-description').forEach(x=>x.remove());
   let tabs=view.querySelector('.jp-catalog-tabs');
   if(!tabs){
     tabs=document.createElement('div');tabs.className='jp-catalog-tabs';tabs.setAttribute('role','tablist');
@@ -407,24 +404,21 @@ function makeOnlineTabs(active){
 function ensureOnlineTabs(){
   const portal=document.getElementById('view-online-portal');
   if(portal){
+    portal.querySelectorAll(':scope > .jp-online-tabs').forEach(x=>x.remove());
     const header=portal.querySelector('.page-header');
     const sub=header?.querySelector('.greeting-subtitle'),title=header?.querySelector('.page-title');
-    if(sub)sub.textContent='Online';if(title)title.textContent='Online';
-    let tabs=portal.querySelector(':scope > .jp-online-tabs');
-    if(!tabs&&header){tabs=makeOnlineTabs('online-portal');header.after(tabs);}
-    tabs?.querySelectorAll('button').forEach(btn=>btn.classList.toggle('active',btn.dataset.onlineView==='online-portal'));
+    if(sub)sub.textContent='Operations';
+    if(title)title.textContent='Portal';
   }
   const ads=document.getElementById('view-in-house-ads');
   if(ads){
+    ads.querySelectorAll(':scope > .jp-online-tabs').forEach(x=>x.remove());
     let header=ads.querySelector(':scope > .jp-online-shell-header');
     if(!header){
       header=document.createElement('header');header.className='page-header jp-online-shell-header';
-      header.innerHTML='<div><div class="greeting-subtitle">Online</div><h1 class="page-title">Online</h1></div>';
       ads.prepend(header);
     }
-    let tabs=ads.querySelector(':scope > .jp-online-tabs');
-    if(!tabs){tabs=makeOnlineTabs('in-house-ads');header.after(tabs);}
-    tabs.querySelectorAll('button').forEach(btn=>btn.classList.toggle('active',btn.dataset.onlineView==='in-house-ads'));
+    header.innerHTML='<div><div class="greeting-subtitle">Operations</div><h1 class="page-title">Ad Management</h1></div>';
   }
 }
 const reportFilters={search:'',date:'all',method:'all',sort:'newest'};
