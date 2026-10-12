@@ -103,3 +103,27 @@
 @media(max-width:1200px){.jp-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:820px){.jp-category-grid,.jp-catalog-browser[data-view="folder"] .jp-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.jp-category-grid,.jp-catalog-browser[data-view="folder"] .jp-category-grid{grid-template-columns:1fr}.jp-catalog-browser-head{align-items:flex-start}}
+
+
+/* Home bento spacing hard lock: one 24px rhythm, no stacked legacy margins */
+#overviewDashboard{
+  gap:24px!important;
+}
+#overviewDashboard > .kpi-grid{
+  gap:24px!important;
+  margin-bottom:0!important;
+}
+#overviewDashboard > .overview-priority-grid{
+  gap:24px!important;
+  margin-bottom:0!important;
+}
+#overviewDashboard .overview-priority-grid > div:last-child{
+  gap:24px!important;
+}
+#overviewDashboard .overview-priority-grid > .card,
+#overviewDashboard .overview-priority-grid > div:last-child > .card{
+  margin:0!important;
+}
+#overviewDashboard .overview-task-card{
+  margin:0!important;
+}
