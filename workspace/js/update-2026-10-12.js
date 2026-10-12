@@ -70,14 +70,52 @@
       '</div></div>';
   }
 
+  function closeCatalogMenus(){
+    document.querySelectorAll('.jp-catalog-floating-menu[data-owner]').forEach(panel=>{
+      const owner=document.getElementById(panel.dataset.owner||'');
+      panel.classList.remove('jp-catalog-floating-menu');
+      panel.style.display='';
+      panel.style.position='';
+      panel.style.left='';
+      panel.style.top='';
+      panel.style.width='';
+      panel.style.zIndex='';
+      panel.removeAttribute('data-owner');
+      if(owner)owner.appendChild(panel);else panel.remove();
+    });
+  }
+
+  function openCatalogMenu(btn,id,e){
+    e?.preventDefault();e?.stopPropagation();
+    const wrap=document.getElementById(id);if(!wrap)return;
+    const existing=document.querySelector('.jp-catalog-floating-menu[data-owner="'+CSS.escape(id)+'"]');
+    if(existing){closeCatalogMenus();return;}
+    closeCatalogMenus();
+    const panel=wrap.querySelector('.jp-category-menu');if(!panel)return;
+    const rect=btn.getBoundingClientRect();
+    document.body.appendChild(panel);
+    panel.classList.add('jp-catalog-floating-menu');
+    panel.dataset.owner=id;
+    panel.style.display='block';
+    panel.style.position='fixed';
+    panel.style.zIndex='2147483000';
+    panel.style.width='210px';
+    const height=Math.max(120,panel.getBoundingClientRect().height||180);
+    const left=Math.max(12,Math.min(window.innerWidth-222,rect.right-210));
+    const below=window.innerHeight-rect.bottom;
+    const top=below>=height+10?rect.bottom+6:Math.max(12,rect.top-height-6);
+    panel.style.left=left+'px';
+    panel.style.top=top+'px';
+  }
+
   function bindCategoryActions(host){
     host.querySelectorAll("[data-cat-menu]").forEach(btn=>btn.addEventListener("click",e=>{
-      e.preventDefault();e.stopPropagation();
-      window.app.togglePopover(btn.dataset.catMenu,e);
+      openCatalogMenu(btn,btn.dataset.catMenu,e);
     }));
     host.querySelectorAll("[data-cat-action]").forEach(btn=>btn.addEventListener("click",e=>{
       e.preventDefault();e.stopPropagation();
       const name=btn.dataset.catName||"",action=btn.dataset.catAction;
+      closeCatalogMenus();
       if(action==="rename")window.app.openCatalogCategoryModal(name,"name");
       else if(action==="icon")window.app.openCatalogCategoryModal(name,"icon");
       else if(action==="up"||action==="down")window.app.moveCatalogCategory(name,action);
@@ -147,6 +185,9 @@
   function install(){
     drawCatalogBrowser();
     improveRefreshButton("onlinePortalRefreshBtn","onlinePortalLoading");
+    document.addEventListener("click",closeCatalogMenus);
+    window.addEventListener("resize",closeCatalogMenus);
+    window.addEventListener("scroll",closeCatalogMenus,true);
 
     const originalCatalog=window.app.renderPricelist;
     if(typeof originalCatalog==="function"){
