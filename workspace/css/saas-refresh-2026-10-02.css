@@ -354,7 +354,7 @@ body.dark-mode #reportsContent .jp-payment-activity-scroll thead th{background:#
 .jp-compact-connection .status-dot{width:6px!important;height:6px!important}
 .nav-section-label{margin-top:28px!important}
 .nav-section-label:first-child{margin-top:2px!important}
-.main-content>.view{max-width:1600px;margin-left:auto!important;margin-right:auto!important}
+.main-content>.view{max-width:none!important;width:100%!important;margin-left:0!important;margin-right:0!important}
 .quick-actions-fab{display:flex!important}
 
 /* Project detail becomes one SaaS workspace, not a nested sidebar. */
@@ -661,3 +661,191 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .project-details-tabs button,.jp-catalog-tabs button,.jp-online-tabs button,.quick-action-card{min-height:44px}
 @media(max-width:1100px){.main-content{padding:32px}.jp-files-workspace{grid-template-columns:1fr}.jp-files-context{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.jp-files-context #jpProjectDriveAdminSlot{grid-column:1/-1}.jp-payment-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.jp-payment-summary-item:nth-child(2){border-right:0}.jp-payment-summary-item:nth-child(-n+2){border-bottom:1px solid var(--border-subtle)}}
 @media(max-width:720px){.main-content{padding:24px 16px}.project-details-tabs,.jp-catalog-tabs,.jp-online-tabs{gap:24px!important;margin-bottom:16px!important}.jp-payment-summary-grid{grid-template-columns:1fr}.jp-payment-summary-item{border-right:0!important;border-bottom:1px solid var(--border-subtle)}.jp-payment-summary-item:last-child{border-bottom:0}.jp-payment-breakdown-grid{grid-template-columns:1fr}.jp-payment-breakdown-grid>div{border-right:0!important;border-bottom:1px solid var(--border-subtle)!important}.jp-payment-breakdown-grid>div:last-child{border-bottom:0!important}.deliverable-child-row{padding-left:24px!important}.jp-deliverable-group-toggle span{display:none}.jp-files-context{display:flex}.jp-files-head{padding:20px 16px;flex-direction:column}.jp-files-actions{width:100%;justify-content:flex-start}.jp-files-toolbar{padding:12px 16px}.jp-files-search{max-width:none}.jp-file-table-head{display:none}.jp-file-row{grid-template-columns:28px minmax(0,1fr) auto;padding:10px 16px}.jp-file-row .jp-file-type{display:none}}
+
+
+/* 2026-10-13 CANONICAL DESKTOP LAYOUT */
+@media (min-width:1024px){
+  /* One desktop shell: 24px outer gutters, no hidden max-width. */
+  .main-content{
+    height:100dvh!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    padding:24px!important;
+    box-sizing:border-box!important;
+  }
+  .main-content>.view{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    min-width:0!important;
+  }
+
+  /* Home fits at 100% zoom. Only the data lists may scroll internally. */
+  #view-my-works.active{
+    height:100%!important;
+    min-height:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+    padding:0!important;
+  }
+  #view-my-works.active>.page-header{
+    flex:0 0 auto!important;
+    margin:0 0 24px!important;
+  }
+  #view-my-works.active #overviewDashboard{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:24px!important;
+    overflow:hidden!important;
+  }
+  #view-my-works.active #overviewDashboard>.kpi-grid{
+    flex:0 0 auto!important;
+    gap:24px!important;
+    margin:0!important;
+  }
+  #view-my-works.active #overviewDashboard .kpi-card{
+    min-height:108px!important;
+    padding:16px 18px!important;
+  }
+  #view-my-works.active #overviewDashboard>.overview-priority-grid{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:0!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1.65fr) minmax(320px,.75fr)!important;
+    gap:24px!important;
+    margin:0!important;
+    overflow:hidden!important;
+    align-items:stretch!important;
+  }
+  #view-my-works.active #overviewDashboard .overview-priority-grid>.card{
+    height:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:18px!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #view-my-works.active #overviewDashboard .overview-priority-grid>div:last-child{
+    height:100%!important;
+    min-height:0!important;
+    display:grid!important;
+    grid-template-rows:minmax(170px,.68fr) minmax(300px,1.32fr)!important;
+    gap:24px!important;
+    overflow:hidden!important;
+  }
+  #view-my-works.active #overviewDashboard .overview-priority-grid>div:last-child>.card{
+    height:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:18px!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #view-my-works.active #overviewCurrentProjects,
+  #view-my-works.active #overviewUpcomingDeadlines{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+    scrollbar-gutter:auto!important;
+  }
+  #view-my-works.active #overviewMiniCalendar,
+  #view-my-works.active #overviewUpcomingEvents{
+    min-height:0!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+  }
+
+  /* Reports stays inside the viewport, with Payment Activity scrolling inside its rounded card. */
+  body:has(#view-reports.active) .main-content{
+    overflow:hidden!important;
+  }
+  #view-reports.active{
+    height:100%!important;
+    min-height:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+    padding:0!important;
+  }
+  #view-reports.active>.page-header{
+    flex:0 0 auto!important;
+    margin:0 0 24px!important;
+  }
+  #view-reports #reportsContent{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+  #view-reports .jp-report-kpi-grid{
+    flex:0 0 auto!important;
+    gap:24px!important;
+    margin:0 0 24px!important;
+  }
+  #view-reports .jp-report-kpi{
+    min-height:112px!important;
+    padding:18px 20px!important;
+  }
+  #view-reports .jp-payment-activity{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+    border-radius:16px!important;
+    padding:0!important;
+  }
+  #view-reports .jp-payment-activity-head{
+    flex:0 0 auto!important;
+    padding:18px 20px 14px!important;
+  }
+  #view-reports .jp-payment-toolbar{
+    flex:0 0 auto!important;
+    grid-template-columns:minmax(260px,1fr) 150px 160px 160px!important;
+    gap:16px!important;
+    padding:0 20px 16px!important;
+  }
+  #view-reports .jp-payment-toolbar input,
+  #view-reports .jp-payment-toolbar select{
+    height:42px!important;
+    min-height:42px!important;
+    border-radius:12px!important;
+  }
+  #reportsContent .jp-payment-activity-scroll{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:auto!important;
+    border-top:1px solid var(--border-subtle)!important;
+    border-radius:0 0 16px 16px!important;
+    background:var(--bg-card)!important;
+  }
+}
+
+/* Short laptop windows may scroll the Home page instead of cropping cards. */
+@media (min-width:1024px) and (max-height:760px){
+  .main-content{overflow-y:auto!important;}
+  #view-my-works.active{height:auto!important;overflow:visible!important;}
+  #view-my-works.active #overviewDashboard,
+  #view-my-works.active #overviewDashboard>.overview-priority-grid{
+    height:auto!important;
+    overflow:visible!important;
+  }
+  #view-my-works.active #overviewDashboard>.overview-priority-grid{
+    grid-template-columns:1fr!important;
+  }
+}
