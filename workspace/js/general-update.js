@@ -54,7 +54,7 @@
     if(document.getElementById("view-orders"))return;
     var s=document.createElement("section");s.id="view-orders";s.className="view";
     s.innerHTML=
-      '<header class="page-header"><div><div class="greeting-subtitle">Online Intake</div><h1 class="page-title">Orders</h1><div class="page-description">Review Order Requests before turning them into projects.</div></div><button class="btn btn-secondary" id="ordersRefreshBtn">Refresh</button></header>'+
+      '<header class="page-header"><div><div class="greeting-subtitle">Online Intake</div><h1 class="page-title">Orders</h1></div><div class="action-buttons-group"><button class="btn btn-secondary" id="ordersRefreshBtn">Refresh</button><div class="popover-wrap" id="ordersMoreMenu"><button class="btn btn-secondary" type="button" onclick="app.togglePopover(\'ordersMoreMenu\',event)" aria-label="More order actions">•••</button><div class="popover-panel client-row-menu"><button class="popover-action text-danger" type="button" onclick="window.JPGeneral.deleteAllOrders()">Delete All Orders</button></div></div></div></header>'+
       '<div class="view-toolbar unified-toolbar jp-orders-toolbar"><input class="form-control" id="ordersPageSearch" placeholder="Search Order ID, client, email, or request..."><div class="toolbar-actions"><div class="filter-pills" id="ordersPageFilters"></div></div></div>'+
       '<div class="card table-card"><div class="table-responsive"><table class="data-table unified-table jp-orders-page-table" data-keyboard-table="orders"><thead><tr><th>Order ID</th><th>Client</th><th>Request</th><th>Amount</th><th>Submitted</th><th>Status</th><th class="table-actions-col"></th></tr></thead><tbody id="ordersPageRows"></tbody></table></div></div>';
     var clients=document.getElementById("view-clients"),parent=clients?clients.parentNode:document.querySelector(".main-content");
@@ -100,7 +100,7 @@
         '<button class="popover-action" onclick="window.JPGeneral.openOrder(\''+id+'\',true)">Edit Order</button>'+
         (o.project_id?"":'<button class="popover-action text-danger" onclick="window.JPGeneral.deleteOrder(\''+id+'\')">Delete Order</button>')+
         "</div></div></td></tr>";
-    }).join("")||'<tr><td colspan="7" class="text-center text-muted py-4">No matching orders.</td></tr>';
+    }).join("")||'<tr><td colspan="7" class="text-center text-muted py-4"><strong>'+((filter==="pending")?"No pending orders":"No orders found")+'</strong><span class="jp-secondary-cell">'+((filter==="pending")?"There are currently no order requests waiting for review.":"New online order requests will appear here.")+'</span></td></tr>';
   }
   function findOrder(id){return orders.find(function(o){return String(o.id)===String(id);});}
   function itemTable(items,editing){
