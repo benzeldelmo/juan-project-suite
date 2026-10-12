@@ -2686,7 +2686,8 @@ table.jp-packages-table col:nth-child(6){width:7%}
   </div>
 
   <!-- CATALOG MANAGER MODALS -->
-  <div class="modal-backdrop" id="catalogCategoryModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATALOG</div><h3 class="modal-title" id="catalogCategoryModalTitle">Add Category</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogCategoryModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogCategoryOldName"><div class="form-group"><label class="form-label">Category Name</label><input class="form-control" id="catalogCategoryName" placeholder="Category name"></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogCategoryDeleteBtn" onclick="app.deleteCatalogCategory()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogCategoryModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogCategory()">Save Category</button></div></div></div>
+  <div class="modal-backdrop" id="catalogCategoryModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATALOG</div><h3 class="modal-title" id="catalogCategoryModalTitle">Add Category</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogCategoryModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogCategoryOldName"><div class="form-group"><label class="form-label">Category Name</label><input class="form-control" id="catalogCategoryName" placeholder="Category name"></div><div class="form-group"><label class="form-label">Category Icon</label><select class="form-control" id="catalogCategoryIcon"><option value="folder">Folder</option><option value="monitor-play">Broadcast / Screen</option><option value="video">Video</option><option value="camera">Camera / Photo</option><option value="palette">Design / Creative</option><option value="megaphone">Marketing</option><option value="briefcase">Business</option></select></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogCategoryDeleteBtn" onclick="app.openCatalogDeleteFlow(document.getElementById('catalogCategoryOldName').value)">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogCategoryModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogCategory()">Save Category</button></div></div></div>
+  <div class="modal-backdrop" id="catalogCategoryDeleteModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATEGORY</div><h3 class="modal-title" id="catalogDeleteCategoryTitle">Delete Category</h3><p class="text-sm text-muted mt-2" id="catalogDeleteCategorySummary"></p></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogCategoryDeleteModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogDeleteCategoryName"><div class="form-group"><label class="form-label">What should happen to the items?</label><select class="form-control" id="catalogDeleteStrategy" onchange="app.updateCatalogDeleteStrategy()"><option value="move">Move to another category</option><option value="uncategorized">Move to Uncategorized</option><option value="delete-all">Delete category and all items</option></select></div><div class="form-group" id="catalogDeleteDestinationGroup"><label class="form-label">Destination Category</label><select class="form-control" id="catalogDeleteDestination"></select></div><div class="catalog-delete-danger hidden" id="catalogDeleteDangerNote"><strong>Permanent deletion</strong><span>Services and packages in this category will be deleted. A PIN confirmation will be required.</span></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="app.closeModal('catalogCategoryDeleteModal')">Cancel</button><button class="btn btn-primary" onclick="app.confirmCatalogDeleteFlow()">Continue</button></div></div></div>
   <div class="modal-backdrop" id="catalogServiceModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATALOG</div><h3 class="modal-title" id="catalogServiceModalTitle">Add Service</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogServiceModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogServiceCode"><div class="form-group"><label class="form-label">Service Name</label><input class="form-control" id="catalogServiceName" placeholder="Service name"></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="catalogServiceCategory"></select></div><div class="form-group"><label class="form-label">Details / Format</label><textarea class="form-control" id="catalogServiceDescription" rows="2" placeholder="e.g. MP4, Blender, AE"></textarea></div><div class="form-grid"><div class="form-group"><label class="form-label">Price (₱)</label><input class="form-control" id="catalogServicePrice" type="number" min="0" step="0.01"></div><div class="form-group" id="catalogServiceStatusGroup"><label class="form-label">Status</label><select class="form-control" id="catalogServiceActive"><option value="true">Active</option><option value="false">Inactive</option></select></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogServiceDeleteBtn" onclick="app.deleteCatalogService()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogServiceModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogService()">Save Service</button></div></div></div>
   <div class="modal-backdrop" id="catalogPackageModal"><div class="modal-card modal-wide"><div class="modal-header"><div><div class="section-kicker">PACKAGE BUILDER</div><h3 class="modal-title" id="catalogPackageModalTitle">Create Package</h3></div><button class="modal-close" type="button" aria-label="Close" onclick="app.closeModal('catalogPackageModal')">×</button></div><div class="modal-body"><input type="hidden" id="catalogPackageCode"><div class="form-grid"><div class="form-group"><label class="form-label">Package Name</label><input class="form-control" id="catalogPackageName" placeholder="Package name"></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="catalogPackageCategory" onchange="app.renderPackageServiceChoices(document.getElementById('catalogPackageServiceSearch').value)"></select></div></div><div class="form-group"><label class="form-label">Find Services</label><input class="form-control" id="catalogPackageServiceSearch" placeholder="Type to search available services..." oninput="app.renderPackageServiceChoices(this.value)"></div><div class="package-service-picker" id="catalogPackageServiceChoices"></div><div class="package-builder-summary"><div><span>Regular total</span><strong id="catalogPackageOriginalTotal">₱0.00</strong><small id="catalogPackageSavings">Savings: ₱0.00</small></div><div class="form-group" style="margin:0"><label class="form-label">Package Price (₱)</label><input class="form-control" id="catalogPackageSellingPrice" type="number" min="0" step="0.01"></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogPackageDeleteBtn" onclick="app.deleteCatalogPackage()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogPackageModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogPackage()">Save Package</button></div></div></div>
 
@@ -2922,6 +2923,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
         catalogTab: "SOLO",
         pricelistTab: "SOLO",
         catalogCategories: [],
+        catalogCategoryIcons: {},
         catalogManagerCategory: "ALL",
         catalogManagerFilter: "All",
         projectFilter: "Active",
@@ -3244,6 +3246,8 @@ table.jp-packages-table col:nth-child(6){width:7%}
         if (savedCategories) { try { state.catalogCategories = JSON.parse(savedCategories).filter(Boolean); } catch(e){} }
         if (!Array.isArray(state.catalogCategories) || !state.catalogCategories.length) state.catalogCategories = derivedCategories.length ? derivedCategories : ["SOLO"];
         derivedCategories.forEach(cat => { if (!state.catalogCategories.includes(cat)) state.catalogCategories.push(cat); });
+        try { state.catalogCategoryIcons = JSON.parse(localStorage.getItem("JUAN_CATALOG_CATEGORY_ICONS")||"{}") || {}; } catch(e) { state.catalogCategoryIcons = {}; }
+        state.catalogCategories.forEach(cat=>{ if(!state.catalogCategoryIcons[cat]) state.catalogCategoryIcons[cat]="folder"; });
 
         const savedPkgs = localStorage.getItem("JUAN_PACKAGES");
         if (savedPkgs) {
@@ -4095,6 +4099,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
         localStorage.setItem("JUAN_SOLO_SERVICES", JSON.stringify(state.soloServices));
         localStorage.setItem("JUAN_PACKAGES", JSON.stringify(state.packagesList));
         localStorage.setItem("JUAN_CATALOG_CATEGORIES", JSON.stringify(state.catalogCategories || []));
+        localStorage.setItem("JUAN_CATALOG_CATEGORY_ICONS", JSON.stringify(state.catalogCategoryIcons || {}));
       }
       function packageDescriptionInclusions(description){
         const raw=String(description||'').replace(/\r/g,'').trim();
@@ -4144,7 +4149,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
       }
       async function commitCatalogMutation(mutator,successMessage,{modalId=null}={}){
         if(!cloudAvailable()||!(await ensureWorkspaceSyncSession())){showToast('Connect to Supabase before changing Services & Pricing.');return false;}
-        const snapshot={services:JSON.parse(JSON.stringify(state.soloServices||[])),packages:JSON.parse(JSON.stringify(state.packagesList||[])),categories:[...(state.catalogCategories||[])]};
+        const snapshot={services:JSON.parse(JSON.stringify(state.soloServices||[])),packages:JSON.parse(JSON.stringify(state.packagesList||[])),categories:[...(state.catalogCategories||[])],icons:{...(state.catalogCategoryIcons||{})}};
         const primary=modalId?document.querySelector('#'+modalId+' .btn-primary'):null,oldLabel=primary?.innerHTML;
         try{
           if(primary){primary.disabled=true;primary.textContent='Saving…';}
@@ -4158,7 +4163,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
           showToast(successMessage);
           return true;
         }catch(error){
-          state.soloServices=snapshot.services;state.packagesList=snapshot.packages;state.catalogCategories=snapshot.categories;
+          state.soloServices=snapshot.services;state.packagesList=snapshot.packages;state.catalogCategories=snapshot.categories;state.catalogCategoryIcons=snapshot.icons||{};
           persistCatalogState();renderPricelist();renderServiceCatalog();
           showToast('Change not saved: '+(error?.message||error));
           return false;
@@ -4180,7 +4185,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
         if (!supabaseClient || !state.isConnected) return false;
         try {
           const [categoriesRes, servicesRes, packagesRes, itemsRes] = await Promise.all([
-            supabaseClient.from("catalog_categories").select("id,name,slug,active,sort_order").order("sort_order").order("name"),
+            supabaseClient.from("catalog_categories").select("id,name,slug,active,sort_order,icon").order("sort_order").order("name"),
             supabaseClient.from("catalog_services").select("id,product_code,category_id,name,description,price,active").order("name"),
             supabaseClient.from("catalog_packages").select("id,product_code,category_id,name,description,original_price,new_price,active").order("name"),
             supabaseClient.from("catalog_package_items").select("id,package_id,service_id,item_name,quantity,sort_order").order("sort_order")
@@ -4195,6 +4200,7 @@ table.jp-packages-table col:nth-child(6){width:7%}
           state.sharedCatalogReady=true;
           const categoryById = new Map(categories.map(c => [String(c.id), c]));
           state.catalogCategories = categories.filter(c => c.active !== false).map(c => c.name).filter(Boolean);
+          state.catalogCategoryIcons = Object.fromEntries(categories.filter(c=>c.active!==false&&c.name).map(c=>[c.name,String(c.icon||"folder")]));
           state.soloServices = services.map((row, index) => ({
             db_id: row.id,
             product_code: row.product_code || `SRV-${String(index + 1).padStart(3, "0")}`,
@@ -4245,14 +4251,15 @@ table.jp-packages-table col:nth-child(6){width:7%}
             name: String(name).trim(),
             slug: catalogSlug(name),
             active: true,
-            sort_order: index
+            sort_order: index,
+            icon: String((state.catalogCategoryIcons||{})[name]||"folder")
           })).filter(row => row.name);
           if (categoryRows.length) {
             const categoryUpsert = await supabaseClient.from("catalog_categories").upsert(categoryRows, { onConflict: "slug" });
             if (categoryUpsert.error) throw categoryUpsert.error;
           }
 
-          const categoriesRes = await supabaseClient.from("catalog_categories").select("id,name,slug,active");
+          const categoriesRes = await supabaseClient.from("catalog_categories").select("id,name,slug,active,icon");
           if (categoriesRes.error) throw categoriesRes.error;
           const categories = categoriesRes.data || [];
           const categoryByName = new Map(categories.map(c => [String(c.name || "").toLowerCase(), c]));
@@ -9395,22 +9402,141 @@ ${description}`))actionCallback();return;}
       function selectCatalogCategory(category){state.catalogManagerCategory=category;renderPricelist()}
       function switchPricelistTab(tab){state.catalogManagerFilter=tab==='PACKAGE'?'Packages':'Services';renderPricelist()}
       function filterPricelistTable(){renderPricelist()}
-      function openCatalogCategoryModal(existing=''){ensureCatalogCategories();document.getElementById('catalogCategoryOldName').value=existing||'';document.getElementById('catalogCategoryName').value=existing||'';document.getElementById('catalogCategoryModalTitle').textContent=existing?'Edit Category':'Add Category';document.getElementById('catalogCategoryDeleteBtn')?.classList.toggle('hidden',!existing);openModal('catalogCategoryModal')}
+      function openCatalogCategoryModal(existing='',focusField='name'){
+        ensureCatalogCategories();
+        const oldName=existing||'';
+        document.getElementById('catalogCategoryOldName').value=oldName;
+        document.getElementById('catalogCategoryName').value=oldName;
+        document.getElementById('catalogCategoryModalTitle').textContent=oldName?'Edit Category':'Add Category';
+        const icon=document.getElementById('catalogCategoryIcon');
+        if(icon)icon.value=(state.catalogCategoryIcons||{})[oldName]||'folder';
+        document.getElementById('catalogCategoryDeleteBtn')?.classList.toggle('hidden',!oldName);
+        openModal('catalogCategoryModal');
+        setTimeout(()=>{(focusField==='icon'?icon:document.getElementById('catalogCategoryName'))?.focus();},60);
+      }
       async function saveCatalogCategory(){
         const old=normalizeHumanText(document.getElementById('catalogCategoryOldName').value,80),name=normalizeHumanText(document.getElementById('catalogCategoryName').value,80);
+        const icon=String(document.getElementById('catalogCategoryIcon')?.value||'folder');
         if(!name){showToast('Category name is required.');return;}
         ensureCatalogCategories();
         if(state.catalogCategories.some(x=>x.toLowerCase()===name.toLowerCase()&&x!==old)){showToast('That category already exists.');return;}
         await commitCatalogMutation(()=>{
+          state.catalogCategoryIcons=state.catalogCategoryIcons||{};
           if(old){
             const idx=state.catalogCategories.indexOf(old);if(idx<0)throw new Error('Category no longer exists.');
             state.catalogCategories[idx]=name;
+            const priorIcon=state.catalogCategoryIcons[old]||'folder';
+            if(old!==name)delete state.catalogCategoryIcons[old];
+            state.catalogCategoryIcons[name]=icon||priorIcon;
             state.soloServices.forEach(s=>{if(String(s.category||'')===old)s.category=name});
             state.packagesList.forEach(p=>{if(String(p.category||'')===old)p.category=name});
             if(state.catalogManagerCategory===old)state.catalogManagerCategory=name;
-          }else state.catalogCategories.push(name);
+          }else{
+            state.catalogCategories.push(name);
+            state.catalogCategoryIcons[name]=icon||'folder';
+          }
         },old?'Category updated.':'Category added.',{modalId:'catalogCategoryModal'});
       }
+      async function moveCatalogCategory(name,direction){
+        name=normalizeHumanText(name,80);if(!name)return;
+        const idx=state.catalogCategories.indexOf(name);if(idx<0)return;
+        const next=direction==='up'?idx-1:idx+1;
+        if(next<0||next>=state.catalogCategories.length)return;
+        await commitCatalogMutation(()=>{
+          const copy=[...state.catalogCategories];
+          [copy[idx],copy[next]]=[copy[next],copy[idx]];
+          state.catalogCategories=copy;
+        },'Category order updated.');
+      }
+      function openCatalogDeleteFlow(name){
+        name=normalizeHumanText(name||document.getElementById('catalogCategoryOldName')?.value,80);if(!name)return;
+        const usedServices=state.soloServices.filter(s=>String(s.category||'')===name).length;
+        const usedPackages=state.packagesList.filter(p=>String(p.category||'')===name).length;
+        if(!usedServices&&!usedPackages){
+          requestDestructivePin('Delete Category',`Delete "${name}"? This category is empty and will be permanently removed.`,async()=>{
+            await commitCatalogMutation(()=>{
+              state.catalogCategories=state.catalogCategories.filter(c=>c!==name);
+              if(state.catalogCategoryIcons)delete state.catalogCategoryIcons[name];
+              if(state.catalogManagerCategory===name)state.catalogManagerCategory='ALL';
+            },'Category deleted.',{modalId:'catalogCategoryModal'});
+          });
+          return;
+        }
+        document.getElementById('catalogDeleteCategoryName').value=name;
+        document.getElementById('catalogDeleteCategoryTitle').textContent=`Delete "${name}"`;
+        document.getElementById('catalogDeleteCategorySummary').textContent=`${usedServices} service${usedServices===1?'':'s'} · ${usedPackages} package${usedPackages===1?'':'s'}`;
+        const dest=document.getElementById('catalogDeleteDestination');
+        dest.innerHTML=state.catalogCategories.filter(c=>c!==name).map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(displayCategory(c))}</option>`).join('');
+        const action=document.getElementById('catalogDeleteStrategy');
+        action.value=dest.options.length?'move':'uncategorized';
+        const unc=action.querySelector('option[value="uncategorized"]');
+        if(unc)unc.disabled=name.toLowerCase()==='uncategorized';
+        updateCatalogDeleteStrategy();
+        closeModal('catalogCategoryModal');
+        openModal('catalogCategoryDeleteModal');
+      }
+      function updateCatalogDeleteStrategy(){
+        const strategy=document.getElementById('catalogDeleteStrategy')?.value||'move';
+        const group=document.getElementById('catalogDeleteDestinationGroup');
+        if(group)group.classList.toggle('hidden',strategy!=='move');
+        const note=document.getElementById('catalogDeleteDangerNote');
+        if(note)note.classList.toggle('hidden',strategy!=='delete-all');
+      }
+      async function confirmCatalogDeleteFlow(){
+        const name=normalizeHumanText(document.getElementById('catalogDeleteCategoryName')?.value,80);
+        const strategy=document.getElementById('catalogDeleteStrategy')?.value||'move';
+        if(!name)return;
+        if(strategy==='move'){
+          const destination=String(document.getElementById('catalogDeleteDestination')?.value||'').trim();
+          if(!destination||destination===name){showToast('Choose another category for these items.');return;}
+          await commitCatalogMutation(()=>{
+            state.soloServices.forEach(s=>{if(String(s.category||'')===name)s.category=destination});
+            state.packagesList.forEach(p=>{if(String(p.category||'')===name)p.category=destination});
+            state.catalogCategories=state.catalogCategories.filter(c=>c!==name);
+            if(state.catalogCategoryIcons)delete state.catalogCategoryIcons[name];
+            if(state.catalogManagerCategory===name)state.catalogManagerCategory=destination;
+          },'Category deleted and items moved.',{modalId:'catalogCategoryDeleteModal'});
+          return;
+        }
+        if(strategy==='uncategorized'){
+          if(name.toLowerCase()==='uncategorized'){showToast('Uncategorized cannot be moved into itself. Choose another category or delete its items.');return;}
+          await commitCatalogMutation(()=>{
+            const destination='Uncategorized';
+            if(!state.catalogCategories.some(c=>c.toLowerCase()===destination.toLowerCase()))state.catalogCategories.push(destination);
+            state.catalogCategoryIcons=state.catalogCategoryIcons||{};state.catalogCategoryIcons[destination]=state.catalogCategoryIcons[destination]||'folder';
+            state.soloServices.forEach(s=>{if(String(s.category||'')===name)s.category=destination});
+            state.packagesList.forEach(p=>{if(String(p.category||'')===name)p.category=destination});
+            state.catalogCategories=state.catalogCategories.filter(c=>c!==name);
+            delete state.catalogCategoryIcons[name];
+            if(state.catalogManagerCategory===name)state.catalogManagerCategory=destination;
+          },'Category deleted and items moved to Uncategorized.',{modalId:'catalogCategoryDeleteModal'});
+          return;
+        }
+        if(strategy==='delete-all'){
+          const serviceNames=new Set(state.soloServices.filter(s=>String(s.category||'')===name).map(s=>String(s.name||'')));
+          const blocked=state.packagesList.filter(p=>String(p.category||'')!==name&&(p.includedServiceNames||[]).length&&
+            (p.includedServiceNames||[]).every(n=>serviceNames.has(String(n))));
+          if(blocked.length){showToast('Delete is blocked because '+blocked[0].name+' would have no services left. Edit that package first.');return;}
+          closeModal('catalogCategoryDeleteModal');
+          requestDestructivePin('Delete Category & Items',`Permanently delete "${name}" and every service/package inside it? This cannot be undone.`,async()=>{
+            await commitCatalogMutation(()=>{
+              const removedNames=new Set(state.soloServices.filter(s=>String(s.category||'')===name).map(s=>String(s.name||'')));
+              state.soloServices=state.soloServices.filter(s=>String(s.category||'')!==name);
+              state.packagesList=state.packagesList.filter(p=>String(p.category||'')!==name);
+              state.packagesList.forEach(p=>{
+                p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>!removedNames.has(String(n)));
+                const selected=new Set(p.includedServiceNames||[]);
+                p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);
+                p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));
+              });
+              state.catalogCategories=state.catalogCategories.filter(c=>c!==name);
+              if(state.catalogCategoryIcons)delete state.catalogCategoryIcons[name];
+              if(state.catalogManagerCategory===name)state.catalogManagerCategory='ALL';
+            },'Category and contained items deleted.');
+          });
+        }
+      }
+      function deleteCatalogCategory(){openCatalogDeleteFlow(document.getElementById('catalogCategoryOldName')?.value||'');}
       function openCatalogServiceModal(code=''){
         ensureCatalogCategories();if(!state.catalogCategories.length){openCatalogCategoryModal();showToast('Create a category first, then add services under it.');return}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Service':'Add Service';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceActive').value=String(item?.active!==false);document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);document.getElementById('catalogServiceStatusGroup')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
       }
@@ -9878,6 +10004,10 @@ ${description}`))actionCallback();return;}
         selectCatalogCategory,
         openCatalogCategoryModal,
         saveCatalogCategory,
+        moveCatalogCategory,
+        openCatalogDeleteFlow,
+        updateCatalogDeleteStrategy,
+        confirmCatalogDeleteFlow,
         openCatalogServiceModal,
         saveCatalogService,
         openCatalogPackageModal,
