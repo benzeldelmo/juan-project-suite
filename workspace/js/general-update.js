@@ -65,17 +65,17 @@
   function effectiveStatus(o){return o.archived_at?"Archived":(o.status||"Order Received");}
   function drawFilters(){
     var host=document.getElementById("ordersPageFilters");if(!host)return;
-    var opts=[["active","Active"],["all","All"],["approved","Approved"],["rejected","Rejected"],["archived","Archived"]];
+    var opts=[["all","All"],["pending","Pending"],["approved","Approved"],["rejected","Rejected"]];
     host.innerHTML=opts.map(function(x){return '<button class="filter-pill '+(filter===x[0]?"active":"")+'" data-filter="'+x[0]+'">'+x[1]+"</button>";}).join("");
     host.querySelectorAll("[data-filter]").forEach(function(b){b.onclick=function(){filter=b.dataset.filter;renderOrders(false);};});
   }
   function visibleOrders(){
     return orders.filter(function(o){
       var s=effectiveStatus(o).toLowerCase();
-      if(filter==="active"&&(o.archived_at||s==="rejected"||s==="project created"))return false;
+      if(filter==="pending"&&(o.archived_at||["approved","rejected","project created","archived"].includes(s)))return false;
       if(filter==="approved"&&s!=="approved")return false;
       if(filter==="rejected"&&s!=="rejected")return false;
-      if(filter==="archived"&&s!=="archived")return false;
+      if(filter==="all"&&s==="archived")return false;
       if(query&&((o.code||"")+" "+(o.name||"")+" "+(o.email||"")+" "+(o.title||"")+" "+s).toLowerCase().indexOf(query)<0)return false;
       return true;
     });
@@ -98,7 +98,7 @@
         '<td><span class="badge '+(status==="Rejected"?"badge-red":status==="Approved"?"badge-green":"badge-neutral")+'">'+esc(status)+"</span></td>"+
         '<td class="table-row-actions" onclick="event.stopPropagation()"><div class="popover-wrap" id="'+menu+'"><button class="icon-more-button vertical-more" aria-label="Order actions" onclick="app.togglePopover(\''+menu+'\',event)">⋮</button><div class="popover-panel client-row-menu">'+
         '<button class="popover-action" onclick="window.JPGeneral.openOrder(\''+id+'\',true)">Edit Order</button>'+
-        (o.project_id?"":'<button class="popover-action text-danger" onclick="window.JPGeneral.archiveOrder(\''+id+'\')">Delete Order</button>')+
+        (o.project_id?"":'<button class="popover-action text-danger" onclick="window.JPGeneral.deleteOrder(\''+id+'\')">Delete Order</button>')+
         "</div></div></td></tr>";
     }).join("")||'<tr><td colspan="7" class="text-center text-muted py-4">No matching orders.</td></tr>';
   }
@@ -158,15 +158,23 @@
       }catch(e){prep.fail(e.message);approve.disabled=false;toast(e.message);}
     };
   }
-  async function archiveOrder(id){
+  async function deleteOrder(id){
     var o=findOrder(id);if(!o)return;
-    if(!(await confirmAction({title:"Delete "+o.code+"?",message:"It will disappear from Active Orders and remain archived for history.",confirmLabel:"Delete Order",danger:true})))return;
-    var index=orders.findIndex(function(x){return String(x.id)===String(id);});
-    var snapshot=index>=0?Object.assign({},orders[index]):null;
-    if(index>=0){orders[index].archived_at=new Date().toISOString();orders[index].status="Archived";}
-    closeOverlay();renderOrders(false);toast("Order removed.");
-    try{await API({action:"archive-order",id:id});}
-    catch(e){if(index>=0&&snapshot)orders[index]=snapshot;renderOrders(false);toast("Delete failed: "+(e.message||e));}
+    if(!(await confirmAction({title:"Delete "+o.code+" permanently?",message:"This removes the order request permanently. Converted orders cannot be deleted.",confirmLabel:"Delete Order",danger:true})))return;
+    try{
+      await API({action:"delete-order",id:id});
+      orders=orders.filter(function(x){return String(x.id)!==String(id);});
+      closeOverlay();renderOrders(false);toast("Order deleted.");
+    }catch(e){toast("Delete failed: "+(e.message||e));}
+  }
+  async function deleteAllOrders(){
+    if(!(await confirmAction({title:"Delete all orders?",message:"This permanently removes every unconverted order request. If the list becomes empty, the next Order ID resets to OR-001.",confirmLabel:"Delete All Orders",danger:true})))return;
+    try{
+      var r=await API({action:"delete-all-orders"});
+      orders=[];
+      renderOrders(false);
+      toast((r&&r.next_order_code)?"All orders deleted. Next ID: "+r.next_order_code:"All orders deleted.");
+    }catch(e){toast(e.message||"Delete All failed.");}
   }
 
   function renderEditableClient(){
@@ -232,7 +240,7 @@
     if(!host.querySelector('.jp-ads-page'))host.innerHTML='<div class="jp-ad-loading"><span class="portal-loading-spinner"></span><div><strong>Loading Ad Management</strong><small>Syncing campaigns…</small></div></div>';
     try{
       var d=await API({action:"ad-dashboard"}),ads=d.ads||[],settings=d.settings||{enabled:true,rotation_seconds:8,max_active_popups:1,auto_archive_expired:true};
-      host.innerHTML='<div class="jp-ads-page"><div class="jp-ads-heading"><div><span class="section-kicker">ONLINE PORTAL</span><h1>Ad Management</h1><p>Control banners and popups shown in JUAN PROJECT Online.</p></div><div class="jp-ads-heading-actions"><label class="jp-ad-master-toggle"><span>In-house Ads</span><span class="toggle-switch"><input id="jpAdsMaster" type="checkbox" '+(settings.enabled!==false?'checked':'')+'><span class="toggle-slider"></span></span></label><button class="btn btn-secondary" id="jpBannerSettings">Ad Settings</button><button class="btn btn-primary" id="jpCreateAd">+ New Ad</button></div></div>'+
+      host.innerHTML='<div class="jp-ads-page"><div class="jp-ads-heading"><div><span class="section-kicker">OPERATIONS</span><h1>Ad Management</h1></div><div class="jp-ads-heading-actions"><label class="jp-ad-master-toggle"><span>In-house Ads</span><span class="toggle-switch"><input id="jpAdsMaster" type="checkbox" '+(settings.enabled!==false?'checked':'')+'><span class="toggle-slider"></span></span></label><button class="btn btn-secondary" id="jpBannerSettings">Ad Settings</button><button class="btn btn-primary" id="jpCreateAd">+ New Ad</button></div></div>'+
         '<section class="jp-ad-management"><div class="jp-ad-toolbar"><div class="jp-ad-search-wrap"><span aria-hidden="true">⌕</span><input id="jpAdSearch" class="form-control" placeholder="Search ad or destination…"></div><div class="filter-pills" id="jpAdFilters"><button class="filter-pill active">All</button><button class="filter-pill">Active</button><button class="filter-pill">Scheduled</button><button class="filter-pill">Draft</button><button class="filter-pill">Paused</button><button class="filter-pill">Expired</button><button class="filter-pill">Archived</button></div></div>'+
         '<div class="jp-ad-table-wrap"><table class="data-table unified-table jp-ad-table"><thead><tr><th>Ad Name</th><th>Type</th><th>Placement</th><th>Status</th><th>Schedule</th><th>Destination</th><th class="table-actions-col"></th></tr></thead><tbody id="jpAdRows"></tbody></table></div></section>'+
         '<div class="jp-ad-rules"><div><strong>Display rules</strong><span>Banners rotate and cannot be dismissed. Only one popup may be active at a time.</span></div><small>Rotation: '+Number(settings.rotation_seconds||8)+' seconds</small></div></div>';
@@ -314,7 +322,7 @@
     var openClient=window.app.openClientProfile&&window.app.openClientProfile.bind(window.app);if(openClient)window.app.openClientProfile=function(id){var r=openClient(id);setTimeout(renderEditableClient,0);return r;};
     var renderPortal=window.app.renderOnlinePortal&&window.app.renderOnlinePortal.bind(window.app);if(renderPortal)window.app.renderOnlinePortal=function(){var r=renderPortal();setTimeout(ensureAdsPage,0);return r;};
     window.jpOpenOrders=function(){window.app.navigateTo("orders");};nav&&nav.addEventListener("click",function(e){e.preventDefault();window.app.navigateTo("orders");});
-    window.JPGeneral={renderOrders:renderOrders,openOrder:openOrder,archiveOrder:archiveOrder,renderEditableClient:renderEditableClient,renderAds:renderAds,closeOverlay:closeOverlay};
+    window.JPGeneral={renderOrders:renderOrders,openOrder:openOrder,deleteOrder:deleteOrder,deleteAllOrders:deleteAllOrders,renderEditableClient:renderEditableClient,renderAds:renderAds,closeOverlay:closeOverlay};
   }
   ready(install);
 })();
