@@ -400,6 +400,16 @@ export default async function handler(req,res){
       if(ce)throw ce;if(oe)throw oe;
       return res.status(200).json({order:safeOrder(o),client});
     }
+    if(action==='delete-order'){
+      const {data,error}=await svc.rpc('delete_juan_order_request',{p_order_id:b.id,p_admin_user:user.id});
+      if(error)throw error;
+      return res.status(200).json(data||{ok:true});
+    }
+    if(action==='delete-all-orders'){
+      const {data,error}=await svc.rpc('delete_all_juan_order_requests',{p_admin_user:user.id});
+      if(error)throw error;
+      return res.status(200).json(data||{ok:true});
+    }
     if(action==='archive-order'){
       const {data:o,error}=await svc.from('incoming_orders').select('*').eq('id',b.id).maybeSingle();if(error)throw error;if(!o)fail('Order not found.',404);
       if(o.project_id)fail('Converted order requests cannot be deleted. Keep them as history.');
