@@ -218,3 +218,37 @@
 
   ready(install);
 })();
+
+/* 2026-10-13 UPDATE #11 — KPI COPY */
+(() => {
+  const normalizeHomeKpiCopy = () => {
+    const host = document.getElementById("overviewKpis");
+    if (!host) return;
+    const labels = host.querySelectorAll(".kpi-label");
+    const todo = labels[1];
+    if (todo && /^not\s+done$/i.test(todo.textContent.trim())) {
+      todo.textContent = "To Do";
+    }
+  };
+
+  const bindHomeKpiCopy = () => {
+    const host = document.getElementById("overviewKpis");
+    if (!host || host.dataset.jpTodoCopyBound === "1") {
+      normalizeHomeKpiCopy();
+      return;
+    }
+    host.dataset.jpTodoCopyBound = "1";
+    normalizeHomeKpiCopy();
+    new MutationObserver(normalizeHomeKpiCopy).observe(host, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindHomeKpiCopy, { once: true });
+  } else {
+    bindHomeKpiCopy();
+  }
+})();
