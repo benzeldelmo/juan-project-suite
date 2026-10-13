@@ -592,3 +592,105 @@ body:has(#view-reports.active) .main-content{
 #view-in-house-ads .jp-ad-table thead th:last-child{
   border-radius:0!important;
 }
+
+
+/* 2026-10-13 HOME BALANCE + KPI ALIGNMENT */
+/* Keep the Home page's outer 32px shell spacing, but stop the left project card
+   from stretching just to match the right stack. */
+@media (min-width:1024px){
+  #overviewDashboard>.overview-priority-grid{
+    align-items:stretch!important;
+  }
+
+  #overviewDashboard .overview-priority-grid>.card:first-child{
+    align-self:start!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding-bottom:18px!important;
+  }
+
+  #overviewDashboard .overview-priority-grid>.card:first-child #overviewCurrentProjects{
+    flex:0 0 auto!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding-bottom:0!important;
+  }
+}
+
+/* The section titles are already self-explanatory; remove the repetitive helper
+   line so each panel header feels quieter and more deliberate. */
+#overviewDashboard .overview-section-heading p{
+  display:none!important;
+}
+#overviewDashboard .overview-section-heading{
+  margin-bottom:16px!important;
+}
+
+/* Four summary cards: one shared internal grid so labels, icons, values and
+   helper text land on the exact same lines across the row. */
+#overviewDashboard>.kpi-grid{
+  align-items:stretch!important;
+}
+
+#overviewDashboard>.kpi-grid>.kpi-card{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 34px!important;
+  grid-template-rows:34px 30px 16px!important;
+  column-gap:12px!important;
+  row-gap:8px!important;
+  align-content:start!important;
+  box-sizing:border-box!important;
+  min-height:120px!important;
+  padding:16px 18px!important;
+}
+
+#overviewDashboard>.kpi-grid>.kpi-card>.overview-kpi-head{
+  display:contents!important;
+}
+
+#overviewDashboard>.kpi-grid>.kpi-card .kpi-label{
+  grid-column:1!important;
+  grid-row:1!important;
+  align-self:center!important;
+  min-width:0!important;
+  line-height:1.2!important;
+}
+
+#overviewDashboard>.kpi-grid>.kpi-card .overview-kpi-icon{
+  grid-column:2!important;
+  grid-row:1!important;
+  align-self:start!important;
+  justify-self:end!important;
+  margin:0!important;
+}
+
+#overviewDashboard>.kpi-grid>.kpi-card .kpi-value{
+  grid-column:1 / -1!important;
+  grid-row:2!important;
+  align-self:center!important;
+  margin:0!important;
+  line-height:1!important;
+}
+
+#overviewDashboard>.kpi-grid>.kpi-card .kpi-sub{
+  grid-column:1 / -1!important;
+  grid-row:3!important;
+  align-self:end!important;
+  min-width:0!important;
+  min-height:16px!important;
+  margin:0!important;
+  line-height:16px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+@media (max-width:1023px){
+  #overviewDashboard>.kpi-grid>.kpi-card{
+    min-height:116px!important;
+  }
+}
