@@ -412,13 +412,7 @@ function ensureOnlineTabs(){
   }
   const ads=document.getElementById('view-in-house-ads');
   if(ads){
-    ads.querySelectorAll(':scope > .jp-online-tabs').forEach(x=>x.remove());
-    let header=ads.querySelector(':scope > .jp-online-shell-header');
-    if(!header){
-      header=document.createElement('header');header.className='page-header jp-online-shell-header';
-      ads.prepend(header);
-    }
-    header.innerHTML='<div><div class="greeting-subtitle">Operations</div><h1 class="page-title">Ad Management</h1></div>';
+    ads.querySelectorAll(':scope > .jp-online-tabs,:scope > .jp-online-shell-header').forEach(x=>x.remove());
   }
 }
 const reportFilters={search:'',date:'all',method:'all',sort:'newest'};
