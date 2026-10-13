@@ -288,7 +288,7 @@ function enhanceSettingsPage(){
 function ensureSaaSStyles(){
   if(document.getElementById('jpSaaSRefreshStyles'))return;
   const link=document.createElement('link');
-  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261013-canonical-2';
+  link.id='jpSaaSRefreshStyles';link.rel='stylesheet';link.href='/css/saas-refresh-2026-10-02.css?v=20261013-home-ref-1';
   document.head.append(link);
 }
 function navIcon(name){
