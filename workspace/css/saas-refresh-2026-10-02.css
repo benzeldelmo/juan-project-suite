@@ -665,7 +665,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* 2026-10-13 CANONICAL DESKTOP LAYOUT */
 @media (min-width:1024px){
-  /* One desktop shell: 24px outer gutters, no hidden max-width. */
+  /* One desktop shell: fixed sidebar + equal 24px content gutters. */
   .main-content{
     height:100dvh!important;
     min-height:0!important;
@@ -680,41 +680,44 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     min-width:0!important;
   }
 
-  /* Home fits at 100% zoom. Only the data lists may scroll internally. */
+  /* HOME — always show KPI row + Current Projects + Deadlines + Calendar at 100% zoom. */
   #view-my-works.active{
     height:100%!important;
     min-height:0!important;
-    display:flex!important;
-    flex-direction:column!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    gap:24px!important;
     overflow:hidden!important;
     padding:0!important;
   }
   #view-my-works.active>.page-header{
-    flex:0 0 auto!important;
-    margin:0 0 24px!important;
+    margin:0!important;
+    min-height:0!important;
   }
   #view-my-works.active #overviewDashboard{
-    flex:1 1 auto!important;
     min-height:0!important;
     height:auto!important;
-    display:flex!important;
-    flex-direction:column!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
     gap:24px!important;
     overflow:hidden!important;
   }
   #view-my-works.active #overviewDashboard>.kpi-grid{
-    flex:0 0 auto!important;
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
     gap:24px!important;
     margin:0!important;
+    min-height:0!important;
   }
   #view-my-works.active #overviewDashboard .kpi-card{
-    min-height:108px!important;
+    min-height:104px!important;
     padding:16px 18px!important;
+    border-radius:18px!important;
+    margin:0!important;
   }
   #view-my-works.active #overviewDashboard>.overview-priority-grid{
-    flex:1 1 auto!important;
     min-height:0!important;
-    height:0!important;
+    height:auto!important;
     display:grid!important;
     grid-template-columns:minmax(0,1.65fr) minmax(320px,.75fr)!important;
     gap:24px!important;
@@ -730,12 +733,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     overflow:hidden!important;
     display:flex!important;
     flex-direction:column!important;
+    border-radius:18px!important;
   }
   #view-my-works.active #overviewDashboard .overview-priority-grid>div:last-child{
     height:100%!important;
     min-height:0!important;
     display:grid!important;
-    grid-template-rows:minmax(170px,.68fr) minmax(300px,1.32fr)!important;
+    grid-template-rows:minmax(150px,.72fr) minmax(250px,1.28fr)!important;
     gap:24px!important;
     overflow:hidden!important;
   }
@@ -747,6 +751,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     overflow:hidden!important;
     display:flex!important;
     flex-direction:column!important;
+    border-radius:18px!important;
   }
   #view-my-works.active #overviewCurrentProjects,
   #view-my-works.active #overviewUpcomingDeadlines{
@@ -757,65 +762,73 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     overflow-x:hidden!important;
     -webkit-mask-image:none!important;
     mask-image:none!important;
-    scrollbar-gutter:auto!important;
+    padding-top:8px!important;
+    padding-bottom:8px!important;
   }
   #view-my-works.active #overviewMiniCalendar,
   #view-my-works.active #overviewUpcomingEvents{
     min-height:0!important;
+    max-height:none!important;
     -webkit-mask-image:none!important;
     mask-image:none!important;
   }
 
-  /* Reports stays inside the viewport, with Payment Activity scrolling inside its rounded card. */
+  /* Reports — entire page fits the viewport; only payment rows scroll. */
   body:has(#view-reports.active) .main-content{
     overflow:hidden!important;
   }
   #view-reports.active{
     height:100%!important;
     min-height:0!important;
-    display:flex!important;
-    flex-direction:column!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    gap:24px!important;
     overflow:hidden!important;
     padding:0!important;
   }
   #view-reports.active>.page-header{
-    flex:0 0 auto!important;
-    margin:0 0 24px!important;
+    margin:0!important;
+    min-height:0!important;
   }
   #view-reports #reportsContent{
-    flex:1 1 auto!important;
     min-height:0!important;
-    display:flex!important;
-    flex-direction:column!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    gap:24px!important;
     overflow:hidden!important;
   }
   #view-reports .jp-report-kpi-grid{
-    flex:0 0 auto!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
     gap:24px!important;
-    margin:0 0 24px!important;
+    margin:0!important;
   }
   #view-reports .jp-report-kpi{
-    min-height:112px!important;
-    padding:18px 20px!important;
+    min-height:108px!important;
+    padding:17px 20px!important;
+    border-radius:18px!important;
+    margin:0!important;
   }
   #view-reports .jp-payment-activity{
-    flex:1 1 auto!important;
+    height:100%!important;
     min-height:0!important;
     max-height:none!important;
-    display:flex!important;
-    flex-direction:column!important;
+    display:grid!important;
+    grid-template-rows:auto auto minmax(0,1fr)!important;
     overflow:hidden!important;
-    border-radius:16px!important;
+    border-radius:18px!important;
     padding:0!important;
+    margin:0!important;
   }
   #view-reports .jp-payment-activity-head{
-    flex:0 0 auto!important;
-    padding:18px 20px 14px!important;
+    margin:0!important;
+    padding:16px 20px 12px!important;
   }
   #view-reports .jp-payment-toolbar{
-    flex:0 0 auto!important;
+    display:grid!important;
     grid-template-columns:minmax(260px,1fr) 150px 160px 160px!important;
     gap:16px!important;
+    margin:0!important;
     padding:0 20px 16px!important;
   }
   #view-reports .jp-payment-toolbar input,
@@ -825,27 +838,35 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     border-radius:12px!important;
   }
   #reportsContent .jp-payment-activity-scroll{
-    flex:1 1 auto!important;
     min-height:0!important;
     height:auto!important;
     max-height:none!important;
     overflow:auto!important;
     border-top:1px solid var(--border-subtle)!important;
-    border-radius:0 0 16px 16px!important;
+    border-radius:0 0 18px 18px!important;
     background:var(--bg-card)!important;
+  }
+
+  /* Page-specific cards use the same soft geometry. */
+  #view-my-works .card,
+  #view-reports .card{
+    border-radius:18px!important;
   }
 }
 
-/* Short laptop windows may scroll the Home page instead of cropping cards. */
+/* Compact desktop height: preserve the same no-page-scroll layout by tightening vertical chrome. */
 @media (min-width:1024px) and (max-height:760px){
-  .main-content{overflow-y:auto!important;}
-  #view-my-works.active{height:auto!important;overflow:visible!important;}
+  .main-content{padding:18px 24px!important;}
+  #view-my-works.active,
+  #view-reports.active{gap:16px!important;}
   #view-my-works.active #overviewDashboard,
-  #view-my-works.active #overviewDashboard>.overview-priority-grid{
-    height:auto!important;
-    overflow:visible!important;
-  }
-  #view-my-works.active #overviewDashboard>.overview-priority-grid{
-    grid-template-columns:1fr!important;
-  }
+  #view-reports #reportsContent{gap:16px!important;}
+  #view-my-works.active #overviewDashboard>.kpi-grid,
+  #view-my-works.active #overviewDashboard>.overview-priority-grid,
+  #view-reports .jp-report-kpi-grid{gap:16px!important;}
+  #view-my-works.active #overviewDashboard .kpi-card{min-height:88px!important;padding:12px 16px!important;}
+  #view-my-works.active #overviewDashboard .overview-priority-grid>div:last-child{gap:16px!important;grid-template-rows:minmax(130px,.7fr) minmax(220px,1.3fr)!important;}
+  #view-reports .jp-report-kpi{min-height:92px!important;padding:14px 18px!important;}
+  #view-reports .jp-payment-activity-head{padding:13px 18px 10px!important;}
+  #view-reports .jp-payment-toolbar{padding:0 18px 12px!important;gap:12px!important;}
 }
