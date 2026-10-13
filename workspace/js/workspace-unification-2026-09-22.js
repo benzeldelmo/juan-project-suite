@@ -205,7 +205,7 @@ function enhanceProjectPage(){
     summary=document.createElement('div');summary.id='jpProjectCompactSummary';summary.className='jp-project-compact-summary';
     if(progress)progress.after(summary);else if(tabs)tabs.before(summary);
   }
-  summary.innerHTML='<div><span>Progress</span><strong>'+esc(percent)+' Complete</strong></div><div><span>Balance</span><strong>'+peso(bal)+'</strong></div><div><span>Status</span><strong class="jp-summary-status '+statusClass(status)+'">'+esc(status)+'</strong></div><div><span>Due</span><strong>'+date(p.payment_due_date)+'</strong></div>'+(fee>0?'<div><span>Overdue Fees</span><strong>'+peso(fee)+'</strong></div>':'');
+  summary.innerHTML='<div><span>Progress</span><strong>'+esc(percent)+' Complete</strong></div><div><span>Balance</span><strong>'+peso(bal)+'</strong></div><div><span>Status</span><strong class="jp-summary-status '+statusClass(status)+'">'+esc(status)+'</strong></div><div><span>Due</span><strong>'+date(p.payment_due_date)+'</strong></div>';
   if(progress)progress.classList.add('jp-progress-collapsed');
   document.getElementById('jpProjectFinanceSummary')?.remove();
   if(tabs){
