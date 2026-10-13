@@ -605,6 +605,8 @@ function pricing(){
   const categoryFilters='<button type="button" data-shop-category="all" class="'+(active==='all'?'active':'')+'">ALL</button>'+(state.catalog.categories||[]).filter(c=>usedCategories.has(String(c.id))).map(c=>'<button type="button" data-shop-category="'+esc(c.id)+'" class="'+(active===String(c.id)?'active':'')+'">'+esc(String(c.name||'').toUpperCase())+'</button>').join('');
   const ready=state.catalogLoaded,expanded=!!state.pricingInclusionsExpanded;
   return '<div class="jp-public-pricing-page">'+
+    '<section class="jp-online-desktop-notice" aria-label="JUAN PROJECT Online mobile availability"><div class="jp-online-desktop-notice-card"><span>JUAN PROJECT ONLINE</span><h1>Continue on mobile</h1><p>This experience is currently available on mobile only. Please continue using your phone for the best browsing experience.</p><small>Mobile-optimized preview for services, packages, and pricing.</small></div></section>'+
+    '<div class="jp-online-mobile-experience">'+
     '<header class="jp-public-pricing-sitebar"><a class="jp-public-brand" href="/" aria-label="JUAN PROJECT Online home">JUAN PROJECT <span>ONLINE</span></a><nav aria-label="Pricing navigation"><a href="#pricingPackages">SERVICES &amp; PACKAGES</a><a href="#pricingAbout">ABOUT</a><a href="#pricingContact">CONTACT</a></nav></header>'+
     '<main class="jp-public-pricing-content">'+
       '<div class="jp-public-pricing-title"><h1>SERVICES &amp; PACKAGES</h1><p>Browse current packages and services.</p></div>'+
@@ -620,6 +622,7 @@ function pricing(){
       '<section class="jp-pricing-info-section" id="pricingContact"><span>CONTACT</span><h2>CONTACT JUAN PROJECT</h2><p>Contact details will be published here soon.</p></section>'+
     '</main>'+
     '<footer class="jp-public-pricing-foot"><div><b>JUAN PROJECT ONLINE</b><span>LAST UPDATED: OCTOBER 2026</span></div><div><a href="/terms.html">TERMS OF SERVICE</a><p>Prices, package inclusions, and service availability are subject to change without prior notice.</p></div></footer>'+
+    '</div>'+
   '</div>';
 }
 function routePage(){if(state.route==='pricing')return pricing();if(state.route==='home')return home();if(state.route==='shop')return shop();if(state.route==='orders')return orders();if(state.route==='project')return project();if(state.route==='payment')return payment();if(state.route==='invoice')return invoice();if(state.route==='account')return account();return home()}
