@@ -431,3 +431,164 @@ body:has(#view-reports.active) .main-content{
   .jp-catalog-browser[data-view="folder"] .jp-category-grid{grid-template-columns:1fr}
   .jp-catalog-browser-head{align-items:flex-start}
 }
+
+
+/* 2026-10-13 final page geometry: Reports, Portal reviews, Ad Management */
+@media (min-width:1024px){
+  /* Reports: fixed page shell, compact section gap, internally scrolling payment rows. */
+  body:has(#view-reports.active) .main-content{
+    overflow:hidden!important;
+  }
+  #view-reports.active{
+    height:100%!important;
+    min-height:0!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    gap:16px!important;
+    overflow:hidden!important;
+    padding:0!important;
+  }
+  #view-reports.active>.page-header{
+    margin:0!important;
+  }
+  #view-reports #reportsContent{
+    min-height:0!important;
+    height:100%!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    gap:16px!important;
+    overflow:hidden!important;
+  }
+  #view-reports .jp-report-kpi-grid{
+    margin:0!important;
+    gap:24px!important;
+  }
+  #view-reports .jp-payment-activity{
+    min-height:0!important;
+    height:100%!important;
+    margin:0!important;
+    display:grid!important;
+    grid-template-rows:auto auto minmax(0,1fr)!important;
+    overflow:hidden!important;
+    border-radius:18px!important;
+    background:var(--bg-card)!important;
+  }
+  #view-reports .jp-payment-activity-head{
+    margin:0!important;
+    padding:14px 20px 10px!important;
+  }
+  #view-reports .jp-payment-toolbar{
+    margin:0!important;
+    padding:0 20px 14px!important;
+    gap:12px!important;
+  }
+  #view-reports .jp-payment-activity-scroll{
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:auto!important;
+    border-radius:0 0 18px 18px!important;
+    border-top:1px solid var(--border-subtle)!important;
+    background:var(--bg-card)!important;
+  }
+  #view-reports .jp-payment-activity-table{
+    border-radius:0!important;
+  }
+  #view-reports .jp-payment-activity-table thead th:first-child,
+  #view-reports .jp-payment-activity-table thead th:last-child{
+    border-radius:0!important;
+  }
+}
+
+/* Keep gray table-header bands rectangular; the outer card owns the rounded corners. */
+#view-reports .jp-payment-activity-table thead th,
+#view-online-portal .portal-payment-review-table thead th,
+#view-in-house-ads .jp-ad-table thead th{
+  border-radius:0!important;
+}
+
+/* Portal Payment Reviews: eight-column desktop layout that does not crush Submitted. */
+#view-online-portal .portal-payment-review-card{
+  overflow:hidden!important;
+  border-radius:18px!important;
+}
+#view-online-portal .portal-payment-review-table-wrap{
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+  border-radius:0 0 18px 18px!important;
+}
+#view-online-portal .portal-payment-review-table{
+  width:100%!important;
+  min-width:1080px!important;
+  table-layout:fixed!important;
+  border-radius:0!important;
+}
+#view-online-portal .portal-payment-review-table th,
+#view-online-portal .portal-payment-review-table td{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  padding:13px 16px!important;
+  vertical-align:middle!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#view-online-portal .portal-payment-review-table th:nth-child(1),
+#view-online-portal .portal-payment-review-table td:nth-child(1){width:14%!important}
+#view-online-portal .portal-payment-review-table th:nth-child(2),
+#view-online-portal .portal-payment-review-table td:nth-child(2){width:19%!important}
+#view-online-portal .portal-payment-review-table th:nth-child(3),
+#view-online-portal .portal-payment-review-table td:nth-child(3){width:17%!important}
+#view-online-portal .portal-payment-review-table th:nth-child(4),
+#view-online-portal .portal-payment-review-table td:nth-child(4){width:13%!important}
+#view-online-portal .portal-payment-review-table th:nth-child(5),
+#view-online-portal .portal-payment-review-table td:nth-child(5){width:9%!important}
+#view-online-portal .portal-payment-review-table th:nth-child(6),
+#view-online-portal .portal-payment-review-table td:nth-child(6){width:9%!important}
+#view-online-portal .portal-payment-review-table th:nth-child(7),
+#view-online-portal .portal-payment-review-table td:nth-child(7){width:15%!important}
+#view-online-portal .portal-payment-review-table th:nth-child(8),
+#view-online-portal .portal-payment-review-table td:nth-child(8){
+  width:4%!important;
+  min-width:48px!important;
+  max-width:56px!important;
+  text-align:center!important;
+  padding-left:6px!important;
+  padding-right:6px!important;
+}
+#view-online-portal .portal-payment-review-table .portal-payment-date{
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#view-online-portal .portal-payment-review-row{
+  height:68px!important;
+}
+
+/* Ad Management: one header only, clean rectangular header shading inside the rounded card. */
+#view-in-house-ads>.jp-online-shell-header{
+  display:none!important;
+}
+#view-in-house-ads .jp-ads-page{
+  gap:16px!important;
+}
+#view-in-house-ads .jp-ads-heading{
+  margin:0!important;
+}
+#view-in-house-ads .jp-ad-management{
+  border-radius:18px!important;
+  overflow:hidden!important;
+}
+#view-in-house-ads .jp-ad-table-wrap{
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+}
+#view-in-house-ads .jp-ad-table{
+  border-radius:0!important;
+}
+#view-in-house-ads .jp-ad-table thead th:first-child,
+#view-in-house-ads .jp-ad-table thead th:last-child{
+  border-radius:0!important;
+}
