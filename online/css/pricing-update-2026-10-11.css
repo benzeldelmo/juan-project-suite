@@ -221,3 +221,170 @@
     transition:none!important;
   }
 }
+
+
+/* 2026-10-13 UPDATES #12–#13 — MOBILE PRICING + MOBILE-ONLY ONLINE */
+.jp-online-desktop-notice{display:none}
+.jp-online-mobile-experience{
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  background:#fff;
+}
+
+/* Full-width section dividers: no short/unfinished rule. */
+.jp-public-pricing-page .jp-pricing-info-section{
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+}
+
+@media (min-width:768px){
+  .jp-public-pricing-page{
+    min-height:100dvh!important;
+    background:#fff!important;
+  }
+  .jp-online-mobile-experience{
+    display:none!important;
+  }
+  .jp-online-desktop-notice{
+    min-height:100dvh;
+    display:grid!important;
+    place-items:center;
+    box-sizing:border-box;
+    padding:48px 32px;
+    background:
+      radial-gradient(circle at 50% 18%,rgba(44,243,158,.08),transparent 32%),
+      #fff;
+  }
+  .jp-online-desktop-notice-card{
+    width:min(520px,100%);
+    box-sizing:border-box;
+    padding:40px 36px;
+    border:1px solid rgba(29,29,31,.10);
+    border-radius:22px;
+    background:#fff;
+    text-align:center;
+    box-shadow:0 24px 70px rgba(0,0,0,.06);
+  }
+  .jp-online-desktop-notice-card>span{
+    display:block;
+    margin-bottom:16px;
+    color:#008f52;
+    font-size:10px;
+    line-height:1.2;
+    font-weight:800;
+    letter-spacing:.09em;
+  }
+  .jp-online-desktop-notice-card h1{
+    margin:0;
+    color:#1d1d1f;
+    font-size:36px;
+    line-height:1.05;
+    letter-spacing:-.04em;
+  }
+  .jp-online-desktop-notice-card p{
+    margin:16px auto 0;
+    max-width:430px;
+    color:#6e6e73;
+    font-size:14px;
+    line-height:1.6;
+  }
+  .jp-online-desktop-notice-card small{
+    display:block;
+    margin-top:20px;
+    color:#8a8a90;
+    font-size:10px;
+    line-height:1.5;
+  }
+}
+
+@media (max-width:767px){
+  html,body,
+  .route-pricing,
+  .route-pricing .page,
+  .jp-public-pricing-page,
+  .jp-online-mobile-experience{
+    background:#fff!important;
+  }
+
+  .jp-online-desktop-notice{display:none!important}
+  .jp-online-mobile-experience{
+    display:flex!important;
+    width:100%!important;
+    min-height:100dvh!important;
+    overflow-x:hidden!important;
+  }
+
+  /* Solid sticky bar: no translucent strip or background peek while scrolling. */
+  .jp-public-pricing-sitebar{
+    position:sticky!important;
+    top:0!important;
+    z-index:100!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:calc(56px + env(safe-area-inset-top))!important;
+    margin:0!important;
+    padding:max(env(safe-area-inset-top),0px) 16px 0!important;
+    box-sizing:border-box!important;
+    background:#fff!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    border-bottom:1px solid rgba(29,29,31,.10)!important;
+    box-shadow:0 1px 0 rgba(255,255,255,.96)!important;
+    isolation:isolate;
+  }
+
+  .jp-public-pricing-content,
+  .jp-public-pricing-foot{
+    width:calc(100% - 32px)!important;
+    max-width:none!important;
+    margin-inline:auto!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Mobile services = Service + Price only. */
+  .jp-public-pricing-page .jp-pricelist-table{
+    width:100%!important;
+    max-width:100%!important;
+    overflow:visible!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-table-row{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"service price"!important;
+    gap:12px!important;
+    align-items:center!important;
+    box-sizing:border-box!important;
+    padding:16px!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-table-row>span:nth-child(2){
+    display:none!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-service-name{
+    grid-area:service!important;
+    min-width:0!important;
+  }
+  .jp-public-pricing-page .jp-pricelist-service-name b{
+    display:block;
+    white-space:normal!important;
+    overflow-wrap:anywhere;
+  }
+  .jp-public-pricing-page .jp-pricelist-table-row>strong{
+    grid-area:price!important;
+    align-self:center!important;
+    min-height:0!important;
+    white-space:nowrap!important;
+    color:#008f52!important;
+    text-align:right!important;
+  }
+
+  /* About / Contact divider rules span the full mobile content width. */
+  .jp-public-pricing-page .jp-pricing-info-section{
+    width:100%!important;
+    max-width:none!important;
+  }
+}
