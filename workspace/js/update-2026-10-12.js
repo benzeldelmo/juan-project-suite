@@ -400,3 +400,71 @@
   else watch();
   document.addEventListener("click",()=>setTimeout(watch,0),true);
 })();
+
+
+/* 2026-10-14 HOME EXACT VIEWPORT FIT */
+(() => {
+  "use strict";
+  let raf=0;
+
+  function px(v){const n=parseFloat(v);return Number.isFinite(n)?n:0;}
+
+  function syncHomeViewport(){
+    cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(()=>{
+      if(window.innerWidth<1024)return;
+      const main=document.querySelector(".main-content");
+      const home=document.getElementById("view-my-works");
+      const dashboard=document.getElementById("overviewDashboard");
+      const kpis=document.getElementById("overviewKpis");
+      const priority=dashboard?.querySelector(":scope > .overview-priority-grid");
+      const header=home?.querySelector(":scope > .page-header");
+      if(!main||!home||!dashboard||!kpis||!priority||!header||!home.classList.contains("active"))return;
+
+      const mainStyle=getComputedStyle(main);
+      const available=Math.max(0,main.clientHeight-px(mainStyle.paddingTop)-px(mainStyle.paddingBottom));
+      const outerGap=24;
+
+      home.style.setProperty("height",available+"px","important");
+      home.style.setProperty("min-height",available+"px","important");
+      home.style.setProperty("max-height",available+"px","important");
+
+      const headerH=Math.ceil(header.getBoundingClientRect().height);
+      const dashboardH=Math.max(0,available-headerH-outerGap);
+      dashboard.style.setProperty("height",dashboardH+"px","important");
+      dashboard.style.setProperty("min-height",dashboardH+"px","important");
+      dashboard.style.setProperty("max-height",dashboardH+"px","important");
+      dashboard.style.setProperty("flex","0 0 "+dashboardH+"px","important");
+
+      const kpiH=Math.ceil(kpis.getBoundingClientRect().height);
+      const priorityH=Math.max(0,dashboardH-kpiH-outerGap);
+      priority.style.setProperty("height",priorityH+"px","important");
+      priority.style.setProperty("min-height",priorityH+"px","important");
+      priority.style.setProperty("max-height",priorityH+"px","important");
+      priority.style.setProperty("flex","0 0 "+priorityH+"px","important");
+    });
+  }
+
+  function bind(){
+    syncHomeViewport();
+    window.addEventListener("resize",syncHomeViewport,{passive:true});
+
+    const main=document.querySelector(".main-content");
+    const header=document.querySelector("#view-my-works > .page-header");
+    const kpis=document.getElementById("overviewKpis");
+    if("ResizeObserver" in window){
+      const ro=new ResizeObserver(syncHomeViewport);
+      if(main)ro.observe(main);
+      if(header)ro.observe(header);
+      if(kpis)ro.observe(kpis);
+    }
+    if(kpis){
+      new MutationObserver(syncHomeViewport).observe(kpis,{childList:true,subtree:true,characterData:true});
+    }
+    document.addEventListener("click",()=>setTimeout(syncHomeViewport,0),true);
+    window.addEventListener("load",syncHomeViewport,{once:true});
+  }
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind,{once:true});
+  else bind();
+})();
