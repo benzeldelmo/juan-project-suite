@@ -1331,3 +1331,104 @@ body:has(#view-reports.active) .main-content{
     -webkit-overflow-scrolling:touch;
   }
 }
+
+
+/* 2026-10-14 TABLE CORNERS — SINGLE CLIPPING OWNER */
+/*
+  Every normal Workspace data table now gets ONE visible rounded surface.
+  Popover menus are portaled to <body>, so clipping the table surface is safe.
+*/
+:root{--jp-table-radius:16px}
+
+/* Card-backed tables: the card is the only rounded/clipping owner. */
+.main-content .jp-system-table-card,
+.main-content .table-card.jp-system-table-card{
+  width:100%!important;
+  border:1px solid #E5E7EB!important;
+  border-radius:var(--jp-table-radius)!important;
+  overflow:hidden!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+
+/* The immediate table shell clips the painted header/rows and may scroll horizontally. */
+.main-content .jp-system-table-card > .jp-system-table-wrap,
+.main-content .jp-system-table-card .jp-system-table-wrap{
+  width:100%!important;
+  max-width:100%!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  background:#fff!important;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* Tables with no card (Ad Management, some profile/history tables) use the shell itself. */
+.main-content .jp-system-table-wrap.jp-system-table-standalone,
+.main-content .jp-ad-table-wrap.jp-system-table-standalone{
+  width:100%!important;
+  max-width:100%!important;
+  border:1px solid #E5E7EB!important;
+  border-radius:var(--jp-table-radius)!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  background:#fff!important;
+  box-sizing:border-box!important;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* The actual table stays square internally; the parent surface creates the rounded silhouette. */
+.main-content table.jp-system-table{
+  width:100%!important;
+  border:0!important;
+  border-radius:0!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  background:#fff!important;
+}
+
+/* Never create a second rounded shape on header or last-row cells. */
+.main-content table.jp-system-table thead tr:first-child th:first-child,
+.main-content table.jp-system-table thead tr:first-child th:last-child,
+.main-content table.jp-system-table tbody tr:last-child td:first-child,
+.main-content table.jp-system-table tbody tr:last-child td:last-child{
+  border-radius:0!important;
+}
+
+/* Keep the standardized gray table header. */
+.main-content table.jp-system-table thead,
+.main-content table.jp-system-table thead tr,
+.main-content table.jp-system-table thead th{
+  background:#F7F7F8!important;
+}
+
+/* Last row must not draw a hard line through the rounded bottom edge. */
+.main-content table.jp-system-table tbody tr:last-child td{
+  border-bottom:0!important;
+}
+
+/* Explicit coverage for the primary Workspace table surfaces. */
+#view-projects .jp-system-table-card,
+#view-payments .jp-system-table-card,
+#view-clients .jp-system-table-card,
+#view-orders .jp-system-table-card,
+#view-pricelist .jp-system-table-card,
+#view-online-portal .jp-system-table-card,
+#view-in-house-ads .jp-system-table-wrap,
+#view-reports .jp-system-table-card,
+#view-analytics .jp-system-table-card,
+#view-client-profile .jp-system-table-card,
+#view-client-profile .jp-system-table-wrap,
+.jp-order-preview-modal .jp-system-table-card,
+.jp-order-preview-modal .jp-system-table-wrap{
+  border-radius:var(--jp-table-radius)!important;
+}
+
+/* Printable invoices/documents remain intentionally outside this UI table system. */
+@media(max-width:1023px){
+  .main-content .jp-system-table-card,
+  .main-content .jp-system-table-wrap.jp-system-table-standalone{
+    border-radius:var(--jp-table-radius)!important;
+  }
+}
