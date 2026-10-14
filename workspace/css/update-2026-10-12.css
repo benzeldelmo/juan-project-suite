@@ -1129,3 +1129,129 @@ body:has(#view-reports.active) .main-content{
 @media(prefers-reduced-motion:reduce){
   .jp-state-icon.is-loading:after,.jp-refreshing:before,.jp-skeleton,.workspace-loading-spinner{animation:none!important}
 }
+
+
+/* 2026-10-14 HOME VIEWPORT FILL — FINAL */
+@media(min-width:1024px){
+  body:has(#view-my-works.active) .main-content{
+    overflow:hidden!important;
+  }
+
+  /* Fill the actual main-content box instead of recalculating viewport height again. */
+  #view-my-works.active{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    overflow:hidden!important;
+    padding:0!important;
+    margin:0!important;
+  }
+
+  #view-my-works>.page-header{
+    flex:0 0 auto!important;
+    margin:0 0 24px!important;
+    min-height:0!important;
+  }
+
+  #overviewDashboard{
+    display:flex!important;
+    flex-direction:column!important;
+    flex:1 1 0!important;
+    width:100%!important;
+    height:0!important;
+    min-height:0!important;
+    max-height:none!important;
+    gap:24px!important;
+    overflow:hidden!important;
+  }
+
+  #overviewDashboard>.kpi-grid{
+    flex:0 0 auto!important;
+    width:100%!important;
+    margin:0!important;
+  }
+
+  #overviewDashboard>.overview-priority-grid{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    flex:1 1 0!important;
+    width:100%!important;
+    height:0!important;
+    min-height:0!important;
+    max-height:none!important;
+    gap:24px!important;
+    margin:0!important;
+    align-items:stretch!important;
+    overflow:hidden!important;
+  }
+
+  #overviewDashboard .overview-priority-grid>.card:first-child{
+    grid-column:1 / span 3!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-self:stretch!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:hidden!important;
+  }
+
+  #overviewDashboard .overview-priority-grid>.card:first-child #overviewCurrentProjects{
+    flex:1 1 0!important;
+    height:0!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+
+  /* Deadlines use only the height they need; Calendar owns the remaining height. */
+  #overviewDashboard .overview-priority-grid>div:last-child{
+    grid-column:4!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    align-self:stretch!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    gap:24px!important;
+    overflow:hidden!important;
+  }
+
+  #overviewDashboard .overview-priority-grid>div:last-child>.card{
+    width:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    overflow:hidden!important;
+  }
+
+  #overviewDashboard .overview-priority-grid>div:last-child>.card:last-child{
+    height:100%!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+
+  #overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-calendar-shell{
+    flex:1 1 0!important;
+    min-height:0!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    aspect-ratio:auto!important;
+  }
+
+  #overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-calendar{
+    width:min(100%,320px)!important;
+    height:auto!important;
+    align-self:center!important;
+    justify-self:center!important;
+  }
+}
