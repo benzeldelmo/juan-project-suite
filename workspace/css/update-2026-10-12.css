@@ -781,5 +781,70 @@ body:has(#view-reports.active) .main-content{
 /* JUAN green is the only decorative progress/accent color on Home. */
 #overviewDashboard .current-project-card .progress-bar-fill,
 #overviewDashboard .progress-bar-fill{
-  background:var(--primary-mint-dark,#19ba75)!important;
+  background:#19BA75!important;
+}
+
+
+/* 2026-10-14 UPDATES #3–#4 — BRAND-LOCKED HOME COLORS + CALENDAR EMPTY STATE */
+/* Home brand accents must not inherit a user-selectable accent theme. */
+#overviewDashboard>.kpi-grid>.home-kpi-active{
+  background:#F7F7F8!important;
+  border-color:#E5E7EB!important;
+}
+#overviewDashboard>.kpi-grid>.home-kpi-active .overview-kpi-icon{
+  background:rgba(142,142,147,.10)!important;
+  color:#8E8E93!important;
+}
+
+#overviewDashboard>.kpi-grid>.home-kpi-todo{
+  background:rgba(25,186,117,.065)!important;
+  border-color:rgba(25,186,117,.28)!important;
+}
+#overviewDashboard>.kpi-grid>.home-kpi-todo .overview-kpi-icon{
+  background:rgba(25,186,117,.12)!important;
+  color:#19BA75!important;
+}
+
+#overviewDashboard>.kpi-grid>.home-kpi-due{
+  background:rgba(245,158,11,.055)!important;
+  border-color:rgba(245,158,11,.28)!important;
+}
+#overviewDashboard>.kpi-grid>.home-kpi-due .overview-kpi-icon{
+  background:rgba(245,158,11,.12)!important;
+  color:#F59E0B!important;
+}
+
+#overviewDashboard>.kpi-grid>.home-kpi-overdue{
+  background:rgba(239,68,68,.05)!important;
+  border-color:rgba(239,68,68,.26)!important;
+}
+#overviewDashboard>.kpi-grid>.home-kpi-overdue .overview-kpi-icon{
+  background:rgba(239,68,68,.10)!important;
+  color:#EF4444!important;
+}
+
+/* JUAN PROJECT green is permanent on Home project progress and positive calendar accents. */
+#overviewDashboard .current-project-card .progress-bar-fill,
+#overviewDashboard .current-project-progress .progress-bar-fill{
+  background:#19BA75!important;
+}
+#overviewDashboard .overview-cal-day.today{
+  border-color:#19BA75!important;
+  background:rgba(25,186,117,.08)!important;
+}
+#overviewDashboard .overview-cal-dot{
+  background:#19BA75!important;
+}
+
+/* No upcoming events: remove the entire empty block/divider and give the calendar room. */
+#overviewDashboard .overview-upcoming-events[hidden]{
+  display:none!important;
+}
+#overviewDashboard .jp-calendar-no-events .overview-calendar-shell{
+  max-width:285px!important;
+  margin-top:4px!important;
+  margin-bottom:auto!important;
+}
+#overviewDashboard .jp-calendar-no-events .overview-calendar{
+  row-gap:2px!important;
 }
