@@ -5570,10 +5570,10 @@ ${description}`))actionCallback();return;}
         const kpi = document.getElementById("overviewKpis");
         if (kpi) {
           kpi.innerHTML = `
-            <div class="kpi-card urgency-card"><div class="overview-kpi-head"><div class="kpi-label">Active Projects</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span></div><div class="kpi-value">${active.length}</div><div class="kpi-sub">${active.length?'Currently in production':'No projects currently in production'}</div></div>
-            <div class="kpi-card urgency-card"><div class="overview-kpi-head"><div class="kpi-label">Not Done</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><div class="kpi-value">${unfinished}</div><div class="kpi-sub">${unfinished?'Unfinished deliverables':'No unfinished deliverables'}</div></div>
-            <div class="kpi-card ${dueSoon?'attention-kpi':''}"><div class="overview-kpi-head"><div class="kpi-label">Due in 7 Days</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span></div><div class="kpi-value">${dueSoon}</div><div class="kpi-sub">${dueSoon?'Needs attention soon':'Nothing due within the next 7 days'}</div></div>
-            <div class="kpi-card ${overdue?'danger-kpi':''}"><div class="overview-kpi-head"><div class="kpi-label">Overdue</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0z"/></svg></span></div><div class="kpi-value">${overdue}</div><div class="kpi-sub">${overdue?'Past project deadline':'No overdue projects'}</div></div>`;
+            <div class="kpi-card home-kpi-active"><div class="overview-kpi-head"><div class="kpi-label">Active Projects</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span></div><div class="kpi-value">${active.length}</div><div class="kpi-sub">${active.length?'Currently in production':'No projects currently in production'}</div></div>
+            <div class="kpi-card home-kpi-todo"><div class="overview-kpi-head"><div class="kpi-label">To Do</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><div class="kpi-value">${unfinished}</div><div class="kpi-sub">${unfinished?'Unfinished deliverables':'No unfinished deliverables'}</div></div>
+            <div class="kpi-card home-kpi-due"><div class="overview-kpi-head"><div class="kpi-label">Due in 7 Days</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span></div><div class="kpi-value">${dueSoon}</div><div class="kpi-sub">${dueSoon?'Needs attention soon':'Nothing due within the next 7 days'}</div></div>
+            <div class="kpi-card home-kpi-overdue"><div class="overview-kpi-head"><div class="kpi-label">Overdue</div><span class="overview-kpi-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0z"/></svg></span></div><div class="kpi-value">${overdue}</div><div class="kpi-sub">${overdue?'Past project deadline':'No overdue projects'}</div></div>`;
         }
         animateNumbersIn(kpi);
         renderOverviewCurrentProjects();
@@ -5848,7 +5848,16 @@ ${description}`))actionCallback();return;}
         const box=document.getElementById('overviewUpcomingEvents');if(!box)return;const now=new Date();now.setHours(0,0,0,0);
         const raw=[...(Array.isArray(state.calendarEvents)?state.calendarEvents:[]),...(Array.isArray(state.manualEvents)?state.manualEvents:[])];
         const events=raw.filter(e=>{const d=parseDateSafe(e.date||e.start_date||e.start);return d&&d>=now}).sort((a,b)=>parseDateSafe(a.date||a.start_date||a.start)-parseDateSafe(b.date||b.start_date||b.start)).slice(0,2);
-        box.innerHTML=`<div class="overview-events-label">Upcoming Events</div>`+(events.length?events.map(e=>`<div class="overview-event-row"><span>${escapeHtml(formatProjectDate(e.date||e.start_date||e.start))}</span><strong>${escapeHtml(e.title||e.name||'Event')}</strong></div>`).join(''):`<div class="overview-event-empty"><strong>NO UPCOMING EVENTS</strong><span>Project deadlines and scheduled events will appear here.</span></div>`);
+        const card=box.closest('.card');
+        if(!events.length){
+          box.innerHTML='';
+          box.hidden=true;
+          if(card)card.classList.add('jp-calendar-no-events');
+          return;
+        }
+        box.hidden=false;
+        if(card)card.classList.remove('jp-calendar-no-events');
+        box.innerHTML=`<div class="overview-events-label">Upcoming Events</div>`+events.map(e=>`<div class="overview-event-row"><span>${escapeHtml(formatProjectDate(e.date||e.start_date||e.start))}</span><strong>${escapeHtml(e.title||e.name||'Event')}</strong></div>`).join('');
       }
 
       function renderProjects() {
@@ -11208,7 +11217,7 @@ ${description}`))actionCallback();return;}
 </style>
 
 <!-- JUAN PROJECT FINAL CASCADE — must remain after legacy appended style patches -->
-<link rel="stylesheet" href="/css/update-2026-10-12.css?v=20261013-canonical-3">
-<script src="/js/update-2026-10-12.js?v=20261013-canonical-2"></script>
+<link rel="stylesheet" href="/css/update-2026-10-12.css?v=20261014-home-urgency-1">
+<script src="/js/update-2026-10-12.js?v=20261014-home-urgency-1"></script>
 </body>
 </html>
