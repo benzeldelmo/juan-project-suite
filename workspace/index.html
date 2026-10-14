@@ -4488,11 +4488,96 @@ table.jp-packages-table col:nth-child(6){width:7%}
       }
 
       let workspaceInitialRenderComplete=false;
-      function finishWorkspaceBoot(){workspaceInitialRenderComplete=true;}
+      function finishWorkspaceBoot(){
+        workspaceInitialRenderComplete=true;
+        document.getElementById('view-my-works')?.classList.remove('jp-home-initial-loading','jp-home-refreshing');
+      }
+
+      function homeKpiSkeleton(label,iconSvg,cls=''){
+        return `<div class="kpi-card jp-home-kpi-skeleton ${cls}">
+          <div class="overview-kpi-head"><div class="kpi-label">${label}</div><span class="overview-kpi-icon">${iconSvg}</span></div>
+          <div class="jp-home-skeleton jp-home-skeleton-value" aria-hidden="true"></div>
+          <div class="jp-home-skeleton jp-home-skeleton-sub" aria-hidden="true"></div>
+        </div>`;
+      }
+
+      function renderHomeInitialLoadingState(){
+        const home=document.getElementById('view-my-works');
+        if(!home||!home.classList.contains('active'))return;
+        home.classList.add('jp-home-initial-loading');
+        home.classList.remove('jp-home-refreshing');
+
+        const kpi=document.getElementById('overviewKpis');
+        if(kpi)kpi.innerHTML=
+          homeKpiSkeleton('Active Projects','<svg class="icon-svg" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/></svg>','home-kpi-active')+
+          homeKpiSkeleton('To Do','<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>','home-kpi-todo')+
+          homeKpiSkeleton('Due in 7 Days','<svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>','home-kpi-due')+
+          homeKpiSkeleton('Overdue','<svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.6a2 2 0 0 0-3.4 0z"/></svg>','home-kpi-overdue');
+
+        const projects=document.getElementById('overviewCurrentProjects');
+        if(projects)projects.innerHTML=Array.from({length:3},()=>`
+          <div class="current-project-card jp-home-project-skeleton" aria-hidden="true">
+            <div class="current-project-top">
+              <div class="current-project-copy">
+                <div class="jp-home-skeleton jp-sk-id"></div>
+                <div class="jp-home-skeleton jp-sk-title"></div>
+                <div class="jp-home-skeleton jp-sk-meta"></div>
+              </div>
+              <div class="current-project-right">
+                <div class="jp-home-skeleton jp-sk-tag"></div>
+                <div class="jp-home-skeleton jp-sk-balance"></div>
+              </div>
+            </div>
+            <div class="current-project-progress"><div class="jp-home-skeleton jp-sk-progress"></div></div>
+          </div>`).join('');
+
+        const deadlines=document.getElementById('overviewUpcomingDeadlines');
+        if(deadlines)deadlines.innerHTML=Array.from({length:2},()=>`
+          <div class="attention-row jp-home-deadline-skeleton" aria-hidden="true">
+            <div class="jp-home-skeleton jp-sk-date"></div>
+            <div class="jp-sk-deadline-copy"><div class="jp-home-skeleton jp-sk-deadline-title"></div><div class="jp-home-skeleton jp-sk-deadline-meta"></div></div>
+            <div class="jp-home-skeleton jp-sk-tag"></div>
+          </div>`).join('');
+
+        renderOverviewMiniCalendar();
+        const events=document.getElementById('overviewUpcomingEvents');
+        if(events){events.innerHTML='';events.hidden=true;}
+      }
+
+      function renderHomeLoadError(message){
+        const home=document.getElementById('view-my-works');
+        if(!home||!home.classList.contains('active'))return false;
+        home.classList.remove('jp-home-initial-loading','jp-home-refreshing');
+
+        const kpi=document.getElementById('overviewKpis');
+        if(kpi)kpi.innerHTML=[
+          ['Active Projects','home-kpi-active'],['To Do','home-kpi-todo'],['Due in 7 Days','home-kpi-due'],['Overdue','home-kpi-overdue']
+        ].map(([label,cls])=>`<div class="kpi-card ${cls}"><div class="overview-kpi-head"><div class="kpi-label">${label}</div></div><div class="kpi-value">—</div><div class="kpi-sub">Temporarily unavailable</div></div>`).join('');
+
+        const safe=escapeHtml(message||'Workspace data could not be loaded.');
+        const retry='<button type="button" class="btn btn-secondary btn-sm" onclick="app.reloadWorkspaceData()">Try Again</button>';
+        const projects=document.getElementById('overviewCurrentProjects');
+        if(projects)projects.innerHTML=`<div class="jp-home-component-error"><strong>Could not load projects</strong><span>${safe}</span>${retry}</div>`;
+        const deadlines=document.getElementById('overviewUpcomingDeadlines');
+        if(deadlines)deadlines.innerHTML=`<div class="jp-home-component-error compact"><strong>Could not load deadlines</strong><span>Try again to refresh this dashboard.</span>${retry}</div>`;
+        renderOverviewMiniCalendar();
+        const events=document.getElementById('overviewUpcomingEvents');
+        if(events){events.innerHTML='';events.hidden=true;}
+        return true;
+      }
 
       function setWorkspaceLoading(loading) {
         const shell=document.getElementById('workspaceLoadingSkeleton');
-        const showInlineLoading=Boolean(loading)&&workspaceInitialRenderComplete;
+        const home=document.getElementById('view-my-works');
+        const homeActive=Boolean(home?.classList.contains('active'));
+
+        if(loading&&homeActive&&!workspaceInitialRenderComplete){
+          renderHomeInitialLoadingState();
+        }else if(homeActive&&workspaceInitialRenderComplete){
+          home.classList.toggle('jp-home-refreshing',Boolean(loading));
+        }
+
+        const showInlineLoading=Boolean(loading)&&workspaceInitialRenderComplete&&!homeActive;
         if(shell)shell.classList.toggle('hidden',!showInlineLoading);
         document.querySelectorAll('.main-content > .view').forEach(v=>v.classList.remove('workspace-loading-hidden'));
       }
@@ -5356,7 +5441,11 @@ ${description}`))actionCallback();return;}
           void (async()=>{try{if(!settingsRes.data)await syncWorkspaceSettingsNow();const remoteCatalogLoaded=await loadSharedCatalogFromDatabase();if(!remoteCatalogLoaded)await syncSharedCatalogToDatabase({silent:true});renderTemplatesDropdown();}catch(e){console.warn('Background Workspace cloud load:',e);}})();
           return true;
         }catch(err){
-          console.error('Database error:',err);state.clients=[];state.projects=[];renderCurrentView();showToast(`Cloud data could not be loaded: ${err?.message||err}`,'Retry',()=>loadDatabaseData());return false;
+          console.error('Database error:',err);
+          state.clients=[];state.projects=[];
+          if(!renderHomeLoadError(err?.message||err))renderCurrentView();
+          showToast(`Cloud data could not be loaded: ${err?.message||err}`,'Retry',()=>loadDatabaseData());
+          return false;
         }finally{setWorkspaceLoading(false);}
       }
 
@@ -5554,9 +5643,25 @@ ${description}`))actionCallback();return;}
         box.innerHTML=items.length?items.map(p=>{const tag=projectDeadlineTag(p);return `<div class="attention-row" onclick="app.openProjectDetails('${p.id}')"><div class="attention-date">${escapeHtml(parseDateSafe(p.deadline_date)?.toLocaleDateString('en-PH',{month:'short',day:'numeric'})||'—')}</div><div><div class="attention-title">${escapeHtml(p.title)}</div><div class="attention-sub">${escapeHtml(formatProjectId(p)+' • '+(p.client_name||'Project'))}</div></div><span class="project-tag ${tag.cls}">${escapeHtml(tag.label)}</span></div>`}).join(''):`<div class="empty-compact-state jp-home-empty-state"><strong>NO UPCOMING DEADLINES</strong><span>Projects with approaching deadlines will appear here.</span></div>`;
       }
       function renderOverviewMiniCalendar(){
-        const box=document.getElementById('overviewMiniCalendar'),title=document.getElementById('overviewCalendarTitle'); if(!box)return; const now=new Date(),y=now.getFullYear(),m=now.getMonth(); if(title)title.textContent=now.toLocaleDateString('en-PH',{month:'long',year:'numeric'});
-        const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),deadlines=new Map(); state.projects.filter(p=>!p.deleted&&p.status!=="Completed"&&p.deadline_date&&String(p.deadline_date).slice(0,7)===`${y}-${String(m+1).padStart(2,'0')}`).forEach(p=>{const day=Number(String(p.deadline_date).slice(8,10));if(!deadlines.has(day))deadlines.set(day,[]);deadlines.get(day).push(p)});
-        let h=['S','M','T','W','T','F','S'].map(x=>`<div class="overview-cal-head">${x}</div>`).join(''); for(let i=0;i<first;i++)h+='<div></div>'; for(let d=1;d<=days;d++){const ps=deadlines.get(d)||[],isToday=d===now.getDate();h+=`<div class="overview-cal-day ${isToday?'today':''} ${ps.length?'has-deadline':''}" ${ps.length?`onclick="app.openProjectDetails('${ps[0].id}')" title="${escapeHtml(ps.map(p=>p.title).join(', '))}"`:''}>${d}${ps.length?'<span class="overview-cal-dot"></span>':''}</div>`} box.innerHTML=h;
+        const box=document.getElementById('overviewMiniCalendar'),title=document.getElementById('overviewCalendarTitle');
+        if(!box)return;
+        const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+        if(title)title.textContent=now.toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+        const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),deadlines=new Map();
+        state.projects.filter(p=>!p.deleted&&p.status!=="Completed"&&p.deadline_date&&String(p.deadline_date).slice(0,7)===`${y}-${String(m+1).padStart(2,'0')}`).forEach(p=>{
+          const day=Number(String(p.deadline_date).slice(8,10));
+          if(!deadlines.has(day))deadlines.set(day,[]);
+          deadlines.get(day).push(p);
+        });
+        let h=['S','M','T','W','T','F','S'].map(x=>`<div class="overview-cal-head">${x}</div>`).join('');
+        for(let i=0;i<first;i++)h+='<div class="overview-cal-empty" aria-hidden="true"></div>';
+        for(let d=1;d<=days;d++){
+          const ps=deadlines.get(d)||[],isToday=d===now.getDate();
+          h+=`<div class="overview-cal-day ${isToday?'today':''} ${ps.length?'has-deadline':''}" ${ps.length?`onclick="app.openProjectDetails('${ps[0].id}')" title="${escapeHtml(ps.map(p=>p.title).join(', '))}"`:''}><span class="overview-cal-number">${d}</span>${ps.length?'<span class="overview-cal-dot"></span>':''}</div>`;
+        }
+        const used=first+days,trailing=(7-(used%7))%7;
+        for(let i=0;i<trailing;i++)h+='<div class="overview-cal-empty" aria-hidden="true"></div>';
+        box.innerHTML=h;
       }
 
       function renderOverviewDashboard() {
@@ -10050,6 +10155,7 @@ ${description}`))actionCallback();return;}
         syncClientToDatabase,
         syncNewClientToDatabase,
         renderOverviewDashboard,
+        reloadWorkspaceData:loadDatabaseData,
         renderOverviewUpcomingEvents,
         openOverviewListModal,
         setListSort,
@@ -11219,8 +11325,8 @@ ${description}`))actionCallback();return;}
 </style>
 
 <!-- JUAN PROJECT FINAL CASCADE — must remain after legacy appended style patches -->
-<link rel="stylesheet" href="/css/update-2026-10-12.css?v=20261014-table-clip-2">
-<script src="/js/update-2026-10-12.js?v=20261014-home-fit-3"></script>
+<link rel="stylesheet" href="/css/update-2026-10-12.css?v=20261014-home-calendar-loading-1">
+<script src="/js/update-2026-10-12.js?v=20261014-home-calendar-loading-1"></script>
 <!-- HOME SEMANTIC COLORS HARD-LOCKED 2026-10-14 -->
 </body>
 </html>

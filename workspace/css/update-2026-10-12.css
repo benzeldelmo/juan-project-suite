@@ -1432,3 +1432,202 @@ body:has(#view-reports.active) .main-content{
     border-radius:var(--jp-table-radius)!important;
   }
 }
+
+
+/* 2026-10-14 HOME CALENDAR 1:1 + PROGRESSIVE LOADING — ATOMIC UPDATE */
+:root{
+  --jp-calendar-gap:7px;
+  --jp-calendar-radius:11px;
+}
+
+/* #1 — Calendar: maximize the usable card width, with true square date cells. */
+#overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-calendar-shell{
+  flex:1 1 0!important;
+  min-height:0!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:12px 0 4px!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  aspect-ratio:auto!important;
+}
+
+#overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-calendar{
+  display:grid!important;
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  grid-template-rows:auto!important;
+  grid-auto-rows:auto!important;
+  width:100%!important;
+  max-width:none!important;
+  height:auto!important;
+  gap:var(--jp-calendar-gap)!important;
+  align-content:center!important;
+  justify-content:stretch!important;
+  padding:0!important;
+  margin:0!important;
+  font-family:"SF Pro Text","SF Pro Display",-apple-system,BlinkMacSystemFont,sans-serif!important;
+}
+
+#overviewDashboard .overview-cal-head{
+  min-width:0!important;
+  padding:0 0 7px!important;
+  text-align:center!important;
+  font-family:"SF Pro Text",-apple-system,BlinkMacSystemFont,sans-serif!important;
+  font-size:10px!important;
+  line-height:1!important;
+  font-weight:600!important;
+  letter-spacing:.02em!important;
+  color:#8A8A92!important;
+}
+
+#overviewDashboard .overview-cal-day,
+#overviewDashboard .overview-cal-empty{
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  aspect-ratio:1 / 1!important;
+  box-sizing:border-box!important;
+  border-radius:var(--jp-calendar-radius)!important;
+}
+
+#overviewDashboard .overview-cal-empty{
+  border:1px solid transparent!important;
+  background:transparent!important;
+}
+
+#overviewDashboard .overview-cal-day{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:relative!important;
+  padding:0!important;
+  border:1px solid #EFEFF1!important;
+  background:#FFFFFF!important;
+  color:#5F6068!important;
+  font-family:"SF Pro Text",-apple-system,BlinkMacSystemFont,sans-serif!important;
+  font-size:11px!important;
+  font-weight:500!important;
+  line-height:1!important;
+}
+
+#overviewDashboard .overview-cal-day .overview-cal-number{
+  display:block;
+  line-height:1;
+}
+
+#overviewDashboard .overview-cal-day.today{
+  border-color:#56EB97!important;
+  background:rgba(86,235,151,.12)!important;
+  color:#176B46!important;
+  font-weight:600!important;
+}
+
+#overviewDashboard .overview-cal-day.has-deadline{
+  cursor:pointer!important;
+  background:#FFFFFF!important;
+}
+#overviewDashboard .overview-cal-day.today.has-deadline{
+  background:rgba(86,235,151,.12)!important;
+}
+
+#overviewDashboard .overview-cal-dot{
+  position:absolute!important;
+  width:5px!important;
+  height:5px!important;
+  left:50%!important;
+  bottom:5px!important;
+  transform:translateX(-50%)!important;
+  border-radius:50%!important;
+  background:#56EB97!important;
+}
+
+#overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-section-heading h2{
+  font-family:"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,sans-serif!important;
+  font-size:18px!important;
+  font-weight:600!important;
+  letter-spacing:-.015em!important;
+}
+
+/* #2 — Targeted Home skeletons only; the surrounding dashboard remains real and stable. */
+.jp-home-skeleton{
+  position:relative;
+  display:block;
+  overflow:hidden;
+  border-radius:999px;
+  background:#ECEDEF!important;
+}
+.jp-home-skeleton::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-105%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);
+  animation:jpHomeSkeleton 1.05s ease-in-out infinite;
+}
+@keyframes jpHomeSkeleton{to{transform:translateX(105%)}}
+
+#overviewDashboard .jp-home-kpi-skeleton .overview-kpi-icon{
+  background:#F1F1F3!important;
+  color:#A5A5AC!important;
+}
+#overviewDashboard .jp-home-kpi-skeleton.home-kpi-todo .overview-kpi-icon{
+  background:rgba(86,235,151,.13)!important;
+  color:#24B86A!important;
+}
+.jp-home-skeleton-value{width:42px;height:25px;margin-top:9px;border-radius:8px}
+.jp-home-skeleton-sub{width:min(150px,72%);height:9px;margin-top:10px}
+
+.jp-home-project-skeleton{pointer-events:none!important}
+.jp-home-project-skeleton .current-project-copy{width:min(56%,430px)}
+.jp-home-project-skeleton .current-project-right{min-width:150px;align-items:flex-end}
+.jp-sk-id{width:52px;height:8px;margin-bottom:10px}
+.jp-sk-title{width:min(180px,82%);height:13px;margin-bottom:9px;border-radius:6px}
+.jp-sk-meta{width:min(240px,95%);height:9px;border-radius:5px}
+.jp-sk-tag{width:74px;height:22px;border-radius:999px}
+.jp-sk-balance{width:102px;height:9px;margin-top:10px}
+.jp-sk-progress{width:100%;height:6px;border-radius:999px}
+
+.jp-home-deadline-skeleton{pointer-events:none!important}
+.jp-sk-date{width:40px;height:10px;border-radius:5px}
+.jp-sk-deadline-copy{display:grid;gap:7px;min-width:0;flex:1}
+.jp-sk-deadline-title{width:min(130px,70%);height:11px;border-radius:5px}
+.jp-sk-deadline-meta{width:min(190px,92%);height:8px;border-radius:5px}
+
+#view-my-works.jp-home-refreshing>.page-header .greeting-subtitle::after{
+  content:"  •  Syncing";
+  color:#25A86A;
+  font-weight:600;
+  letter-spacing:.02em;
+}
+#view-my-works.jp-home-refreshing>.page-header .greeting-subtitle{
+  position:relative;
+}
+
+/* Calendar is never skeletonized and remains interactive/static while data waits. */
+#view-my-works.jp-home-initial-loading .overview-calendar-shell{
+  opacity:1!important;
+}
+
+/* Component-level failure instead of collapsing the whole Home page. */
+.jp-home-component-error{
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:22px;
+  text-align:center;
+  color:var(--text-tertiary);
+}
+.jp-home-component-error.compact{min-height:110px;padding:16px}
+.jp-home-component-error strong{font-size:13px;color:var(--text-primary);font-weight:650}
+.jp-home-component-error span{max-width:360px;font-size:11px;line-height:1.45}
+.jp-home-component-error .btn{margin-top:8px}
+
+@media(prefers-reduced-motion:reduce){
+  .jp-home-skeleton::after{animation:none!important}
+}
