@@ -175,7 +175,8 @@
         const busy=!loading.classList.contains("hidden");
         btn.setAttribute("aria-busy",busy?"true":"false");
         btn.disabled=busy;
-        btn.textContent=busy?"Refreshing…":"Refresh";
+        btn.classList.toggle("jp-refreshing",busy);
+        btn.textContent="Refresh";
       };
       new MutationObserver(sync).observe(loading,{attributes:true,attributeFilter:["class"]});
       sync();
@@ -251,4 +252,151 @@
   } else {
     bindHomeKpiCopy();
   }
+})();
+
+
+/* 2026-10-14 UPDATE LIST #1–#4 — runtime state harmonizer */
+(() => {
+  "use strict";
+  const BRAND="#56EB97";
+  const soft="rgba(86,235,151,.075)";
+  const border="rgba(86,235,151,.36)";
+
+  const iconPaths={
+    inbox:'<path d="M4 4h16v13H4z"/><path d="M4 13h4l2 3h4l2-3h4"/>',
+    search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    folder:'<path d="M3 6h6l2 2h10v11H3z"/>',
+    card:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>',
+    grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    activity:'<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+    warning:'<path d="M12 3 2.7 20h18.6L12 3Z"/><path d="M12 9v4M12 17h.01"/>',
+    check:'<path d="M20 6 9 17l-5-5"/>'
+  };
+  const icon=(name="inbox")=>'<span class="jp-state-icon"><svg viewBox="0 0 24 24" aria-hidden="true">'+(iconPaths[name]||iconPaths.inbox)+'</svg></span>';
+  const loadingIcon=(name="activity")=>'<span class="jp-state-icon is-loading"><svg viewBox="0 0 24 24" aria-hidden="true">'+(iconPaths[name]||iconPaths.activity)+'</svg></span>';
+
+  function enforceHomeBrand(){
+    const root=document.getElementById("overviewDashboard");
+    if(!root)return;
+    const todo=root.querySelector(".home-kpi-todo");
+    if(todo){
+      todo.style.setProperty("background",soft,"important");
+      todo.style.setProperty("border-color",border,"important");
+      const ico=todo.querySelector(".overview-kpi-icon");
+      if(ico){
+        ico.style.setProperty("background","rgba(86,235,151,.16)","important");
+        ico.style.setProperty("color","#24B86A","important");
+      }
+    }
+    root.querySelectorAll(".current-project-progress .progress-bar-fill").forEach(el=>el.style.setProperty("background",BRAND,"important"));
+    root.querySelectorAll(".overview-cal-dot").forEach(el=>el.style.setProperty("background",BRAND,"important"));
+    root.querySelectorAll(".overview-cal-day.today").forEach(el=>{
+      el.style.setProperty("border-color",BRAND,"important");
+      el.style.setProperty("background","rgba(86,235,151,.12)","important");
+    });
+  }
+
+  function skeletonRows(tbody,cols,count=5){
+    if(!tbody||tbody.querySelector("tr:not(.jp-state-skeleton-row):not(.jp-state-loading-message-row)"))return;
+    tbody.innerHTML='<tr class="jp-state-loading-message-row"><td colspan="'+cols+'"><div class="jp-state-inline">'+loadingIcon("activity")+'<div class="jp-state-inline-copy"><strong>Loading latest data</strong><span>Fetching the information for this view…</span></div></div></td></tr>'+
+      Array.from({length:count},()=>'<tr class="jp-state-skeleton-row" aria-hidden="true">'+Array.from({length:cols},()=>'<td><span class="jp-skeleton"></span></td>').join("")+'</tr>').join("");
+  }
+  function clearSkeletonRows(tbody){
+    if(!tbody)return;
+    tbody.querySelectorAll(".jp-state-skeleton-row,.jp-state-loading-message-row").forEach(x=>x.remove());
+  }
+
+  function stateMeta(text){
+    const t=String(text||"").toLowerCase();
+    if(t.includes("order"))return {icon:"inbox",title:"No orders here",body:"New order requests will appear here when they are available."};
+    if(t.includes("client"))return {icon:"users",title:t.includes("matching")?"No matching clients":"No clients yet",body:t.includes("matching")?"Try adjusting your search or filters.":"Clients will appear here once they are added."};
+    if(t.includes("project"))return {icon:"folder",title:t.includes("matching")?"No matching projects":"No projects yet",body:t.includes("matching")?"Try adjusting your search or filters.":"Projects will appear here once they are created."};
+    if(t.includes("payment"))return {icon:"card",title:"No payments yet",body:"Recorded or submitted payments will appear here."};
+    if(t.includes("service")||t.includes("package"))return {icon:"grid",title:"Nothing to show yet",body:"Catalog items matching this view will appear here."};
+    if(t.includes("activity"))return {icon:"activity",title:"No activity yet",body:"Recent portal activity will appear here."};
+    if(t.includes("task")||t.includes("deliverable"))return {icon:"check",title:"Nothing pending here",body:"Items will appear here when there is something to review."};
+    return {icon:"inbox",title:"Nothing here yet",body:"New records will appear here when available."};
+  }
+
+  function upgradeEmptyRow(tbody){
+    if(!tbody||tbody.querySelector(".jp-state-empty-row,.jp-state-error-row,.jp-state-skeleton-row"))return;
+    const rows=[...tbody.children].filter(x=>x.tagName==="TR");
+    if(rows.length!==1)return;
+    const row=rows[0],text=row.textContent.trim();
+    if(!/^no\b/i.test(text))return;
+    const meta=stateMeta(text),cols=Math.max(1,row.querySelector("td")?.colSpan||tbody.closest("table")?.querySelectorAll("thead th").length||1);
+    row.className="jp-state-empty-row";
+    row.innerHTML='<td colspan="'+cols+'"><div class="jp-state-panel">'+icon(meta.icon)+'<h3>'+meta.title+'</h3><p>'+meta.body+'</p></div></td>';
+  }
+
+  function syncPortalState(){
+    const loading=document.getElementById("onlinePortalLoading");
+    if(!loading)return;
+    const busy=!loading.classList.contains("hidden");
+    if(busy){
+      if(!loading.querySelector(".jp-state-inline")){
+        loading.innerHTML='<div><div class="jp-state-inline">'+loadingIcon("activity")+'<div class="jp-state-inline-copy"><strong>Syncing Portal</strong><span>Refreshing client access and payment activity…</span></div></div></div>';
+      }
+      const panel=document.querySelector("#view-online-portal .portal-panel:not(.hidden)");
+      const tbody=panel?.querySelector("tbody");
+      if(tbody&&!tbody.querySelector("tr:not(.jp-state-empty-row):not(.jp-state-skeleton-row):not(.jp-state-loading-message-row)")){
+        const cols=tbody.closest("table")?.querySelectorAll("thead th").length||6;
+        skeletonRows(tbody,cols,4);
+      }
+    }else{
+      document.querySelectorAll("#view-online-portal tbody").forEach(tbody=>{clearSkeletonRows(tbody);upgradeEmptyRow(tbody);});
+    }
+
+    const refresh=document.getElementById("onlinePortalRefreshBtn");
+    if(refresh){
+      refresh.classList.toggle("jp-refreshing",busy);
+      refresh.setAttribute("aria-busy",busy?"true":"false");
+    }
+  }
+
+  function upgradePortalError(){
+    const err=document.getElementById("onlinePortalError");
+    if(!err||err.classList.contains("hidden")||err.querySelector(".jp-state-panel"))return;
+    const message=err.textContent.trim()||"The Portal could not be loaded.";
+    err.innerHTML='<div class="jp-state-panel is-error">'+icon("warning")+'<h3>Could not load Portal</h3><p>'+message+'</p><button type="button" class="btn btn-secondary btn-sm" data-jp-portal-retry>Try Again</button></div>';
+    err.querySelector("[data-jp-portal-retry]")?.addEventListener("click",()=>document.getElementById("onlinePortalRefreshBtn")?.click());
+  }
+
+  function watch(){
+    enforceHomeBrand();
+    const home=document.getElementById("overviewDashboard");
+    if(home&&!home.dataset.jpBrandObserver){
+      home.dataset.jpBrandObserver="1";
+      new MutationObserver(enforceHomeBrand).observe(home,{childList:true,subtree:true});
+    }
+
+    const loading=document.getElementById("onlinePortalLoading");
+    if(loading&&!loading.dataset.jpSmartState){
+      loading.dataset.jpSmartState="1";
+      new MutationObserver(()=>{syncPortalState();upgradePortalError();}).observe(loading,{attributes:true,attributeFilter:["class"],childList:true,subtree:true});
+    }
+    const error=document.getElementById("onlinePortalError");
+    if(error&&!error.dataset.jpSmartState){
+      error.dataset.jpSmartState="1";
+      new MutationObserver(upgradePortalError).observe(error,{attributes:true,attributeFilter:["class"],childList:true});
+    }
+    ["onlinePortalAccountRows","onlinePortalPaymentRows","onlinePortalActivityRows"].forEach(id=>{
+      const tbody=document.getElementById(id);
+      if(tbody&&!tbody.dataset.jpSmartState){
+        tbody.dataset.jpSmartState="1";
+        new MutationObserver(()=>{if(!document.getElementById("onlinePortalLoading")?.classList.contains("hidden"))return;upgradeEmptyRow(tbody);}).observe(tbody,{childList:true});
+      }
+      if(tbody)upgradeEmptyRow(tbody);
+    });
+
+    /* Normalize simple one-row empty tables elsewhere, without creating loaders for synchronous pages. */
+    document.querySelectorAll(".main-content tbody").forEach(upgradeEmptyRow);
+    syncPortalState();
+    upgradePortalError();
+  }
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",watch,{once:true});
+  else watch();
+  document.addEventListener("click",()=>setTimeout(watch,0),true);
 })();

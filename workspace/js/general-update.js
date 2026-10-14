@@ -13,6 +13,30 @@
   var dateTime=function(v){if(!v)return "—";var d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString("en-PH",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});};
   var toast=function(m){if(window.showToast)window.showToast(m);};
   var orders=[],filter="pending",query="",overlay=null;
+  /* Smart state helpers — October 14 2026 */
+  var JP_BRAND="#56EB97";
+  function stateSvg(type){
+    var p={
+      inbox:'<path d="M4 4h16v13H4z"/><path d="M4 13h4l2 3h4l2-3h4"/>',
+      search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+      ad:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/>',
+      warning:'<path d="M12 3 2.7 20h18.6L12 3Z"/><path d="M12 9v4M12 17h.01"/>',
+      activity:'<path d="M3 12h4l2-6 4 12 2-6h6"/>'
+    }[type]||'<path d="M4 4h16v16H4z"/>';
+    return '<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';
+  }
+  function stateIcon(type,loading){return '<span class="jp-state-icon'+(loading?' is-loading':'')+'">'+stateSvg(type)+'</span>';}
+  function skeletonRows(cols,count,withMessage,label,sub){
+    var rows=withMessage?'<tr class="jp-state-loading-message-row"><td colspan="'+cols+'"><div class="jp-state-inline">'+stateIcon("activity",true)+'<div class="jp-state-inline-copy"><strong>'+esc(label||"Loading")+'</strong><span>'+esc(sub||"Fetching the latest data…")+'</span></div></div></td></tr>':"";
+    for(var r=0;r<(count||4);r++){rows+='<tr class="jp-state-skeleton-row" aria-hidden="true">';for(var c=0;c<cols;c++)rows+='<td><span class="jp-skeleton"></span></td>';rows+='</tr>';}
+    return rows;
+  }
+  function stateRow(cols,type,title,message,actionHtml,kind){
+    return '<tr class="'+(kind==="error"?"jp-state-error-row":"jp-state-empty-row")+'"><td colspan="'+cols+'"><div class="jp-state-panel '+(kind==="error"?"is-error":type==="search"?"is-search":"")+'">'+stateIcon(type,false)+'<h3>'+esc(title)+'</h3><p>'+esc(message)+'</p>'+(actionHtml||"")+'</div></td></tr>';
+  }
+  function setRefreshBusy(btn,busy){
+    if(!btn)return;btn.classList.toggle("jp-refreshing",!!busy);btn.setAttribute("aria-busy",busy?"true":"false");btn.disabled=!!busy;
+  }
 
   function ready(fn,n){n=n||0;if(window.app&&window.JuanSuiteRuntime)return fn();if(n<60)setTimeout(function(){ready(fn,n+1);},100);}
   function closeOverlay(){if(overlay)overlay.remove();overlay=null;document.body.classList.remove("jp-general-modal-open");}
@@ -81,11 +105,17 @@
     });
   }
   async function renderOrders(reload){
-    ensureOrdersView();drawFilters();var body=document.getElementById("ordersPageRows");if(!body)return;
+    ensureOrdersView();drawFilters();var body=document.getElementById("ordersPageRows"),refresh=document.getElementById("ordersRefreshBtn");if(!body)return;
     if(reload!==false){
-      body.innerHTML='<tr><td colspan="7" class="text-center text-muted py-4">Loading orders…</td></tr>';
-      try{var d=await API({action:"dashboard"});orders=Array.isArray(d.incoming_orders)?d.incoming_orders:[];}
-      catch(e){body.innerHTML='<tr><td colspan="7" class="text-center text-danger py-4">'+esc(e.message||"Orders could not be loaded.")+"</td></tr>";return;}
+      var hasRealRows=!!body.querySelector("tr:not(.jp-state-empty-row):not(.jp-state-error-row):not(.jp-state-skeleton-row):not(.jp-state-loading-message-row)");
+      setRefreshBusy(refresh,true);
+      if(!hasRealRows)body.innerHTML=skeletonRows(7,4,true,"Loading orders","Checking for new online order requests…");
+      try{
+        var d=await API({action:"dashboard"});orders=Array.isArray(d.incoming_orders)?d.incoming_orders:[];
+      }catch(e){
+        body.innerHTML=stateRow(7,"warning","Could not load orders",e.message||"The latest order requests could not be fetched.",'<button type="button" class="btn btn-secondary btn-sm" onclick="window.JPGeneral.refreshOrders()">Try Again</button>',"error");
+        setRefreshBusy(refresh,false);return;
+      }finally{setRefreshBusy(refresh,false);}
     }
     var list=visibleOrders();
     body.innerHTML=list.map(function(o){
@@ -100,7 +130,12 @@
         '<button class="popover-action" onclick="window.JPGeneral.openOrder(\''+id+'\',true)">Edit Order</button>'+
         (o.project_id?"":'<button class="popover-action text-danger" onclick="window.JPGeneral.deleteOrder(\''+id+'\')">Delete Order</button>')+
         "</div></div></td></tr>";
-    }).join("")||'<tr><td colspan="7" class="text-center text-muted py-4"><strong>'+((filter==="pending")?"No pending orders":"No orders found")+'</strong><span class="jp-secondary-cell">'+((filter==="pending")?"There are currently no order requests waiting for review.":"New online order requests will appear here.")+'</span></td></tr>';
+    }).join("");
+    if(!list.length){
+      if(query)body.innerHTML=stateRow(7,"search","No matching orders","Try a different Order ID, client, email, or request.");
+      else if(filter==="pending")body.innerHTML=stateRow(7,"inbox","No pending orders","New order requests will appear here when they are waiting for review.");
+      else body.innerHTML=stateRow(7,"inbox","No orders in this view","Orders matching this status will appear here.");
+    }
   }
   function findOrder(id){return orders.find(function(o){return String(o.id)===String(id);});}
   function itemTable(items,editing){
@@ -235,9 +270,22 @@
   function adPlacementLabel(v){return ({homepage_banner:"Home Banner",guest_home_banner:"Guest Home",guest_shop_banner:"Guest Shop",client_home_banner:"Client Home",client_shop_banner:"Client Shop",homepage_popup:"Home Popup",guest_home_popup:"Guest Home Popup",client_home_popup:"Client Home Popup"})[v]||String(v||"—").replace(/_/g," ");}
   function adAudienceLabel(v){return ({all:"Everyone",guest:"Guests",client:"Clients"})[v]||"Everyone";}
   function adDestinationLabel(a){var type=String(a.destination_type||"no_action"),value=String(a.destination_value||"").trim(),label=({no_action:"No action",shop:"Shop",package:"Package",service:"Service",referral:"Referral",loyalty:"Loyalty",page:"Online page",external_url:"External URL"})[type]||type;return label+(value?" · "+value:"");}
+  function adsLoadingMarkup(){
+    return '<div class="jp-ads-page jp-state-loading"><div class="jp-ads-heading"><div><span class="section-kicker">OPERATIONS</span><h1>Ad Management</h1></div></div>'+
+      '<section class="jp-ad-management"><div class="jp-state-inline">'+stateIcon("ad",true)+'<div class="jp-state-inline-copy"><strong>Loading campaigns</strong><span>Syncing campaign settings and performance data…</span></div></div>'+
+      '<div class="jp-ad-toolbar"><div class="jp-ad-search-wrap"><span class="jp-skeleton" style="width:100%;height:38px"></span></div><div style="display:flex;gap:8px"><span class="jp-skeleton" style="width:72px;height:34px"></span><span class="jp-skeleton" style="width:72px;height:34px"></span><span class="jp-skeleton" style="width:72px;height:34px"></span></div></div>'+
+      '<div class="jp-ad-table-wrap"><table class="data-table unified-table jp-ad-table"><thead><tr><th>Ad Name</th><th>Type</th><th>Placement</th><th>Status</th><th>Schedule</th><th>Destination</th><th class="table-actions-col"></th></tr></thead><tbody>'+skeletonRows(7,5,false)+'</tbody></table></div></section></div>';
+  }
+  function adsErrorMarkup(message){
+    return '<div class="jp-ads-page"><div class="jp-ads-heading"><div><span class="section-kicker">OPERATIONS</span><h1>Ad Management</h1></div></div>'+
+      '<section class="jp-ad-management"><div class="jp-ad-table-wrap"><table class="data-table unified-table jp-ad-table"><thead><tr><th>Ad Name</th><th>Type</th><th>Placement</th><th>Status</th><th>Schedule</th><th>Destination</th><th class="table-actions-col"></th></tr></thead><tbody>'+
+      stateRow(7,"warning","Could not load campaigns",message||"Campaign data could not be fetched.",'<button type="button" class="btn btn-secondary btn-sm" onclick="window.JPGeneral.refreshAds()">Try Again</button>',"error")+
+      '</tbody></table></div></section></div>';
+  }
   async function renderAds(){
     var host=ensureAdsPage();if(!host)return;
-    if(!host.querySelector('.jp-ads-page'))host.innerHTML='<div class="jp-ad-loading"><span class="portal-loading-spinner"></span><div><strong>Loading Ad Management</strong><small>Syncing campaigns…</small></div></div>';
+    var hadPage=!!host.querySelector('.jp-ads-page:not(.jp-state-loading)');
+    if(!host.querySelector('.jp-ads-page'))host.innerHTML=adsLoadingMarkup();
     try{
       var d=await API({action:"ad-dashboard"}),ads=d.ads||[],settings=d.settings||{enabled:true,rotation_seconds:8,max_active_popups:1,auto_archive_expired:true};
       host.innerHTML='<div class="jp-ads-page"><div class="jp-ads-heading"><div><span class="section-kicker">OPERATIONS</span><h1>Ad Management</h1></div><div class="jp-ads-heading-actions"><label class="jp-ad-master-toggle"><span>In-house Ads</span><span class="toggle-switch"><input id="jpAdsMaster" type="checkbox" '+(settings.enabled!==false?'checked':'')+'><span class="toggle-slider"></span></span></label><button class="btn btn-secondary" id="jpBannerSettings">Ad Settings</button><button class="btn btn-primary" id="jpCreateAd">+ New Ad</button></div></div>'+
@@ -247,7 +295,7 @@
       var current="All",search=document.getElementById("jpAdSearch"),filters=document.getElementById("jpAdFilters"),rows=document.getElementById("jpAdRows");
       function draw(){
         var q=(search.value||"").toLowerCase().trim(),list=ads.filter(function(a){var s=adStatus(a),match=current==="All"||current==="Active"&&s==="Live"||s===current;if(!match)return false;return !q||((a.title||"")+" "+adPlacementLabel(a.placement)+" "+adDestinationLabel(a)).toLowerCase().indexOf(q)>=0;});
-        rows.innerHTML=list.map(function(a){var status=adStatus(a),menu="adMenu_"+String(a.id).replace(/-/g,""),statusClass=status==="Live"?"badge-green":status==="Expired"?"badge-red":status==="Scheduled"?"badge-orange":"badge-neutral",schedule=(a.start_at?esc(dateTime(a.start_at)):"Now")+'<span class="jp-secondary-cell">'+(a.no_expiration?"No expiration":a.end_at?"Ends "+esc(dateTime(a.end_at)):"No end date")+"</span>",archiveAction=status==="Archived"?"":'<button class="popover-action" data-aarchive="'+a.id+'">Archive</button>',deleteAction='<div class="jp-popover-separator"></div><button class="popover-action text-danger" data-adelete="'+a.id+'">Delete Campaign</button>';return '<tr><td><strong>'+esc(a.title||"Untitled ad")+'</strong></td><td><span class="badge badge-neutral">'+esc(a.ad_type==="popup"?"Popup":"Banner")+'</span></td><td><strong class="jp-ad-cell-primary">'+esc(adPlacementLabel(a.placement))+'</strong></td><td><span class="badge '+statusClass+'">'+esc(status==="Live"?"Active":status)+'</span></td><td>'+schedule+'</td><td>'+esc(adDestinationLabel(a))+'</td><td class="table-row-actions"><div class="popover-wrap" id="'+menu+'"><button class="icon-more-button vertical-more" aria-label="Ad actions" onclick="app.togglePopover(\''+menu+'\',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" data-aedit="'+a.id+'">Edit</button><button class="popover-action" data-aduplicate="'+a.id+'">Duplicate</button><button class="popover-action" data-atoggle="'+a.id+'">'+(status==="Live"?"Pause":"Publish")+'</button>'+archiveAction+deleteAction+'</div></div></td></tr>';}).join("")||'<tr><td colspan="7" class="text-center text-muted py-4">No matching ads.</td></tr>';
+        rows.innerHTML=list.map(function(a){var status=adStatus(a),menu="adMenu_"+String(a.id).replace(/-/g,""),statusClass=status==="Live"?"badge-green":status==="Expired"?"badge-red":status==="Scheduled"?"badge-orange":"badge-neutral",schedule=(a.start_at?esc(dateTime(a.start_at)):"Now")+'<span class="jp-secondary-cell">'+(a.no_expiration?"No expiration":a.end_at?"Ends "+esc(dateTime(a.end_at)):"No end date")+"</span>",archiveAction=status==="Archived"?"":'<button class="popover-action" data-aarchive="'+a.id+'">Archive</button>',deleteAction='<div class="jp-popover-separator"></div><button class="popover-action text-danger" data-adelete="'+a.id+'">Delete Campaign</button>';return '<tr><td><strong>'+esc(a.title||"Untitled ad")+'</strong></td><td><span class="badge badge-neutral">'+esc(a.ad_type==="popup"?"Popup":"Banner")+'</span></td><td><strong class="jp-ad-cell-primary">'+esc(adPlacementLabel(a.placement))+'</strong></td><td><span class="badge '+statusClass+'">'+esc(status==="Live"?"Active":status)+'</span></td><td>'+schedule+'</td><td>'+esc(adDestinationLabel(a))+'</td><td class="table-row-actions"><div class="popover-wrap" id="'+menu+'"><button class="icon-more-button vertical-more" aria-label="Ad actions" onclick="app.togglePopover(\''+menu+'\',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" data-aedit="'+a.id+'">Edit</button><button class="popover-action" data-aduplicate="'+a.id+'">Duplicate</button><button class="popover-action" data-atoggle="'+a.id+'">'+(status==="Live"?"Pause":"Publish")+'</button>'+archiveAction+deleteAction+'</div></div></td></tr>';}).join("")||stateRow(7,(q||current!=="All")?"search":"ad",(q||current!=="All")?"No matching campaigns":"No campaigns yet",(q||current!=="All")?"Try adjusting your search or status filter.":"Create your first campaign when you are ready to promote JUAN PROJECT Online.");
         rows.querySelectorAll("[data-aedit]").forEach(function(btn){btn.onclick=function(){openAd(ads.find(function(a){return a.id===btn.dataset.aedit;}),renderAds);};});
         rows.querySelectorAll("[data-aduplicate]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.aduplicate;});if(!a)return;try{var copy=Object.assign({},a,{id:null,title:(a.title||"Ad")+" Copy",status:"draft",enabled:false,published_at:null,archived_at:null});await API({action:"save-ad",ad:copy});toast("Ad duplicated as draft.");renderAds();}catch(e){toast(e.message);}};});
         rows.querySelectorAll("[data-atoggle]").forEach(function(btn){btn.onclick=async function(){var a=ads.find(function(x){return x.id===btn.dataset.atoggle;}),wasLive=adStatus(a)==="Live";try{await API({action:"save-ad",ad:Object.assign({},a,{status:wasLive?"paused":"published"})});toast(wasLive?"Ad paused.":"Ad published.");renderAds();}catch(e){toast(e.message);}};});
@@ -258,7 +306,7 @@
       document.getElementById("jpCreateAd").onclick=function(){openAd(null,renderAds);};
       document.getElementById("jpBannerSettings").onclick=function(){bannerSettings(settings,renderAds);};
       document.getElementById("jpAdsMaster").onchange=async function(){var enabled=this.checked;this.disabled=true;try{await API({action:"ad-settings",enabled:enabled,rotation_seconds:Number(settings.rotation_seconds||8),max_active_popups:1,auto_archive_expired:settings.auto_archive_expired!==false});toast(enabled?"In-house ads enabled.":"In-house ads disabled.");settings.enabled=enabled;}catch(e){this.checked=!enabled;toast(e.message);}finally{this.disabled=false;}};
-    }catch(e){host.innerHTML='<div class="card text-danger">'+esc(e.message)+"</div>";}
+    }catch(e){if(hadPage){toast(e.message||"Campaigns could not be refreshed.");return;}host.innerHTML=adsErrorMarkup(e.message||"Campaigns could not be loaded.");}
   }
   async function uploadAd(file,type){
     if(!/^image\/(jpeg|png|webp)$/.test(file.type))throw new Error("Use JPG, PNG, or WEBP.");
@@ -322,7 +370,7 @@
     var openClient=window.app.openClientProfile&&window.app.openClientProfile.bind(window.app);if(openClient)window.app.openClientProfile=function(id){var r=openClient(id);setTimeout(renderEditableClient,0);return r;};
     var renderPortal=window.app.renderOnlinePortal&&window.app.renderOnlinePortal.bind(window.app);if(renderPortal)window.app.renderOnlinePortal=function(){var r=renderPortal();setTimeout(ensureAdsPage,0);return r;};
     window.jpOpenOrders=function(){window.app.navigateTo("orders");};nav&&nav.addEventListener("click",function(e){e.preventDefault();window.app.navigateTo("orders");});
-    window.JPGeneral={renderOrders:renderOrders,openOrder:openOrder,deleteOrder:deleteOrder,deleteAllOrders:deleteAllOrders,renderEditableClient:renderEditableClient,renderAds:renderAds,closeOverlay:closeOverlay};
+    window.JPGeneral={renderOrders:renderOrders,openOrder:openOrder,refreshOrders:function(){return renderOrders(true);},refreshAds:function(){return renderAds();},deleteOrder:deleteOrder,deleteAllOrders:deleteAllOrders,renderEditableClient:renderEditableClient,renderAds:renderAds,closeOverlay:closeOverlay};
   }
   ready(install);
 })();

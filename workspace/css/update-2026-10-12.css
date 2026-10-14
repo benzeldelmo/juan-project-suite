@@ -848,3 +848,284 @@ body:has(#view-reports.active) .main-content{
 #overviewDashboard .jp-calendar-no-events .overview-calendar{
   row-gap:2px!important;
 }
+
+
+/* 2026-10-14 UPDATE LIST #1–#4 — BRAND, HOME BALANCE, TABLES, SMART STATES */
+:root{
+  --jp-brand:#56EB97;
+  --jp-brand-rgb:86,235,151;
+  --jp-brand-soft:rgba(86,235,151,.11);
+  --jp-brand-border:rgba(86,235,151,.34);
+  --jp-brand-ink:#137A4A;
+  --primary-mint:#56EB97;
+  --primary-mint-hover:#45DC86;
+  --mint-light-bg:rgba(86,235,151,.11);
+  --mint-subtle-border:rgba(86,235,151,.34);
+}
+
+/* #1 — JUAN PROJECT's permanent brand accents never inherit selectable theme colors. */
+#overviewDashboard .home-kpi-todo{
+  background:rgba(86,235,151,.075)!important;
+  border-color:rgba(86,235,151,.36)!important;
+}
+#overviewDashboard .home-kpi-todo .overview-kpi-icon{
+  background:rgba(86,235,151,.16)!important;
+  color:#24B86A!important;
+}
+#overviewDashboard .current-project-progress .progress-bar-fill,
+#overviewDashboard .current-project-card .progress-bar-fill{
+  background:#56EB97!important;
+}
+#overviewDashboard .overview-cal-day.today{
+  border-color:#56EB97!important;
+  background:rgba(86,235,151,.12)!important;
+}
+#overviewDashboard .overview-cal-dot{
+  background:#56EB97!important;
+}
+.workspace-loading-spinner,
+.portal-loading-spinner{
+  border-color:rgba(86,235,151,.24)!important;
+  border-top-color:#56EB97!important;
+}
+
+/* #2 — Home uses the viewport: same visual breathing room at top and bottom. */
+@media(min-width:1024px){
+  #view-my-works.active{
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    row-gap:24px!important;
+    width:100%!important;
+    height:calc(100dvh - 64px)!important;
+    min-height:calc(100dvh - 64px)!important;
+    overflow:hidden!important;
+    padding:0!important;
+  }
+  #view-my-works>.page-header{
+    margin:0!important;
+    min-height:0!important;
+  }
+  #overviewDashboard{
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    gap:24px!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  #overviewDashboard>.kpi-grid{
+    margin:0!important;
+  }
+  #overviewDashboard>.overview-priority-grid{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    height:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    gap:24px!important;
+    align-items:stretch!important;
+    overflow:hidden!important;
+  }
+  #overviewDashboard .overview-priority-grid>.card:first-child{
+    grid-column:1 / span 3!important;
+    align-self:stretch!important;
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  #overviewDashboard .overview-priority-grid>.card:first-child #overviewCurrentProjects{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+  #overviewDashboard .overview-priority-grid>div:last-child{
+    grid-column:4!important;
+    display:grid!important;
+    grid-template-rows:minmax(150px,.58fr) minmax(0,1.42fr)!important;
+    gap:24px!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  #overviewDashboard .overview-priority-grid>div:last-child>.card{
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+
+  /* Calendar header stays at the top; the month grid is centered in the free space. */
+  #overviewDashboard .overview-priority-grid>div:last-child>.card:last-child{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-calendar-shell{
+    flex:1 1 auto!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:0!important;
+    aspect-ratio:auto!important;
+    margin:0!important;
+  }
+  #overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-calendar{
+    width:min(100%,310px)!important;
+    height:auto!important;
+    grid-template-rows:auto repeat(6,30px)!important;
+    row-gap:5px!important;
+    column-gap:5px!important;
+    align-content:center!important;
+  }
+  #overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-cal-head{
+    padding:5px 0 9px!important;
+  }
+  #overviewDashboard .overview-priority-grid>div:last-child>.card:last-child .overview-cal-day{
+    min-height:30px!important;
+    padding:5px!important;
+    align-items:flex-start!important;
+  }
+}
+
+/* #3 — One table-header language across Workspace: gray, flush, never a nested rounded pill. */
+.main-content .table-card table,
+.main-content .jp-ad-management table,
+.main-content .portal-panel table,
+.main-content .report-recent-v2 table,
+.main-content .jp-client-recent table{
+  border-radius:0!important;
+}
+.main-content .table-card table thead,
+.main-content .jp-ad-management table thead,
+.main-content .portal-panel table thead,
+.main-content .report-recent-v2 table thead,
+.main-content .jp-client-recent table thead{
+  background:#F7F7F8!important;
+}
+.main-content .table-card table thead tr,
+.main-content .jp-ad-management table thead tr,
+.main-content .portal-panel table thead tr,
+.main-content .report-recent-v2 table thead tr,
+.main-content .jp-client-recent table thead tr,
+.main-content .table-card table thead th,
+.main-content .jp-ad-management table thead th,
+.main-content .portal-panel table thead th,
+.main-content .report-recent-v2 table thead th,
+.main-content .jp-client-recent table thead th{
+  background:#F7F7F8!important;
+  border-radius:0!important;
+}
+.main-content .table-card table thead th,
+.main-content .jp-ad-management table thead th,
+.main-content .portal-panel table thead th,
+.main-content .report-recent-v2 table thead th,
+.main-content .jp-client-recent table thead th{
+  color:#77777F!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  letter-spacing:.045em!important;
+}
+
+/* #4 — Shared, fast state system. Layout stays visible; only waiting content is skeletonized. */
+.jp-state-inline{
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:10px 14px;
+  color:var(--text-secondary);
+  background:transparent;
+}
+.jp-state-inline-copy{display:grid;gap:2px;min-width:0}
+.jp-state-inline-copy strong{font-size:12px;color:var(--text-primary)}
+.jp-state-inline-copy span{font-size:10px;color:var(--text-tertiary)}
+.jp-state-icon{
+  width:32px;height:32px;flex:0 0 32px;border-radius:10px;
+  display:grid;place-items:center;position:relative;
+  color:#15945D;background:rgba(86,235,151,.11);
+}
+.jp-state-icon svg{
+  width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.75;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.jp-state-icon.is-loading:after{
+  content:"";position:absolute;inset:-4px;border-radius:12px;
+  border:2px solid rgba(86,235,151,.18);border-top-color:#56EB97;
+  animation:jpStateSpin .72s linear infinite;
+}
+.jp-state-panel{
+  min-height:190px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:30px 20px;
+}
+.jp-state-panel .jp-state-icon{width:48px;height:48px;border-radius:15px;margin-bottom:13px}
+.jp-state-panel .jp-state-icon svg{width:24px;height:24px}
+.jp-state-panel h3{margin:0;font-size:14px;letter-spacing:-.01em;color:var(--text-primary)}
+.jp-state-panel p{max-width:430px;margin:5px auto 0;font-size:11px;line-height:1.5;color:var(--text-tertiary)}
+.jp-state-panel .btn{margin-top:14px}
+.jp-state-panel.is-error .jp-state-icon{background:rgba(239,68,68,.08);color:#EF4444}
+.jp-state-panel.is-search .jp-state-icon{background:#F5F5F7;color:#707078}
+.jp-state-empty-row>td,
+.jp-state-error-row>td,
+.jp-state-loading-message-row>td{
+  padding:0!important;background:#fff!important;
+}
+.jp-state-loading-message-row .jp-state-inline{justify-content:center;padding-top:16px;padding-bottom:8px}
+.jp-state-skeleton-row td{height:54px!important}
+.jp-state-skeleton-row:hover td{background:#fff!important}
+.jp-skeleton{
+  display:block;height:10px;max-width:100%;border-radius:999px;
+  background:linear-gradient(90deg,#ECEDEF 25%,#F7F7F8 45%,#ECEDEF 65%);
+  background-size:260% 100%;
+  animation:jpSkeletonShimmer 1.05s ease-in-out infinite;
+}
+.jp-state-skeleton-row td:nth-child(2n) .jp-skeleton{width:72%}
+.jp-state-skeleton-row td:nth-child(3n) .jp-skeleton{width:58%}
+.jp-refreshing{position:relative!important}
+.jp-refreshing:before{
+  content:"";width:13px;height:13px;display:inline-block;margin-right:7px;
+  border:1.8px solid rgba(86,235,151,.26);border-top-color:#15945D;border-radius:50%;
+  animation:jpStateSpin .68s linear infinite;vertical-align:-2px;
+}
+
+/* Portal: no large loading card. Keep current data during refresh; skeleton only an empty waiting table. */
+#onlinePortalLoading.portal-loading{
+  width:100%!important;
+  min-height:0!important;
+  margin:0 0 10px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#onlinePortalLoading.portal-loading>.portal-loading-spinner{display:none!important}
+#onlinePortalLoading.portal-loading>div{width:100%!important}
+#onlinePortalLoading.portal-loading .jp-state-inline{padding-left:2px!important}
+
+/* Workspace boot loader uses the same compact visual language, not a takeover card. */
+.workspace-loading-tab{
+  border-color:var(--border-subtle)!important;
+  background:var(--bg-card)!important;
+}
+.workspace-loading-spinner{animation:jpStateSpin .72s linear infinite!important}
+
+/* Existing compact empties inherit the same tone. */
+.payment-history-empty,
+.empty-compact-state{
+  min-height:150px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  gap:4px!important;
+}
+
+@keyframes jpStateSpin{to{transform:rotate(360deg)}}
+@keyframes jpSkeletonShimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media(prefers-reduced-motion:reduce){
+  .jp-state-icon.is-loading:after,.jp-refreshing:before,.jp-skeleton,.workspace-loading-spinner{animation:none!important}
+}
