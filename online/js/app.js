@@ -595,6 +595,22 @@ function shop(){
 }
 function findShopItem(key){const [kind,id]=String(key).split(':');if(kind==='Package')return {...state.catalog.packages.find(x=>String(x.id)===String(id)),kind};return {...state.catalog.services.find(x=>String(x.id)===String(id)),kind:'Service'}}
 
+function mobileOnlyActionNotice(){
+  return '<section class="jp-mobile-only-action-notice" role="dialog" aria-modal="true" aria-label="Continue on mobile">'+
+    '<div class="jp-mobile-only-action-card">'+
+      '<div class="jp-device-transfer" aria-hidden="true">'+
+        '<span class="jp-device-icon jp-device-desktop"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>'+
+        '<span class="jp-device-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h13M14 7l5 5-5 5"/></svg></span>'+
+        '<span class="jp-device-icon jp-device-phone"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 5h4M11 19h2"/></svg></span>'+
+      '</div>'+
+      '<span class="jp-mobile-only-eyebrow">JUAN PROJECT ONLINE</span>'+
+      '<h2>Continue on mobile</h2>'+
+      '<p>This action is optimized for mobile. Please continue using your phone for the best experience.</p>'+
+      '<div class="jp-mobile-only-helper"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 19h2"/></svg><span>Mobile-optimized experience</span></div>'+
+    '</div>'+
+  '</section>';
+}
+
 function pricing(){
   const q=String(state.shopQuery||'').trim().toLowerCase(),active=String(state.shopCategory||'all');
   const matches=x=>!q||[x.name,x.description,categoryName(x.category_id)].some(v=>String(v||'').toLowerCase().includes(q));
@@ -605,7 +621,6 @@ function pricing(){
   const categoryFilters='<button type="button" data-shop-category="all" class="'+(active==='all'?'active':'')+'">ALL</button>'+(state.catalog.categories||[]).filter(c=>usedCategories.has(String(c.id))).map(c=>'<button type="button" data-shop-category="'+esc(c.id)+'" class="'+(active===String(c.id)?'active':'')+'">'+esc(String(c.name||'').toUpperCase())+'</button>').join('');
   const ready=state.catalogLoaded,expanded=!!state.pricingInclusionsExpanded;
   return '<div class="jp-public-pricing-page">'+
-    '<section class="jp-online-desktop-notice" aria-label="JUAN PROJECT Online mobile availability"><div class="jp-online-desktop-notice-card"><span>JUAN PROJECT ONLINE</span><h1>Continue on mobile</h1><p>This experience is currently available on mobile only. Please continue using your phone for the best browsing experience.</p><small>Mobile-optimized preview for services, packages, and pricing.</small></div></section>'+
     '<div class="jp-online-mobile-experience">'+
     '<header class="jp-public-pricing-sitebar"><a class="jp-public-brand" href="/" aria-label="JUAN PROJECT Online home">JUAN PROJECT <span>ONLINE</span></a><nav aria-label="Pricing navigation"><a href="#pricingPackages">SERVICES &amp; PACKAGES</a><a href="#pricingAbout">ABOUT</a><a href="#pricingContact">CONTACT</a></nav></header>'+
     '<main class="jp-public-pricing-content">'+
