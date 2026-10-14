@@ -1255,3 +1255,79 @@ body:has(#view-reports.active) .main-content{
     justify-self:center!important;
   }
 }
+
+
+/* 2026-10-14 UPDATE #5 — GLOBAL ROUNDED TABLE SYSTEM */
+:root{--jp-table-radius:16px}
+
+/* The outer table surface owns the shape. Keep action popovers free to escape on desktop. */
+.main-content .jp-system-table-card,
+.main-content .table-card.jp-system-table-card{
+  border:1px solid #E5E7EB!important;
+  border-radius:var(--jp-table-radius)!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+
+.main-content .jp-system-table-wrap,
+.main-content .jp-ad-table-wrap{
+  border-radius:var(--jp-table-radius)!important;
+  background:#fff!important;
+}
+
+/* Standalone tables (Ad Management, client-profile tables, etc.) get their own outer border. */
+.main-content .jp-system-table-wrap.jp-system-table-standalone,
+.main-content .jp-ad-table-wrap.jp-system-table-standalone{
+  border:1px solid #E5E7EB!important;
+}
+
+/* Remove the old nested table border; the card/wrapper is now the single outline. */
+.main-content .jp-system-table-card .jp-system-table,
+.main-content .jp-system-table-wrap.jp-system-table-standalone .jp-system-table{
+  border:0!important;
+}
+
+.main-content .jp-system-table{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  border-radius:var(--jp-table-radius)!important;
+  background:#fff!important;
+}
+
+/* Round the actual painted cells so desktop can keep overflow:visible for row menus. */
+.main-content .jp-system-table thead tr:first-child th:first-child{
+  border-top-left-radius:calc(var(--jp-table-radius) - 1px)!important;
+}
+.main-content .jp-system-table thead tr:first-child th:last-child{
+  border-top-right-radius:calc(var(--jp-table-radius) - 1px)!important;
+}
+.main-content .jp-system-table tbody tr:last-child td:first-child{
+  border-bottom-left-radius:calc(var(--jp-table-radius) - 1px)!important;
+}
+.main-content .jp-system-table tbody tr:last-child td:last-child{
+  border-bottom-right-radius:calc(var(--jp-table-radius) - 1px)!important;
+}
+
+/* Catalog cards have a white title strip above the gray column header, so only the card itself owns the top radius. */
+.main-content .catalog-manager-simple .jp-system-table thead tr:first-child th:first-child,
+.main-content .catalog-manager-simple .jp-system-table thead tr:first-child th:last-child{
+  border-radius:0!important;
+}
+
+/* Preserve the gray, flush header language from update #3. */
+.main-content .jp-system-table thead,
+.main-content .jp-system-table thead tr,
+.main-content .jp-system-table thead th{
+  background:#F7F7F8!important;
+}
+
+/* On narrow screens the scrolling shell clips naturally to the same 16px outer radius. */
+@media(max-width:1023px){
+  .main-content .jp-system-table-wrap,
+  .main-content .jp-ad-table-wrap{
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+    border-radius:var(--jp-table-radius)!important;
+    -webkit-overflow-scrolling:touch;
+  }
+}

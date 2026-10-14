@@ -10543,9 +10543,11 @@ ${description}`))actionCallback();return;}
 
       const headers=heads.map(textOf);
       table.classList.add("jp-static-table","jp-system-table");
-      const shell=table.closest(".table-responsive,.portal-payment-review-table-wrap");
+      const shell=table.closest(".table-responsive,.portal-payment-review-table-wrap,.jp-ad-table-wrap");
       shell?.classList.add("jp-table-scroll-x","jp-system-table-wrap");
-      table.closest(".card,.table-card")?.classList.add("jp-table-card","jp-system-table-card");
+      const card=table.closest(".card,.table-card");
+      card?.classList.add("jp-table-card","jp-system-table-card");
+      if(shell&&!card)shell.classList.add("jp-system-table-standalone");
 
       headers.forEach((h,i)=>{
         const head=heads[i];
@@ -11217,7 +11219,7 @@ ${description}`))actionCallback();return;}
 </style>
 
 <!-- JUAN PROJECT FINAL CASCADE — must remain after legacy appended style patches -->
-<link rel="stylesheet" href="/css/update-2026-10-12.css?v=20261014-home-fill-2">
+<link rel="stylesheet" href="/css/update-2026-10-12.css?v=20261014-table-radius-1">
 <script src="/js/update-2026-10-12.js?v=20261014-home-fit-3"></script>
 <!-- HOME SEMANTIC COLORS HARD-LOCKED 2026-10-14 -->
 </body>
